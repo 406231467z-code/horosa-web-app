@@ -328,27 +328,6 @@ export function guolaoMergedPaintEnabled(){
 	return flagEnabled('horosa.perf.guolaoMergedPaint');
 }
 
-// —— FE-9 天文馆五闸(渲染门控/按需渲染/空闲心跳/指标节流/时间编辑防抖) ——
-export function planetariumRenderGatingEnabled(){
-	return flagEnabled('horosa.perf.planetariumRenderGating');
-}
-
-export function planetariumOnDemandRenderEnabled(){
-	return flagEnabled('horosa.perf.planetariumOnDemandRender');
-}
-
-export function planetariumIdleHeartbeatEnabled(){
-	return flagEnabled('horosa.perf.planetariumIdleHeartbeat');
-}
-
-export function planetariumMetricsThrottleEnabled(){
-	return flagEnabled('horosa.perf.planetariumMetricsThrottle');
-}
-
-export function planetariumTimeEditDebounceEnabled(){
-	return flagEnabled('horosa.perf.planetariumTimeEditDebounce');
-}
-
 // FE-2:确定性纯计算技法结果「同参复用 + 在途合并」(紫微本盘/七政等;严禁随机/取现时端点,
 // 判据见 _requestCache.js 头注)。关=每次直连后端。
 export function techniqueResultCacheEnabled(){

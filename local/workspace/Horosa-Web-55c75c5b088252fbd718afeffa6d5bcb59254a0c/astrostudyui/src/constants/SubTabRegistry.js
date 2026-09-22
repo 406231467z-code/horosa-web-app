@@ -19,17 +19,8 @@ export const AUX_SUBTABS = [
 	'babylon',
 ];
 
-// 卜·其他。
-// tarot 已升「卜」一级入口(2026-08-15 用户反馈:成熟功能藏聚合页没人发现),不再是 cnyibu 子页。
+// 卜·其他。塔罗页已裁剪,不再是 cnyibu 子页。
 export const CNYIBU_SUBTABS = ['suzhan', 'jinkou', 'tongshefa', 'huangji', 'wuzhao', 'taixuan', 'jingjue', 'shenyishu', 'geomancy', 'guice', 'xiaoliuren', 'xiaochengtu', 'feigong', 'lingqi'];
-
-// 择日(工具组主导航模块;首档=数组第一项,新增择日技法尾部追加 + ZeriMain TabPane 成对)。
-export const ZERI_SUBTABS = ['tianxing', 'qimenzeri',
-	'huanglizeri', 'bazizeri', 'taiyizeri', 'ziweizeri', 'liurengzeri', 'sanshizeri', 'qizhengzeri', 'indiazeri',
-];
-
-// 命·传统(参考类)。
-export const CNTRADITION_SUBTABS = ['guasym', 'cuangong12', 'pithy'];
 
 /** 取某组的首档(导航层回落用),空集时返回 ''。 */
 export function firstSubTab(list){
@@ -50,8 +41,6 @@ export function resolveSubTab(list, current){
 const SUBTAB_RUNTIME_KEYS = {
 	cnyibu: '__horosaCnyibuCurrentTab',
 	auxchart: '__horosaAuxchartCurrentTab',
-	cntradition: '__horosaCnTraditionCurrentTab',
-	zeri: '__horosaZeriCurrentTab',
 };
 
 /** 记住某组当前子页签(仅合法值入槽;SSR/未知组静默跳过)。 */

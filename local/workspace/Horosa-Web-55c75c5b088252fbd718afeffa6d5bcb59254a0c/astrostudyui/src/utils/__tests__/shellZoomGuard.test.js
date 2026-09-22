@@ -25,11 +25,10 @@ describe('壳缩放链守卫', () => {
 		expect(/\.horosa-direction-page\s*>\s*\.ant-tabs\s*>\s*\.ant-tabs-content-holder\s*>\s*\.ant-tabs-content/.test(t)).toBe(true);
 	});
 
-	it('③AstroPDSphere 捕获期忽略 pointerleave + guard 对偶分支在位', () => {
-		const sphere = read('components/astro3d/AstroPDSphere.js');
-		expect(sphere.includes('handleTimelineLeave')).toBe(true);
-		expect(/handleTimelineLeave\(\)\s*\{[^}]*_tlCaptured[^}]*return;/s.test(sphere)).toBe(true);
+	it('③3D 主限天球已从产品范围删除,星运页不再挂载 AstroPDSphere', () => {
+		expect(fs.existsSync(path.join(SRC, 'components/astro3d/AstroPDSphere.js'))).toBe(false);
 		const direct = read('components/direction/AstroDirectMain.js');
+		expect(direct.includes('AstroPDSphere')).toBe(false);
 		expect(direct.includes('this.rootEl.contains(t)')).toBe(true);
 	});
 

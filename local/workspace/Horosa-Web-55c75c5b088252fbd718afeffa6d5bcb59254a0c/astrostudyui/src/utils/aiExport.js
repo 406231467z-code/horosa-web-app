@@ -19,6 +19,7 @@ import { isDocxTableSep, isTableBodyLine } from './mdTableParse';
 import { buildAIExportLegendSection } from './aiExportLegend';
 import { classicalGlobalValue } from './classicalChartGlobals';   // [M-1] 导出 [古典格局] 恒星轨与右栏/挂载同全局仓
 import { capturePageScreenshotForExport } from './pageScreenshot';
+import { isRemovedAiTechniqueKey } from '../constants/ProductScope';
 
 const SYMBOL_MAP = {
 	'☉': '日',
@@ -311,7 +312,7 @@ const AI_EXPORT_SECTION_MIGRATION_KEYS = [
 	'sanshiunited',
 	'taiyi',
 	'guolao',
-	// v39 补:节气盘主键 + 四分点子盘(春分/夏至/秋分/冬至)+ 元数据键;presets 增 3D盘段,自定义用户须并集补入。
+	// v39 补:节气盘主键 + 四分点子盘(春分/夏至/秋分/冬至)+ 元数据键;PHASE1 起仅星盘/宿盘。
 	'jieqi',
 	'jieqi_chunfen',
 	'jieqi_xiazhi',
@@ -432,10 +433,10 @@ const AI_EXPORT_HOVER_MEANING_TECHNIQUES = new Set([
 ]);
 const JIEQI_SETTING_PRESETS = {
 	jieqi_meta: ['节气盘参数'],
-	jieqi_chunfen: ['春分星盘', '春分宿盘', '春分3D盘'],
-	jieqi_xiazhi: ['夏至星盘', '夏至宿盘', '夏至3D盘'],
-	jieqi_qiufen: ['秋分星盘', '秋分宿盘', '秋分3D盘'],
-	jieqi_dongzhi: ['冬至星盘', '冬至宿盘', '冬至3D盘'],
+	jieqi_chunfen: ['春分星盘', '春分宿盘'],
+	jieqi_xiazhi: ['夏至星盘', '夏至宿盘'],
+	jieqi_qiufen: ['秋分星盘', '秋分宿盘'],
+	jieqi_dongzhi: ['冬至星盘', '冬至宿盘'],
 };
 const JIEQI_SPLIT_SETTING_KEYS = Object.keys(JIEQI_SETTING_PRESETS);
 const JIEQI_SPLIT_TECHNIQUES = [
@@ -497,6 +498,7 @@ const AI_EXPORT_TECHNIQUES = [
 	{ key: 'jingjue', label: '荆诀' },
 	{ key: 'shenyishu', label: '神易数' },
 	{ key: 'geomancy', label: '天文地占' },
+	// 以下键保留在登记表中供历史 AI 快照解析;listAIExportTechniqueSettings 不会把它们交给设置面。
 	{ key: 'tarot', label: '塔罗' },
 	{ key: 'lingqi', label: '灵棋经' },
 	{ key: 'liureng', label: '六壬' },
@@ -806,7 +808,7 @@ export const AI_EXPORT_PRESET_SECTIONS = {
 	cetian: ['起盘', '农历与命身', '四化', '飞星', '格局', '命宮', '兄弟宮', '夫妻宮', '子女宮', '財帛宮', '疾厄宮', '遷移宮', '交友宮', '官祿宮', '田宅宮', '福德宮', '父母宮', '男女宮', '奴僕宮', '妻妾宮', '相貌宮', '衣鉢宮', '徒弟宮', '本師宮', '小師宮', '人刀宮', '僧道宮', '遊行宮', '師號宮', '相品宮', '运限', '童限', '凶限提示', '会照', '流年飞星', '流年七煞', '十七飞星', '神煞·岁前', '神煞·岁后', '神煞·年干', '神煞·月煞', '三日宫', '廿八宿分野', '十干变曜', '杂曜', '断诀', '星曜别名', '阴阳宫', '星解与运限歌', '星曜属性', '正曜副曜', '宫干四化表', '飞化规则', '古法格局规则', '三合组'],
 	germany: ['起盘信息', '宫位宫头', '行星', '中点', 'TNP星体', '中点相位', '90°中点盘', '行星图', '映点', '中点列表', '汉堡学派要素', '组合盘', '戴维森盘', '虚星参考'],
 	babylon: ['起盘信息', '七曜按宫', '分至天狼星', '位三法', '行星神性', '微黄道'],
-	jieqi: ['节气盘参数', '春分星盘', '春分宿盘', '春分3D盘', '夏至星盘', '夏至宿盘', '夏至3D盘', '秋分星盘', '秋分宿盘', '秋分3D盘', '冬至星盘', '冬至宿盘', '冬至3D盘'],
+	jieqi: ['节气盘参数', '春分星盘', '春分宿盘', '夏至星盘', '夏至宿盘', '秋分星盘', '秋分宿盘', '冬至星盘', '冬至宿盘'],
 	...JIEQI_SETTING_PRESETS,
 	otherbu: ['起盘信息', '骰子结果', '骰子盘宫位与星体', '天象盘宫位与星体'],
 	fengshui: ['起盘信息', '标记判定', '冲突清单', '未定位标注', '破局危害', '龙虎灶台', '移动盘', '吉凶评分', '缓解建议', '使用要点', '建议汇总', '纳气建议', '八卦定位', '成員卦象', '四类象格局', '应期成格', '改运建议', '风水·纳气盘', '风水·八卦阳宅', '风水·八宅大游年', '风水·玄空飞星', '风水·三合水法', '风水·金锁玉关', '风水·乾坤国宝', '风水·紫白飞星', '风水·辅星水法', '风水·净阴净阳', '风水·玄空大卦', '风水·形势峦头', '风水·择日选择',
@@ -3135,14 +3137,13 @@ export function saveAIExportSettings(settings){
 const AI_EXPORT_TECHNIQUE_GROUPS = [
 	{ title: '西方占星', keys: ['astrochart', 'hellenastro', 'dwadasamsa', 'harmonic', 'draconic', 'relocation', 'locastro', 'astrochart_like', 'relative', 'mundane', 'germany',
 		'babylon',
-		'horary', 'election', 'tianxing', 'otherbu', 'jieqi', 'jieqi_meta', 'jieqi_chunfen', 'jieqi_xiazhi', 'jieqi_qiufen', 'jieqi_dongzhi',
+		'horary', 'election', 'otherbu', 'jieqi', 'jieqi_meta', 'jieqi_chunfen', 'jieqi_xiazhi', 'jieqi_qiufen', 'jieqi_dongzhi',
 	] },
 	{ title: '星运推运', keys: ['primarydirect', 'primarydirchart', 'zodialrelease', 'firdaria', 'distributions', 'agepoint', 'profection', 'solararc', 'solarreturn', 'lunarreturn', 'givenyear', 'decennials', 'planetaryages', 'vedicprog', 'jaynesprog', 'planetaryarc', 'persiandirected', 'yearsystem129', 'balbillus', 'triplicityrulers', 'keypoints', 'lunationphase', 'extrareturns',
 	] },
 	{ title: '中式命理', keys: ['bazi', 'ziwei', 'guolao', 'qizhengkin', 'indiachart', 'heluo', 'canping', 'zhengchuan', 'yizhangjing', 'xianqin', 'cetian', 'shaozi', 'tieban', 'fendjing', 'beiji', 'nanji', 'chunzi', 'suzhan',
 	] },
-	{ title: '占卜术数', keys: ['sixyao', 'tongshefa', 'liureng', 'jinkou', 'qimen', 'qimenzeri', 'bazizeri', 'taiyizeri', 'ziweizeri', 'liurengzeri', 'sanshizeri', 'qizhengzeri', 'indiazeri', 'sanshiunited', 'taiyi', 'huangji', 'wuzhao', 'taixuan', 'guice', 'xiaoliuren', 'xiaochengtu', 'feigong', 'jingjue', 'shenyishu', 'geomancy', 'tarot', 'lingqi', 'fengshui',
-		'calendar', 'huangli', 'huanglizeri', 'tongshu'] },
+	{ title: '占卜术数', keys: ['sixyao', 'tongshefa', 'liureng', 'jinkou', 'qimen', 'sanshiunited', 'taiyi', 'huangji', 'wuzhao', 'taixuan', 'guice', 'xiaoliuren', 'xiaochengtu', 'feigong', 'jingjue', 'shenyishu', 'geomancy', 'lingqi'] },
 ];
 
 export function listAIExportTechniqueSettingGroups(){
@@ -3198,7 +3199,7 @@ export function getSectionGroupsForTechnique(key, options){
 
 export function listAIExportTechniqueSettings(){
 	const settings = loadAIExportSettings();
-	return AI_EXPORT_TECHNIQUES.map((item)=>{
+	return AI_EXPORT_TECHNIQUES.filter((item)=>!isRemovedAiTechniqueKey(item.key)).map((item)=>{
 		const meaningMeta = getMeaningSettingMetaByTechnique(item.key);
 		return {
 			key: item.key,
@@ -6361,7 +6362,7 @@ function getCandidateExportKeys(context){
 
 	// 兜底候选：确保上下文误判时仍能从计算快照抓到内容。
 	if(!hasPrimarySpecific){
-		keys.push('astrochart', 'astrochart_like', 'indiachart', 'relative', 'germany', 'jieqi', 'guolao', 'qizhengkin', 'bazi', 'ziwei', 'qimen', 'liureng', 'jinkou', 'sanshiunited', 'tongshefa', 'huangji', 'wuzhao', 'taixuan', 'jingjue', 'shenyishu', 'sixyao', 'taiyi', 'shaozi', 'tieban', 'fendjing', 'beiji', 'nanji', 'chunzi', 'xianqin', 'cetian', 'otherbu', 'fengshui');
+		keys.push('astrochart', 'astrochart_like', 'indiachart', 'relative', 'germany', 'jieqi', 'guolao', 'qizhengkin', 'bazi', 'ziwei', 'qimen', 'liureng', 'jinkou', 'sanshiunited', 'tongshefa', 'huangji', 'wuzhao', 'taixuan', 'jingjue', 'shenyishu', 'sixyao', 'taiyi', 'shaozi', 'tieban', 'fendjing', 'beiji', 'nanji', 'chunzi', 'xianqin', 'cetian', 'otherbu');
 	}
 
 	return uniqueArray(keys.map((key)=>normalizeExportKey(key)).filter(Boolean));
@@ -6456,7 +6457,7 @@ function getRescueExportKeys(context, fallbackStateContext, triedKeys){
 		'primarydirect', 'primarydirchart', 'zodialrelease', 'firdaria', 'profection', 'solararc', 'solarreturn', 'lunarreturn', 'givenyear', 'decennials',
 		'planetaryages', 'vedicprog', 'jaynesprog', 'planetaryarc', 'persiandirected', 'yearsystem129', 'balbillus', 'triplicityrulers', 'keypoints', 'lunationphase', 'extrareturns',
 		'sanshiunited', 'qimen', 'liureng', 'jinkou', 'sixyao', 'tongshefa', 'huangji', 'wuzhao', 'taixuan', 'jingjue', 'shenyishu', 'taiyi', 'suzhan',
-		'guolao', 'qizhengkin', 'shaozi', 'tieban', 'fendjing', 'beiji', 'nanji', 'chunzi', 'xianqin', 'cetian', 'otherbu', 'fengshui',
+		'guolao', 'qizhengkin', 'shaozi', 'tieban', 'fendjing', 'beiji', 'nanji', 'chunzi', 'xianqin', 'cetian', 'otherbu',
 		'bazi', 'ziwei',
 	);
 	return keys;

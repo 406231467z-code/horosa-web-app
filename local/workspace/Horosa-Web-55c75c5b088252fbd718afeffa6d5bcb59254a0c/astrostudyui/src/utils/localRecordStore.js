@@ -18,6 +18,16 @@ import { isQuotaError, purgeQuotaEmergency } from './safeStorage';
 import { mirrorShadowWrite } from './shadowMirror';
 // [V5-D11] 版本历史:更新前旧版快照(独立 IDB 库;jest/无 IDB 环境自动内存回退)。
 import { pushRecordRevision } from './recordRevisions';
+// PHASE 2-B/2-C/2-D: 命盘/事盘四键 IndexedDB。2-D 在 primary-ready 后写入只走
+// memory snapshot + 异步 IDB;四键禁止生产 setItem。LS 四键不删除,作迁移遗留快照。
+import {
+	kickUserRecordsMigration,
+	scheduleUserRecordsReplace,
+	isUserRecordsPrimaryReady,
+	getUserRecordsSnapshot,
+	adoptUserRecordsSnapshot,
+	subscribeUserRecordsPrimary,
+} from './userRecordsStore';
 
 export function safeParseJson(txt, defVal){
 	if(!txt){
@@ -157,6 +167,7 @@ export function createLocalRecordStore(config){
 	const trashKey = config.trashKey || null;
 	const TRASH_RETENTION_DAYS = 30;
 	const TRASH_MAX = 200;
+	const replicaKind = warnLabel === 'case' ? 'case' : 'chart';
 
 	let fallbackToMemoryStore = false;
 	let fallbackWarned = false;
@@ -172,6 +183,17 @@ export function createLocalRecordStore(config){
 	let lastRawText = null;
 	let lastParsedList = null;
 	let newerSchemaNotified = false;   // [V5-C10] 超版记录提示,每会话一次
+
+	subscribeUserRecordsPrimary(()=>{
+		if(fallbackToMemoryStore || !isUserRecordsPrimaryReady()){
+			return;
+		}
+		const live = getUserRecordsSnapshot(replicaKind, 'live');
+		if(live instanceof Array){
+			lastParsedList = live;
+			memoryList = live.slice();
+		}
+	});
 
 	function warnMemoryFallback(){
 		if(fallbackWarned){
@@ -209,6 +231,15 @@ export function createLocalRecordStore(config){
 		if(fallbackToMemoryStore){
 			return memoryList.slice();
 		}
+		if(isUserRecordsPrimaryReady()){
+			const snap = getUserRecordsSnapshot(replicaKind, 'live');
+			if(snap instanceof Array){
+				lastParsedList = snap;
+				memoryList = snap.slice();
+				return snap.slice();
+			}
+		}
+		kickUserRecordsMigration();
 		const storage = getLocalStorage();
 		if(!storage){
 			enableMemoryFallback();
@@ -253,6 +284,7 @@ export function createLocalRecordStore(config){
 		lastRawText = raw;
 		lastParsedList = migrated.slice();
 		memoryList = migrated.slice();
+		kickUserRecordsMigration();
 		return migrated;
 	}
 
@@ -269,19 +301,50 @@ export function createLocalRecordStore(config){
 	// 库一有增删改签名即变、缓存即失效:写驱动失效,零轮询零事件面)。仅内存计数不落盘
 	// (重载后从 0 起,读侧首键必 miss,安全)。
 	let writeVersion = 0;
+	let trashWriteVersion = 0;
 	function getWriteVersion(){
 		return writeVersion;
+	}
+	function jsonCloneList(list){
+		try{
+			const ary = JSON.parse(JSON.stringify(list instanceof Array ? list : []));
+			return ary instanceof Array ? ary : [];
+		}catch(_e){
+			return list instanceof Array ? list.slice() : [];
+		}
+	}
+
+	function scheduleLiveReplica(list){
+		scheduleUserRecordsReplace(replicaKind, 'live', list, writeVersion);
+		kickUserRecordsMigration();
+	}
+	function scheduleTrashReplica(list){
+		scheduleUserRecordsReplace(replicaKind, 'trash', list, trashWriteVersion);
+		kickUserRecordsMigration();
 	}
 	function writeRaw(list){
 		writeVersion += 1; // 所有写路径(含内存回退)都经此,先自增再落盘
 		const next = list instanceof Array ? list.slice() : [];
 		memoryList = next;
+		if(isUserRecordsPrimaryReady()){
+			const parsed = jsonCloneList(next);
+			memoryList = parsed.slice();
+			lastParsedList = parsed;
+			lastRawText = null;
+			lastWriteFailed = false;
+			lastFailureReason = null;
+			adoptUserRecordsSnapshot(replicaKind, 'live', parsed);
+			scheduleLiveReplica(parsed);
+			return { persisted: true, reason: 'ok' };
+		}
 		if(fallbackToMemoryStore){
+			scheduleLiveReplica(next);
 			return { persisted: false, reason: 'memory-mode' };
 		}
 		const storage = getLocalStorage();
 		if(!storage){
 			enableMemoryFallback('storage-error');
+			scheduleLiveReplica(next);
 			return { persisted: false, reason: 'memory-mode' };
 		}
 		const text = JSON.stringify(next);
@@ -297,6 +360,8 @@ export function createLocalRecordStore(config){
 			lastRawText = text;
 			lastParsedList = JSON.parse(text);
 			mirrorShadowWrite(storageKey, text);
+			adoptUserRecordsSnapshot(replicaKind, 'live', lastParsedList);
+			scheduleLiveReplica(next);
 			return { persisted: true, reason: 'ok' };
 		}catch(e){
 			if(isQuotaError(e)){
@@ -308,6 +373,8 @@ export function createLocalRecordStore(config){
 					lastRawText = text;
 					lastParsedList = JSON.parse(text);
 					mirrorShadowWrite(storageKey, text);
+					adoptUserRecordsSnapshot(replicaKind, 'live', lastParsedList);
+					scheduleLiveReplica(next);
 					return { persisted: true, reason: 'ok', purged: true };
 				}catch(e2){
 					lastWriteFailed = true;
@@ -318,6 +385,7 @@ export function createLocalRecordStore(config){
 			lastWriteFailed = true;
 			lastFailureReason = 'storage-error';
 			enableMemoryFallback('storage-error');
+			scheduleLiveReplica(next);
 			return { persisted: false, reason: 'storage-error' };
 		}
 	}
@@ -608,6 +676,12 @@ export function createLocalRecordStore(config){
 		if(!trashKey){
 			return [];
 		}
+		if(isUserRecordsPrimaryReady()){
+			const snap = getUserRecordsSnapshot(replicaKind, 'trash');
+			if(snap instanceof Array){
+				return snap.slice();
+			}
+		}
 		const storage = getLocalStorage();
 		if(!storage){
 			return [];
@@ -624,14 +698,25 @@ export function createLocalRecordStore(config){
 		if(!trashKey){
 			return false;
 		}
+		const nextTrash = list instanceof Array ? list : [];
+		if(isUserRecordsPrimaryReady()){
+			const parsed = jsonCloneList(nextTrash);
+			trashWriteVersion += 1;
+			adoptUserRecordsSnapshot(replicaKind, 'trash', parsed);
+			scheduleTrashReplica(parsed);
+			return true;
+		}
 		const storage = getLocalStorage();
 		if(!storage){
 			return false;
 		}
-		const text = JSON.stringify(list instanceof Array ? list : []);
+		const text = JSON.stringify(nextTrash);
 		try{
 			storage.setItem(trashKey, text);
 			mirrorShadowWrite(trashKey, text);
+			trashWriteVersion += 1;
+			adoptUserRecordsSnapshot(replicaKind, 'trash', JSON.parse(text));
+			scheduleTrashReplica(nextTrash);
 			return true;
 		}catch(e){
 			if(isQuotaError(e)){
@@ -639,6 +724,9 @@ export function createLocalRecordStore(config){
 				try{
 					storage.setItem(trashKey, text);
 					mirrorShadowWrite(trashKey, text);
+					trashWriteVersion += 1;
+					adoptUserRecordsSnapshot(replicaKind, 'trash', JSON.parse(text));
+					scheduleTrashReplica(nextTrash);
 					return true;
 				}catch(e2){
 					// ignore

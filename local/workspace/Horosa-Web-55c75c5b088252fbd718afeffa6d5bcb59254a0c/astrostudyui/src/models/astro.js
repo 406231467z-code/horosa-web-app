@@ -24,6 +24,7 @@ import * as AstroConst from '../constants/AstroConst';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../utils/dayBoundary';
 import { applyRecordToFields, registerFieldsBaselineFactory } from '../utils/recordFieldsRestore';
 import { classicalGlobalValue, classicalGlobalOverrides, classicalBackendOverridesFromFields } from '../utils/classicalChartGlobals';
+import { canonicalizeTabKey, isKeepDrawerKey } from '../constants/ProductScope';
 
 let dtm = new DateTime();
 const DefaultHouseSystem = 1;
@@ -560,8 +561,7 @@ function shouldIncludePrimaryDirection(state){
 		state
 		&& state.currentTab === 'direction'
 		&& (state.currentSubTab === 'primarydirect'
-			|| state.currentSubTab === 'primarydirchart'
-			|| state.currentSubTab === 'primarydirsphere')
+			|| state.currentSubTab === 'primarydirchart')
 	);
 }
 
@@ -602,21 +602,9 @@ function closeAllDrawer(msg){
 		selectchartdisplay: false,
 		selectasp: false,
 		selectorb: false,
-		register: false,
-		login: false,
-		resetpwd: false,
-		changepwd: false,
-		changeparams: false,
 		chartlist: false,
 		chartedit: false,
 		chartadd: false,
-		caselist: false,
-		caseedit: false,
-		caseadd: false,
-		chartdeeplearn: false,
-		memo: false,
-		chartsgps: false,
-		commtools: false,
 		homepage: false,
 	};
 	return drawer;
@@ -810,28 +798,27 @@ registerOptionChartTaskBuilder((variantFields, astroState)=>{
 });
 
 function hooking(hook, currentTab, fields, chartObj){
-	if(currentTab === 'indiachart' || currentTab === 'locastro'
-		|| currentTab === 'hellenastro' || currentTab === 'guolao'
-		|| currentTab === 'germanytech' || currentTab === 'jieqichart'
-		|| currentTab === 'cntradition' || currentTab === 'cnyibu' || currentTab === 'otherbu'
-		|| currentTab === 'fengshui' || currentTab === 'sanshiunited' || currentTab === 'aianalysis'
-		|| currentTab === 'bazi' || currentTab === 'ziwei' || currentTab === 'guazhan'
-		|| currentTab === 'liureng' || currentTab === 'dunjia' || currentTab === 'taiyi'
-		|| currentTab === 'shusuan' || currentTab === 'yanqin' || currentTab === 'mingother'
-		|| currentTab === 'auxchart' || currentTab === 'planetarium'){
-		if(hook[currentTab].fun){
-			hook[currentTab].fun(fields, chartObj)
+	const tab = canonicalizeTabKey(currentTab);
+	if(!hook || !hook[tab]){
+		return;
+	}
+	if(tab === 'indiachart' || tab === 'locastro'
+		|| tab === 'hellenastro' || tab === 'guolao'
+		|| tab === 'germanytech' || tab === 'jieqichart'
+		|| tab === 'cnyibu' || tab === 'otherbu'
+		|| tab === 'sanshiunited' || tab === 'aianalysis'
+		|| tab === 'bazi' || tab === 'ziwei' || tab === 'guazhan'
+		|| tab === 'liureng' || tab === 'dunjia' || tab === 'taiyi'
+		|| tab === 'shusuan' || tab === 'yanqin' || tab === 'mingother'
+		|| tab === 'auxchart' || tab === 'astrochart'){
+		if(hook[tab].fun){
+			hook[tab].fun(fields, chartObj)
 		}
-	}else if(currentTab === 'direction'){
-		if(hook[currentTab].fun){
-			hook[currentTab].fun(chartObj);
-		}
-	}else if(currentTab === 'astroreader'){
-		if(hook[currentTab].fun){
-			hook[currentTab].fun();
+	}else if(tab === 'direction'){
+		if(hook[tab].fun){
+			hook[tab].fun(chartObj);
 		}
 	}
-
 }
 
 let now = new DateTime();
@@ -862,12 +849,6 @@ export default {
 				fun: null
 			},
 			ziwei:{
-				fun: null
-			},
-			planetarium:{
-				fun: null
-			},
-			planetarium:{
 				fun: null
 			},
 			direction:{
@@ -906,9 +887,6 @@ export default {
 			jieqichart:{
 				fun: null
 			},
-			cntradition:{
-				fun: null
-			},
 			cnyibu:{
 				fun: null
 			},
@@ -927,31 +905,16 @@ export default {
 			shusuan:{
 				fun: null
 			},
-			yanqin:{
-				fun: null
-			},
 			mingother:{
 				fun: null
 			},
-			calendar:{
-				fun: null
-			},
 			otherbu:{
-				fun: null
-			},
-			fengshui:{
 				fun: null
 			},
 			sanshiunited:{
 				fun: null
 			},
 			aianalysis:{
-				fun: null
-			},
-			astroreader:{
-				fun: null
-			},
-			admintools:{
 				fun: null
 			},
 			guolao:{
@@ -985,7 +948,10 @@ export default {
 				values = { ...values, fields: cleanFields };
 			}
 			let st = { ...state, ...values, };
-			let tab = values.currentTab ? values.currentTab : state.currentTab;
+			if(values && values.currentTab){
+				st.currentTab = canonicalizeTabKey(values.currentTab);
+			}
+			let tab = st.currentTab;
 			let subtab = values.currentSubTab ? values.currentSubTab : state.currentSubTab;
 
 			if(values.currentChart){
@@ -1136,7 +1102,10 @@ export default {
 
 		},
 
-		*openDrawer({ payload: values }, { call, put, select }){
+		*openDrawer({ payload: values }, { put, select }){
+			if(!values || !isKeepDrawerKey(values.key)){
+				return;
+			}
 			let drawer = closeAllDrawer('*openDrawer');
 			drawer[values.key] = true;
 
@@ -1147,12 +1116,7 @@ export default {
                 },
             });
 
-			if(values.key === 'register' || values.key === 'resetpwd'){
-				yield put({
-					type: 'app/fetchImgToken',
-					payload: { },
-				});	
-			}else if(values.key === 'chartadd'){
+			if(values.key === 'chartadd'){
 				yield put({
 					type: 'user/newCurrentChart',
 					payload: values.record ? values.record : { },
@@ -1162,97 +1126,6 @@ export default {
 					type: 'user/fetchCharts',
 					payload: { },
 				});
-			}else if(values.key === 'caselist'){
-				yield put({
-					type: 'user/fetchCases',
-					payload: { },
-				});
-			}else if(values.key === 'caseadd'){
-				yield put({
-					type: 'user/newCurrentCase',
-					payload: values.record ? values.record : {},
-				});
-			}else if(values.key === 'caseedit'){
-				let record = values.record;
-				if(record){
-					yield put({
-						type: 'user/setCurrentCase',
-						payload: {
-							...values.record,
-							drawerVisible: drawer,
-						},
-					});
-				}else{
-					const userstate = yield select((s)=>s.user);
-					if(userstate.currentCase && userstate.currentCase.cid && userstate.currentCase.cid.value){
-						let caze = userstate.currentCase;
-						record = {
-							cid: caze.cid.value,
-							event: caze.event.value,
-							caseType: caze.caseType.value,
-							divTime: caze.divTime.value,
-							zone: caze.zone.value,
-							lat: caze.lat.value,
-							lon: caze.lon.value,
-							gpsLat: caze.gpsLat.value,
-							gpsLon: caze.gpsLon.value,
-							pos: caze.pos.value,
-							isPub: caze.isPub.value,
-							creator: caze.creator.value,
-							updateTime: caze.updateTime.value,
-							group: caze.group.value,
-							payload: caze.payload.value,
-							sourceModule: caze.sourceModule.value,
-							drawerVisible: drawer,
-						};
-						yield put({
-							type: 'user/setCurrentCase',
-							payload: record,
-						});
-					}else{
-						yield put({
-							type: 'openDrawer',
-							payload: {
-								key: 'caseadd',
-							},
-						});
-					}
-				}
-			}else if(values.key === 'chartdeeplearn'){
-				let record = values.record;
-				if(record){
-					yield put({
-						type: 'fetchFateEvents',
-						payload: record,
-					});		
-				}else{
-					const userstate = yield select((s)=>s.user);
-					if(userstate.currentChart.cid.value && userstate.currentChart.cid.value !== ''){
-						let chart = userstate.currentChart;
-						let tm = chart.birth.value.clone();
-						record = {
-							birth: tm,
-							zone: chart.zone.value,
-							ad: tm.ad,
-							lat: chart.lat.value,
-							lon: chart.lon.value,
-							gpsLat: chart.gpsLat.value,
-							gpsLon: chart.gpsLon.value,
-							name: chart.name.value,
-							pos: chart.pos.value,
-							gender: parseInt(chart.gender.value + ''),
-							isPub: chart.isPub.value,
-							cid: chart.cid.value,
-							creator: chart.creator.value,
-							updateTime: chart.updateTime.value,
-							group: chart.group.value,
-						};
-						yield put({
-							type: 'fetchFateEvents',
-							payload: record,
-						});			
-					}
-				}
 			}else if(values.key === 'chartedit'){
 				let record = values.record;
 				if(record){
@@ -1311,10 +1184,6 @@ export default {
 					}
 		
 				}
-			}else if(values.key === 'planetselect'){
-
-			}else if(values.key === 'statistic'){
-
 			}else if(values.key === 'homepage'){
 
 			}
@@ -1779,17 +1648,8 @@ export default {
 			}
 
 			let path = values.path;
-			if(path[0] === 'astroreader'){
-				const userState = yield select((s)=>s.user);
-				if(userState.userInfo === undefined || userState.userInfo === null){
-					yield put({
-						type: 'save',
-						payload: {
-							currentTab: 'astrochart',
-						},
-					});		
-					return;
-				}	
+			if(path && path[0]){
+				path = [canonicalizeTabKey(path[0]), ...path.slice(1)];
 			}
 
 			let payload = {

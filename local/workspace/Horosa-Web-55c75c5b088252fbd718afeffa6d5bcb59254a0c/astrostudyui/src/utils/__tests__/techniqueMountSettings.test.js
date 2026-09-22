@@ -49,6 +49,8 @@ const SECTIONS_ONLY = ['tongshefa', 'mundane',
 	'relative', // [D2] 合盘:两盘技法只读(快照单源=合盘页,选项在合盘页改即重存)
 	'tianxing', // 天星择日:征象搜索结果为一次性产物,按存档快照直读不按时间复算(v3.7.0 并入)
 	'qimenzeri', // 奇门择日:找局结果为一次性产物,按存档快照直读不按时间复算(与 tianxing 同范式)
+	'tongshu', // PHASE1:通书页面已裁剪
+	'tarot', // PHASE1:塔罗页面已裁剪
 ];
 
 beforeEach(()=>{
@@ -802,14 +804,13 @@ describe('R3 挂载大修覆盖面锁(2026-07-30)', ()=>{
 		// 起卦输入(coinFace)/装卦行序(writeDir)/中栏页签(biangua)/纯显示(changshengUse/changshengYinYang)恒不入。
 		['coinFace', 'writeDir', 'biangua', 'changshengUse', 'changshengYinYang'].forEach((k)=>expect(names).not.toContain(k));
 	});
-	it('地占/塔罗:payload 判读轴;种子/牌阵/问句(可伪造新卦面)绝不入齿轮', ()=>{
-		['geomancy', 'tarot'].forEach((k)=>{
-			const sc = getTechniqueSettingsSchema(k);
-			expect(sc.kind).toBe('payload');
-			expect(sc.optionsPath).toBe('options');
-			const names = sc.fields.map((f)=>f.name);
-			['seed', 'seedMode', 'question', 'deckId', 'spreadType'].forEach((bad)=>expect(names).not.toContain(bad));
-		});
+	it('地占:payload 判读轴;种子/问句(可伪造新卦面)绝不入齿轮;塔罗页面已裁剪为 sectionsOnly', ()=>{
+		const sc = getTechniqueSettingsSchema('geomancy');
+		expect(sc.kind).toBe('payload');
+		expect(sc.optionsPath).toBe('options');
+		const names = sc.fields.map((f)=>f.name);
+		['seed', 'seedMode', 'question', 'deckId', 'spreadType'].forEach((bad)=>expect(names).not.toContain(bad));
+		expect(getTechniqueSettingsSchema('tarot').kind).toBe('sectionsOnly');
 	});
 	it('卜卦/择日:hp_/ep_ 扁平键与 SPEC 单源等长(漏一键=判读参数在挂载里蒸发)', ()=>{
 		const h = getTechniqueSettingsSchema('horary').fields.filter((f)=>f.name.indexOf('hp_') === 0);
@@ -825,14 +826,11 @@ describe('R3 挂载大修覆盖面锁(2026-07-30)', ()=>{
 		expect(names).toContain('chartCategory');
 		expect(names).not.toContain('jieQiType');
 	});
-	it('太乙流派六轴/通书 event+mingYear(zuoShan 幽灵不复活)/皇极 historyYear', ()=>{
+	it('太乙流派六轴/通书已裁剪/皇极 historyYear', ()=>{
 		const ty = getTechniqueSettingsSchema('taiyi').fields.map((f)=>f.name);
 		['school_jishen', 'school_wenchang', 'school_keJianChen', 'school_sanji', 'school_youshen', 'school_shijiCoord']
 			.forEach((k)=>expect(ty).toContain(k));
-		const tsu = getTechniqueSettingsSchema('tongshu').fields.map((f)=>f.name);
-		expect(tsu).toContain('event');
-		expect(tsu).toContain('mingYear');
-		expect(tsu).not.toContain('zuoShan');
+		expect(getTechniqueSettingsSchema('tongshu').kind).toBe('sectionsOnly');
 		expect(getTechniqueSettingsSchema('huangji').fields.map((f)=>f.name)).toContain('historyYear');
 	});
 	it('kinastro 族:齿轮全为哨兵默认(prune 后空 = 无头 payload 不带键 = 现状零回归)', ()=>{
@@ -878,22 +876,14 @@ describe('挂载审计条目', ()=>{
 	});
 });
 
-// tongshu 齿轮 → payload.tongshu(此前 aiAnalysisContext 读点 {...defaults,...p.tongshu} 无任何写入方)
-describe('tongshu optionsPath 嵌套命名空间', ()=>{
-	const { mergeOptionsIntoPayload, getTechniqueSettingsSchema } = require('../techniqueMountSettings');
-	it('齿轮值写进 payload.tongshu.<name>,与 regenerate 读点同构;默认值被剪除', ()=>{
-		const out = mergeOptionsIntoPayload({ some: 1 }, 'tongshu', { school: 'wutu', liexiuUse: '建宅', event: '安葬', mingYear: '甲子' });
-		expect(out.some).toBe(1);
-		// liexiuUse=默认被 prune;mingYear=默认(甲子)同剪;event 非默认保留。
-		// zuoShan 已从 schema 删除(无流派声明 needs、builder 全文不消费的双重幽灵) —— 不得再出现。
-		expect(out.tongshu).toEqual({ school: 'wutu', event: '安葬' });
-	});
-	it('全默认 → payload 原样(不产生空 tongshu 命名空间)', ()=>{
-		const out = mergeOptionsIntoPayload({ a: 1 }, 'tongshu', { school: 'donggong' });
-		expect(out).toEqual({ a: 1 });
-	});
-	it('huangli schema 在位且为 sectionsOnly;astrochart 埃及七键入组', ()=>{
+describe('huangli / tongshu PHASE1 schema', ()=>{
+	const { getTechniqueSettingsSchema } = require('../techniqueMountSettings');
+	it('huangli/tongshu/tarot schema 均为 sectionsOnly', ()=>{
 		expect(getTechniqueSettingsSchema('huangli').kind).toBe('sectionsOnly');
+		expect(getTechniqueSettingsSchema('tongshu').kind).toBe('sectionsOnly');
+		expect(getTechniqueSettingsSchema('tarot').kind).toBe('sectionsOnly');
+	});
+	it('astrochart 埃及七键入组', ()=>{
 		const astro = getTechniqueSettingsSchema('astrochart');
 		const names = astro.fields.map((f)=>f.name);
 		['egypt_decanRuler','egypt_decanAnchor','egypt_decanNaming','egypt_starClock','egypt_calendarAnchor','egypt_petosirisMod','egypt_godEdition']

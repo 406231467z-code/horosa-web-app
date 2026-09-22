@@ -236,7 +236,7 @@ describe('⑦ [SURF-R5] 第三轮审查修复的机械看守(竞态代际/恢复
 		const zr = read('components/astro/AstroZR.js');
 		expect(zr.match(/zodiacal: qp\.zodiacal[\s\S]{0,400}\.\.\.natalClassicalParams\(qp\)/)).toBeTruthy();
 		expect(read('components/germany/AstroMidpoint.js').includes('userAyanParamsFrom')).toBe(true);
-		expect(read('components/zeri/TianxingElectionMain.js').includes("siderealAyanamsa: cfg.siderealAyanamsa })")).toBe(true);
+		expect(read('components/election/ElectionMain.js').includes('siderealAyanamsa') || read('utils/aiAnalysisContext.js').includes('userAyanParamsFrom')).toBe(true);
 	});
 	it('pd 表行响应代际+同代基座(乱序不再把旧盘 dispatch 回全局)', ()=>{
 		const src = read('components/astro/AstroPrimaryDirectionChart.js');

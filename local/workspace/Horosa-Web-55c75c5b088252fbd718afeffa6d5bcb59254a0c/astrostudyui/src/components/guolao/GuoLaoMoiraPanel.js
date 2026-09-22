@@ -7,7 +7,7 @@ import * as AstroText from '../../constants/AstroText';
 import { moiraMergeStellarRelationRows as mergeStellarRelationRows, moiraBuildLimitTable as buildLimitTable, moiraCurrentLimitIndex as currentLimitIndex, MOIRA_PLANET_DEFS, } from './GuoLaoMoiraWheel';
 import { calcAzimuthLocal } from '../commtools/Azimuth';
 import { convertLatStrToDegree, convertLonStrToDegree } from '../astro/AstroHelper';
-import { shanAtDeg } from '../fengshui/liqiCore';
+import { shanAtDeg } from '../../constants/shan24';
 import { LIFE_HELPER_LABELS, lifeHelperRow, weakSolidPillars, smallLimitBranch, flyLimitBranches, limitDegreeSpan, childAgeLimitYears, childYearsSpan, childLimitBranch, monthLimitBranch, lunarMonthNumFromBranch, branchElementOf, SU_ELEMENT } from './guolaoMoiraTables';
 import { GUOLAO_STAR_NOTES } from './guolaoStarNotes';
 import { PALACE_LORD as GL_PALACE_LORD, SU28 as GL_SU28, SU28_DEGREE_LORD as GL_SU28_LORD, HUAYAO_A as GL_HUAYAO_A, EXALT_DEGREE as GL_EXALT, DIGNITY_TABLE as GL_DIGNITY, SIGN_STATUS_SEQ, starDignityStatuses as glStarDignity, starMotionState as glStarMotion, starCombust as glStarCombust } from './guolaoData';

@@ -6,25 +6,11 @@ import { Component } from 'react';
 import { stepPrefetchEnabled } from '../../utils/perfFlags';
 import { registerStepPrefetcher } from '../../utils/stepPrefetch';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
-import { safeJsonParseFromStorage } from '../../utils/safeStorage';
 import { Row, Col, message, } from 'antd';
 import { XQTabs as Tabs } from '../xq-ui';
 import DateTime from '../comp/DateTime';
 import AstroPrimaryDirection from '../astro/AstroPrimaryDirection';
 import AstroPrimaryDirectionChart from '../astro/AstroPrimaryDirectionChart';
-// 🔴 主限天球必须懒加载,绝不可改回静态 import(2026-08-01 用户实报「进入星运台卡死」的真因):
-//   静态引它 → AstroPDSphere → PDSphereEngine → three,整条链成为本页 chunk 的**同步依赖**,
-//   于是只要进星运页,模块求值期就得先解析完 three(vendors-gl 862KB)+ 引擎(90KB);
-//   而本页默认停在「主限法」表格,二十多个子页签里只有「主限天球」一个用得着 3D ——
-//   从不打开天球的用户每次进页都白等这份解析,配置一般的机器足以让主线程长时间无响应。
-//   本页又是 idle 预取队列 order:1(优先级最高),连「从不进星运页」的用户都可能在空闲期吃到它。
-//   天球子页签是 TabPane + FreezeInactive(不激活不挂载),故懒化后「不打开=零成本」天然成立;
-//   FreezeInactive.render 自带 TechniqueErrorBoundary,此处无需再包一层边界。
-import { makeLazyBoundary, idleWarm } from '../../utils/lazyBoundary';
-const AstroPDSphere = makeLazyBoundary(
-	() => import(/* webpackChunkName: "pd-sphere" */ '../astro3d/AstroPDSphere'),
-	{ label: '主限天球', tip: '主限天球加载中…' }
-);
 import AstroZR from '../astro/AstroZR';
 import AstroFirdaria from '../astro/AstroFirdaria';
 import AstroDistributions from '../astro/AstroDistributions';
@@ -421,14 +407,6 @@ function buildPrimaryDirectSnapshotText(chartObj){
 			const bpd = best.pd;
 			nearestLine = `表中距今最近行：${degreeText(bpd && bpd[0], pdMethod) || '无'}（${directionObjText(bpd && bpd[1], obj) || '无'} → ${directionObjText(bpd && bpd[2], obj) || '无'}，${bpd && bpd[4] ? `${bpd[4]}` : '无'}）`;
 		}
-	}
-	// [WP-5.5] 主限天球可选行:用户最近在 3D 球上选中/播放的向运(≤24h 有效,防跨日陈旧)。
-	// 文本由 AstroPDSphere 从选中 row 既有字段拼好盖章,此处只读不再推导。
-	const sphereStamp = safeJsonParseFromStorage('horosa.pdsphere.aiCurrentRow');
-	if(sphereStamp && sphereStamp.txt && Number.isFinite(sphereStamp.ts) && (Date.now() - sphereStamp.ts) < 24 * 3600 * 1000){
-		lines.push('');
-		lines.push('[主限天球·当前动画所指]');
-		lines.push(`${sphereStamp.txt}`);
 	}
 	lines.push('');
 	lines.push(...safeHelperLines(buildCurrentMomentLines, obj, nearestLine ? [nearestLine] : []));
@@ -851,7 +829,7 @@ function unwrapPredictiveResponse(data){
 function isPrimaryDirectionTabKey(key){
 	// primarydirsphere(WS-3 主限天球)同吃 PD 表行:行数据是 AI 快照(复用主限表段)
 	// 与 chart.params pd 系持久化的单一来源,天球自身的 /predict/pd3d 不落盘。
-	return key === 'primarydirect' || key === 'primarydirchart' || key === 'primarydirsphere';
+	return key === 'primarydirect' || key === 'primarydirchart';
 }
 
 class AstroDirectMain extends Component{
@@ -876,9 +854,6 @@ class AstroDirectMain extends Component{
 					fun: null
 				},
 				primarydirchart:{
-					fun: null
-				},
-				primarydirsphere:{
 					fun: null
 				},
 				firdaria:{
@@ -1310,9 +1285,6 @@ class AstroDirectMain extends Component{
 
 	componentDidMount(){
 		this.unmounted = false;
-		// 天球 chunk 空闲预热:不打开天球=零成本(它只在空闲拍拉取,不占进页面这一帧),
-		// 真去点「主限天球」时通常已就绪,体感不比静态 import 差。卸载时必须 cancel。
-		this._cancelSphereWarm = idleWarm(AstroPDSphere, { timeout: 2500 });
 		if(typeof window !== 'undefined' && window.addEventListener){
 			window.addEventListener('horosa:refresh-module-snapshot', this.handleSnapshotRefreshRequest);
 		}
@@ -1384,7 +1356,6 @@ class AstroDirectMain extends Component{
 
 	componentWillUnmount(){
 		this.unmounted = true;
-		if(this._cancelSphereWarm){ this._cancelSphereWarm(); this._cancelSphereWarm = null; }
 		if(this._scrollZeroGuard){ window.removeEventListener('scroll', this._scrollZeroGuard, true); this._scrollZeroGuard = null; }
 		if(typeof window !== 'undefined' && window.removeEventListener){
 			window.removeEventListener('horosa:refresh-module-snapshot', this.handleSnapshotRefreshRequest);
@@ -1689,38 +1660,6 @@ class AstroDirectMain extends Component{
 								planetDisplay={this.props.planetDisplay}
 								lotsDisplay={this.props.lotsDisplay}
 								hook={this.state.hook.primarydirchart}
-							/>
-						</FreezeInactive>
-					</TabPane>
-
-					<TabPane tab="主限天球" key="primarydirsphere">
-						<FreezeInactive active={this.state.currentTab === "primarydirsphere"}>
-							{/* AI 快照复用主限表既有段(buildPrimaryDirectSnapshotText→'primarydirect'),
-							    本组件零新增快照段 —— 防 AI 段表漂移;pd3d 构参直接复用
-							    buildPrimaryDirectionRequest(与 /predict/pd 同一构参函数,零复刻)。 */}
-							<AstroPDSphere
-								value={this.props.chartObj}
-								height={height}
-								active={this.state.currentTab === "primarydirsphere"}
-								pdMethod={appliedPdMethod}
-								pdTimeKey={appliedPdTimeKey}
-								pdYears={appliedPdYears}
-								pdType={appliedPdType}
-								pdDirect={appliedPdDirect}
-								pdConverse={appliedPdConverse}
-								pdAntiscia={appliedPdAntiscia}
-								pdTerms={appliedPdTerms}
-								pdProjection={appliedPdExt.pdProjection}
-								pdFrame={appliedPdExt.pdFrame}
-								pdFramework={appliedPdExt.pdFramework}
-								pdParallel={appliedPdExt.pdParallel}
-								pdRaptParallel={appliedPdExt.pdRaptParallel}
-								pdTimeKeyCustom={appliedPdExt.pdTimeKeyCustom}
-								pdSignificators={appliedPdExt.pdSignificators}
-								pdPromissorTypes={appliedPdExt.pdPromissorTypes}
-								termsVariant={appliedPdExt.termsVariant}
-								buildRequest={this.buildPrimaryDirectionRequest}
-								onPdConfigApply={this.applyPrimaryDirectionConfig}
 							/>
 						</FreezeInactive>
 					</TabPane>

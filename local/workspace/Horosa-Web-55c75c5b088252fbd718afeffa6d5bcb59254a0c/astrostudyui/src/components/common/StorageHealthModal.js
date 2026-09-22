@@ -6,6 +6,7 @@ import { safeLocalStorageGet } from '../../utils/safeStorage';
 import { getShadowMirrorStatus } from '../../utils/shadowMirror';
 import { listLocalCharts, listLocalChartsTrash } from '../../utils/localcharts';
 import { listLocalCases, listLocalCasesTrash } from '../../utils/localcases';
+import { formatUserRecordsReadinessLabel } from '../../utils/userRecordsStore';
 import { isDesktopBridgeAvailable, invokeDesktopCommand } from '../../utils/aiAnalysisDesktop';
 import { getAutoBackupStatus } from '../../utils/autoBackup';
 import { runArchiveHealthCheck } from '../../utils/archiveHealthCheck';
@@ -77,6 +78,7 @@ export default function StorageHealthModal({ visible, onClose }){
 		>
 			<Descriptions column={1} size='small' bordered>
 				<Descriptions.Item label='记录库规模'>{`命盘 ${charts} 条 · 事盘 ${cases} 条 · 回收站 ${trash} 条`}</Descriptions.Item>
+				<Descriptions.Item label='命盘/事盘 IndexedDB'>{formatUserRecordsReadinessLabel()}</Descriptions.Item>
 				<Descriptions.Item label='持久化保护'>
 					{persisted === '1' ? '已授予（磁盘紧张时本地数据免于被系统清理）' : persisted === '0' ? '未授予（由系统决定；建议定期导出备份）' : '未知'}
 				</Descriptions.Item>

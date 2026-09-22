@@ -53,9 +53,8 @@ reg('components/guice/guiceSchools.js', ['yanshuFa', 'qiguaShu', 'shiyingSet', '
 reg('components/xiaoliuren/XiaoLiuRenMain.js', ['showOneThree']);
 reg('components/xiaochengtu/XiaoChengTuMain.js', ['yongGong', 'piKoujing']);
 reg('components/feigong/FeiGongMain.js', ['mingAge', 'mingGender', 'liuYueMonth', 'koujing']);
-// 通书:列宿用法在 tongshuSchools,命年在玄空层。
-reg('components/calendar/tongshuSchools.js', ['liexiuUse']);
-reg('components/calendar/tongshu/xuankong.js', ['mingYear']);
+// 通书页面已裁剪;齿轮定义仍留在挂载 schema,消费点改为 schema 自身以免假红。
+reg('utils/techniqueMountSettings.js', ['liexiuUse', 'mingYear']);
 // 六爻:schema 驱动 merge 后(W2 根修,组装文件无手抄键名),判读消费在 liuyaoFacade/liuyaoSchools。
 reg('components/gua/liuyaoFacade.js', ['askType', 'yongOverride', 'benming', 'tuChangsheng', 'bianyaoScope', 'fushen', 'yuepoMode', 'shishen', 'jinTuiTu', 'tianshiSchool', 'guashen', 'sixGods', 'yuqi', 'yingqi', 'doctrine', 'gufa', 'yueLiushen', 'guirenFa']);
 reg('components/wuzhao/WuZhaoMain.js', ['shifaVariant', 'qianAuto', 'qianThrows', 'zhaoNums', 'xingshenMonth', 'mingZhi']);
@@ -295,7 +294,7 @@ describe('[闸7] regen case 块 record.* 引用覆盖 schema 齿轮字段', ()=>
 		'heluo.huangdiOffset': 'builder 直读 record(2033)',
 	};
 	it('🔴 逐技法 case 块透传完备(canping.dayunRule 曾漏=此处红)', ()=>{
-		const m = CTX_SRC.match(/export async function regenerateChartTechniqueSnapshot[\s\S]*?\n\}\n/);
+		const m = CTX_SRC.match(/export async function regenerateChartTechniqueSnapshot[\s\S]*?\r?\n\}\r?\n/);
 		expect(m ? 'found' : 'regen 函数未定位').toBe('found');
 		const body = m[0];
 		// case 块切分:case 'key': ... 到下一个 case/default

@@ -10,9 +10,7 @@ import LiurengHelpDoc from './LiurengHelpDoc';
 import DunjiaHelpDoc from './DunjiaHelpDoc';
 import GuazhanHelpDoc from './GuazhanHelpDoc';
 import TaiyiHelpDoc from './TaiyiHelpDoc';
-import FengshuiHelpDoc from './FengshuiHelpDoc';
 import CnyibuHelpDoc from './CnyibuHelpDoc';
-import TarotHelpDoc from './TarotHelpDoc';
 import SanshiHelpDoc from './SanshiHelpDoc';
 import DirectionHelpDoc from './DirectionHelpDoc';
 import AuxchartHelpDoc from './AuxchartHelpDoc';
@@ -20,15 +18,8 @@ import RelativeHelpDoc from './RelativeHelpDoc';
 import JieqiHelpDoc from './JieqiHelpDoc';
 import ShusuanHelpDoc from './ShusuanHelpDoc';
 import YanqinHelpDoc from './YanqinHelpDoc';
-import CalendarHelpDoc from './CalendarHelpDoc';
-import PlanetariumHelpDoc from './PlanetariumHelpDoc';
-import CntraditionHelpDoc from './CntraditionHelpDoc';
-import Astro3DHelpDoc from './Astro3DHelpDoc';
-import XuanshiHelpDoc from './XuanshiHelpDoc';
 import AIAnalysisHelpDoc from './AIAnalysisHelpDoc';
 import YizhangjingHelpDoc from './YizhangjingHelpDoc';
-import AstrodataHelpDoc from './AstrodataHelpDoc';
-import ZeriHelpDoc from './ZeriHelpDoc';
 
 export const TECHNIQUE_HELP_DOCS = {
 	astrochart: AstroHelpDoc,
@@ -41,9 +32,7 @@ export const TECHNIQUE_HELP_DOCS = {
 	dunjia: DunjiaHelpDoc,
 	guazhan: GuazhanHelpDoc,
 	taiyi: TaiyiHelpDoc,
-	fengshui: FengshuiHelpDoc,
 	cnyibu: CnyibuHelpDoc,
-	tarot: TarotHelpDoc,
 	sanshiunited: SanshiHelpDoc,
 	direction: DirectionHelpDoc,
 	auxchart: AuxchartHelpDoc,
@@ -51,15 +40,8 @@ export const TECHNIQUE_HELP_DOCS = {
 	jieqichart: JieqiHelpDoc,
 	shusuan: ShusuanHelpDoc,
 	yanqin: YanqinHelpDoc,
-	calendar: CalendarHelpDoc,
-	planetarium: PlanetariumHelpDoc,
-	cntradition: CntraditionHelpDoc,
-	astrochart3D: Astro3DHelpDoc,
-	xuanshi: XuanshiHelpDoc,
 	aianalysis: AIAnalysisHelpDoc,
 	mingother: YizhangjingHelpDoc,
-	astrodata: AstrodataHelpDoc,
-	zeri: ZeriHelpDoc,
 };
 
 // 子技法手册:这些 key 不是主 tab,而是挂在别的主 tab 下的子页签。只按主 tab 取的话,

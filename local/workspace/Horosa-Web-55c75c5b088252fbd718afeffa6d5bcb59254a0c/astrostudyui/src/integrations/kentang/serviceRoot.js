@@ -55,12 +55,6 @@ export const KENTANG_SERVICE_CONFIG = {
 		queryKeys: ['geomancySrv'],
 		defaultLocalPort: 8899,
 	},
-	xuanshi: {
-		engine: 'xuanshi_history',
-		path: 'xuanshi',
-		queryKeys: ['xuanshiSrv'],
-		defaultLocalPort: 8899,
-	},
 	shaozi: {
 		engine: 'kinastro-shaozi',
 		path: 'shaozi',
@@ -120,13 +114,6 @@ export const KENTANG_SERVICE_CONFIG = {
 		engine: 'horosa-election',
 		path: 'qizhengelection',
 		queryKeys: ['qizhengElectionSrv'],
-		defaultLocalPort: 8899,
-	},
-	// 天星择日·征象搜索(webelectionscansrv,挂在主 chart 服务 :8899,非 kentang vendor)
-	electionscan: {
-		engine: 'horosa-electionscan',
-		path: 'electionscan',
-		queryKeys: ['electionScanSrv'],
 		defaultLocalPort: 8899,
 	},
 };

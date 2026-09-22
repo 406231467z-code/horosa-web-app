@@ -5,17 +5,9 @@ import { Spin, } from 'antd';
 import { armStepPrefetch } from '../utils/stepPrefetchArm';
 import { setCurrentTechnique } from '../utils/perfMark';
 import DateTime from '../components/comp/DateTime';
-import LoginForm from '../components/user/LoginForm';
-import RegisterForm from '../components/user/RegisterForm';
-import ResetPwdForm from '../components/user/ResetPwdForm';
-import ChangePwdForm from '../components/user/ChangePwdForm';
-import ChangeParamsFormComp from '../components/user/ChangeParamsFormComp';
 import ChartAddFormComp from '../components/user/ChartAddFormComp';
 import ChartEditFormComp from '../components/user/ChartEditFormComp';
 import ChartList from '../components/user/ChartList';
-import CaseAddFormComp from '../components/user/CaseAddFormComp';
-import CaseEditFormComp from '../components/user/CaseEditFormComp';
-import CaseList from '../components/user/CaseList';
 import AstroFormComp from '../components/astro/AstroFormComp';
 import AstroChartMain from '../components/astro/AstroChartMain';
 import TechniqueErrorBoundary from '../components/common/TechniqueErrorBoundary';
@@ -92,9 +84,6 @@ if(cityDbIdlePreloadEnabled()){
 	LAZY_PRELOAD_QUEUE.push({ factory: () => import('../data/citiesFull.json'), order: 1.5 });
 }
 
-// 3D 星盘动态化(首包瘦身):babylon 系重组件不入主包;lazyPreloadable 自带 Suspense+错误边界,并进 idle 预取队列(用户点击时通常已就绪)。
-const AstroChartMain3D = lazyPreloadable(() => import('../components/astro3d/AstroChartMain3D'), { order: 3, navKey: 'astrochart3D' });
-const PlanetariumMain = lazyPreloadable(() => import('../components/planetarium/PlanetariumMain'), { order: 3, navKey: 'planetarium' });
 const AuxChartMain = lazyPreloadable(() => import('../components/auxchart/AuxChartMain'), { order: 1, navKey: 'auxchart' });
 const IndiaChartMain = lazyPreloadable(() => import('../components/astro/IndiaChartMain'), { order: 1, navKey: 'indiachart' });
 // [B6] 合盘转 lazy(此前 eager 拖整组件进首屏;快照链亦已在 aiAnalysisContext 动态化,饿链全断)。
@@ -104,32 +93,13 @@ import AspSelector from '../components/astro/AspSelector';
 import AstroOrbSetting from '../components/astro/AstroOrbSetting';
 import PlanetSelector from '../components/astro/PlanetSelector';
 import ChartDisplaySelector from '../components/astro/ChartDisplaySelector';
-import ChartsGps from '../components/user/ChartsGps';
-// [B6] 笔记面板转 lazy:其饿链拖 Quill+node-forge 进首屏 vendors(explorer 实测);lazyPreloadable 自带 Suspense+边界。
-const ChartMemo = lazyPreloadable(() => import('../components/comp/ChartMemo'), { order: 3 });
 import FreezeInactive from '../components/comp/FreezeInactive';
-import { AUX_SUBTABS, CNYIBU_SUBTABS, CNTRADITION_SUBTABS, ZERI_SUBTABS, recallSubTab } from '../constants/SubTabRegistry';
+import { AUX_SUBTABS, CNYIBU_SUBTABS, recallSubTab } from '../constants/SubTabRegistry';
 const JieQiChartsMain = lazyPreloadable(() => import('../components/jieqi/JieQiChartsMain'), { order: 2, navKey: 'jieqichart' });
-const CnTraditionMain = lazyPreloadable(() => import('../components/cntradition/CnTraditionMain'), { order: 2, navKey: 'cntradition' });
 const CnYiBuMain = lazyPreloadable(() => import('../components/cnyibu/CnYiBuMain'), { order: 2, navKey: 'cnyibu' });
-const TarotMain = lazyPreloadable(() => import(/* webpackChunkName: "tarot-main" */ '../components/tarot/TarotMain'), { order: 2, navKey: 'tarot' });
-const XuanShiMain = lazyPreloadable(() => import('../components/xuanshi/XuanShiMain'), { order: 3, navKey: 'xuanshi' });
-const AstrodataPage = lazyPreloadable(() => import('../components/astrodata/AstrodataPage'), { order: 3, navKey: 'astrodata' });
-// horosa_zeri_render_slice_v1(Windows-ahead,W3b-Z4):order 3→2 —— 择日是主导航技法页
-// (非重可视化;重引擎 3D/天文馆/数据库才配 3),v3.7.1 起含天星/奇门双分册更该早暖。
-const ZeriMain = lazyPreloadable(() => import('../components/zeri/ZeriMain'), { order: 2, navKey: 'zeri' });
-const CalendarMain = lazyPreloadable(() => import('../components/calendar/CalendarMain'), { order: 2, navKey: 'calendar' });
-const FengShuiMain = lazyPreloadable(() => import('../components/fengshui/FengShuiMain'), { order: 2, navKey: 'fengshui' });
 const SanShiUnitedMain = lazyPreloadable(() => import('../components/sanshi/SanShiUnitedMain'), { order: 2, navKey: 'sanshiunited' });
 const AIAnalysisMain = lazyPreloadable(() => import('../components/aianalysis/AIAnalysisMain'), { order: 1, navKey: 'aianalysis' });
-// 此前四项无 navKey → 不在悬停预取注册表,主导航/抽屉/dock 掠过恒 no-op,只能等
-// order 2/3 的 idle 队列殿后 —— 补 navKey(与 drawerNavigationPages/openDrawer 的 key 同名)。
-const BookMain = lazyPreloadable(() => import('../components/reader/BookMain'), { order: 3, navKey: 'astroreader' });
-const MediaMain = lazyPreloadable(() => import('../components/multimedia/MediaMain'), { order: 3, navKey: 'liveplayer' });
-const AdminToolsMain = lazyPreloadable(() => import('../components/admintools/AdminToolsMain'), { order: 3, navKey: 'admintools' });
 const GuoLaoChartMain = lazyPreloadable(() => import('../components/guolao/GuoLaoChartMain'), { order: 1, navKey: 'guolao' });
-const CommToolsMain = lazyPreloadable(() => import('../components/commtools/CommToolsMain'), { order: 2, navKey: 'commtools' });
-import DLFeature from '../components/deeplearn/DLFeature';
 import HomePageSetup from '../components/HomePageSetup';
 import BaZi from '../components/cntradition/BaZi';
 const ZiWeiMain = lazyPreloadable(() => import('../components/ziwei/ZiWeiMain'), { order: 1, navKey: 'ziwei' });
@@ -146,6 +116,7 @@ import XQIcon from '../components/xq-icons';
 import { XQDrawer as Drawer, XQModal, XQTabs } from '../components/xq-ui';
 import { scheduleUnconfirmedTimeDispatch, cancelPendingTimeDispatch } from '../utils/timeDispatchScheduler';
 import { registerNavPreload, preloadNavByKey } from '../utils/navPreload';
+import { canonicalizeTabKey, CHARTS_NAV_KEY, isKeepDrawerKey } from '../constants/ProductScope';
 
 const TabPane = XQTabs.TabPane;
 
@@ -155,9 +126,6 @@ const mainTabIcons = {
     星运: <XQIcon name="direction" />,
     八字: <XQIcon name="bazi" />,
     紫微: <XQIcon name="ziwei" />,
-    '3D': <XQIcon name="threeD" />,
-    三维盘: <XQIcon name="threeD" />,
-    天文馆: <XQIcon name="globe" />,
     七政: <XQIcon name="qizheng" />,
     印占: <XQIcon name="vedic" />,
     辅盘: <XQIcon name="aux" />,
@@ -170,23 +138,13 @@ const mainTabIcons = {
     六壬: <XQIcon name="liureng" />,
     遁甲: <XQIcon name="qimen" />,
     六爻: <XQIcon name="liuyao" />,
-    塔罗: <XQIcon name="tarot" />,
     太乙: <XQIcon name="taiyi" />,
     分至: <XQIcon name="solstice" />,
     节气盘: <XQIcon name="solstice" />,
-    风水: <XQIcon name="fengshui" />,
     其他: <XQIcon name="other" />,
     其他术数: <XQIcon name="other" />,
     AI分析: <XQIcon name="ai" />,
-    黄历: <XQIcon name="calendar" />,
-    玄学史: <XQIcon name="other" />,
-    数据库: <XQIcon name="database" />,
-    择日: <XQIcon name="calendar" />,
-    '3D星盘': <XQIcon name="sphere3d" />,
-    辅助: <XQIcon name="support" />,
-    书籍阅读: <XQIcon name="book" />,
-    星阙直播: <XQIcon name="live" />,
-    管理工具: <XQIcon name="admin" />,
+    命盘: <XQIcon name="astro" />,
 };
 
 // keywords：该模块内部的术法/别名串（简体 + 常见叫法），供导航搜索匹配「模块内术法」。
@@ -208,17 +166,9 @@ const navigationPages = [
     { label: '六爻', key: 'guazhan', icon: 'liuyao', group: '卜', keywords: '六爻 纳甲 卜卦 摇卦 装卦' },
     { label: '太乙', key: 'taiyi', icon: 'taiyi', group: '卜', keywords: '太乙神数 太乙' },
     { label: '分至', key: 'jieqichart', icon: 'solstice', group: '卜', keywords: '节气盘 分至 二分二至' },
-    { label: '风水', key: 'fengshui', icon: 'fengshui', group: '卜', keywords: '风水 纳气盘 八卦阳宅 阳宅 理气 罗盘 八宅 大游年 东西四宅 门主灶 玄空 玄空飞星 兼向 替卦 三合 十二长生 水法 立向 黄泉 拨砂 穿山 透地 分金 金锁玉关 过路阴阳 乾坤国宝 龙门八局 紫白 紫白飞星 辅星水法 翻卦 净阴净阳 纳甲 玄空大卦 六十四卦 卦运 形势 峦头 龙穴砂水向 择日 造命 太岁 三煞 岁破 坐向 元运 玄空六法 谈养吾 零正 雌雄 金龙 挨星 城门 命理派 以命配宅 罗盘 罗经 三针 正针 中针 缝针 天池 圆图 补龙 相主 定穴 倒杖 五黄分运 兼向度界 大玄空 单盘挨星 正神 零神 父母星 合局 反局 拨水入零堂 水破令星 上山下水 水龙 平洋 平洋龙 坐水骑龙 挟龙倚水 向水攀龙 息道 漏道 干水 支水 湖荡 曲水朝堂 化煞 改造化煞 形煞 气煞 枪煞 天堑煞 反弓煞 尖射煞 孤阳煞 孤阴煞 辐射煞 廉贞煞 补偏救弊 镇物 石敢当 葫芦 六帝钱 黄黑煞 斗牛煞 交剑煞 紫黄毒药 阴神满地 令星煞 阳宅判断 峦头断 外六事 内六事 峤星 客星 飞太岁 选宅 室内凶局 用事 紫白择日 斗首 元辰 武财 廉子 贪狼 破鬼' },
-    { label: '塔罗', key: 'tarot', icon: 'tarot', group: '卜', keywords: '塔罗 tarot 韦特 RWS 马赛 托特 Thoth 雷诺曼 Lenormand 埃及塔罗 扑克占卜 大牌 小牌 权杖 圣杯 宝剑 星币 凯尔特十字 牌阵 日课 逆位 宫廷牌 定局 计时' },
     { label: '其他', key: 'cnyibu', icon: 'other', group: '卜', keywords: '金口诀 五兆 太玄 荆诀 神易数 皇极经世 宿占 统摄法 地占 天文地占 护盾盘 判官 调和者 16图形 盾牌盘 四片盘 Hakata 异或表盘 Sikidy 皇极轨策 轨策 策数 轨数 万物数 周易数 梅花易数 体用 互卦 三要十应 大定神数 元会运世 邵子 小成图 小成圖 股市卦 飞宫小奇门 小奇门 飞宫 小六壬 掌诀 大安 留连 速喜 赤口 小吉 空亡 灵棋经 灵棋 靈棋 十二棋 灵棋卜 掷棋 棋卦 东方朔' },
     { label: 'AI分析', key: 'aianalysis', icon: 'ai', group: '工具', keywords: 'AI 分析 挂载 报告 大模型' },
-    { label: '天文馆', key: 'planetarium', icon: 'globe', group: '工具', keywords: '天文馆 星空 观星 星图 babylon' },
-    { label: '黄历', key: 'calendar', icon: 'calendar', group: '工具', keywords: '黄历 农历 老黄历 择日 宜忌 节气' },
-    { label: '辅助', key: 'cntradition', icon: 'support', group: '工具', keywords: '辅助 工具 真太阳时 八卦类象 类象 卦象 十二串宫 十二宫 八字规则 规则速查' },
-    { label: '玄学史', key: 'xuanshi', icon: 'other', group: '工具', keywords: '玄学史 历史 星象 天象 列传 朝代 地图 关系 二十四史 野载 正史 omen 玄史 中国玄学史' },
-    { label: '3D星盘', key: 'astrochart3D', icon: 'sphere3d', group: '工具', keywords: '3D 星盘 三维 天球 立体 球面 星空 相位 映点 接纳 互容 围攻 夹宫 希腊点 3d' },
-    { label: '数据库', key: 'astrodata', icon: 'database', group: '工具', keywords: '数据库 名人 命例 名人星盘 星盘库 案例库 出生数据 Rodden AstroDatabank 名人库 celebrity 星盘目录' },
-    { label: '择日', key: 'zeri', icon: 'calendar', group: '工具', keywords: '择日 天星择日 电子择日 征象搜索 选时 时间区间 逻辑门 征象 择时 选日子' },
+    { label: '命盘', key: '__charts__', icon: 'astro', group: '管理', keywords: '命盘 保存 打开 编辑 删除 列表 新建' },
 ];
 
 // 悬停预取:鼠标掠过导航项即预载对应 lazy chunk(React.lazy 幂等,重复调用零成本;
@@ -226,9 +176,7 @@ const navigationPages = [
 // 主导航渲染 label(mainTab),预取按 key —— navigationPages 之外的三个主 tab
 // (内容/管理组,不进模块选择器)手工补映射,否则其悬停恒 no-op。
 const NAV_LABEL_TO_KEYS = {
-	书籍阅读: ['astroreader'],
-	星阙直播: ['liveplayer'],
-	管理工具: ['admintools'],
+	命盘: [CHARTS_NAV_KEY],
 };
 for(const page of navigationPages){
 	if(!NAV_LABEL_TO_KEYS[page.label]){
@@ -272,17 +220,8 @@ const fullHeightWorkspaceTabs = new Set([
     'guazhan',
     'taiyi',
     'jieqichart',
-    'fengshui',
-    'tarot',
     'cnyibu',
-    'zeri',
     'aianalysis',
-    'astrochart3D',
-    'planetarium',
-    'calendar',
-    'cntradition',
-    'xuanshi',
-    'astrodata',
 ]);
 
 function mainTab(label, group, options = {}){
@@ -359,23 +298,16 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
     }, []);
     // 每个 tab「上次刷新时的输入签名」(脏标记)。用 ref:可变、跨渲染留存、改它不触发重渲。
     const tabRefreshSigRef = React.useRef({});
-    const { tokenImg, registerFields, loginFields, loading, loadingText, refresh, chartDisplay, chartStyle, wheelArt, indiaChartStyle, aspects, planetDisplay, lotsDisplay, resolvedAppearance, showPdBounds, showPlanetHouseInfo, showAstroMeaning, showOnlyRulExaltReception, schoolPreset, tripSystem, voidClassical} = app;
+    const { loading, loadingText, refresh, chartDisplay, chartStyle, wheelArt, indiaChartStyle, aspects, planetDisplay, lotsDisplay, resolvedAppearance, showPdBounds, showPlanetHouseInfo, showAstroMeaning, showOnlyRulExaltReception, schoolPreset, tripSystem, voidClassical} = app;
     const {
-        pwdFields,
         userInfo,
         charts,
         currentChart,
-        admin,
         pageSize,
         pageIndex,
         total,
-        cases,
-        currentCase,
-        casePageSize,
-        casePageIndex,
-        caseTotal,
     } = user;
- 	const { height, fields, chartObj, drawerVisible, predictHook, memo, memoType, currentTab, currentSubTab, deeplearn} = astro;
+ 	const { height, fields, chartObj, drawerVisible, predictHook, currentTab, currentSubTab} = astro;
     const { ziwei, } = rules; 
 
     
@@ -399,6 +331,16 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chartObj && chartObj.chartId]);
 
+    React.useEffect(()=>{
+        const next = canonicalizeTabKey(currentTab);
+        if(next !== currentTab){
+            dispatch({
+                type: 'astro/save',
+                payload: { currentTab: next },
+            });
+        }
+    }, [currentTab, dispatch]);
+
     function closeDrawer(){
         dispatch({
             type: 'astro/closeDrawer',
@@ -407,6 +349,9 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
     }
 
     function openDrawer(key){
+        if(!isKeepDrawerKey(key)){
+            return;
+        }
         dispatch({
             type: 'astro/openDrawer',
             payload:{
@@ -416,30 +361,22 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
     }
 
     function changeTab(key){
-        // 切页流畅度:盘(fields+chartId)签名未变 → 跳过 predictHook.fun(keep-alive 面板已最新 → 切换瞬间);
-        // 变了才刷新并记签名 → 盘变必刷新、零降级。刷新放 dispatch 之后 setTimeout(0) → 切换观感瞬间、刷新随后带 spinner。
+        if(key === CHARTS_NAV_KEY){
+            openDrawer('chartlist');
+            return;
+        }
+        const nextKey = canonicalizeTabKey(key);
         const currentSig = computeRefreshSignature(fields, chartObj);
-        const needRefresh = !!(predictHook[key] && predictHook[key].fun) && tabRefreshSigRef.current[key] !== currentSig;
+        const needRefresh = !!(predictHook[nextKey] && predictHook[nextKey].fun) && tabRefreshSigRef.current[nextKey] !== currentSig;
 
-        // 三份合法子页签集合走 constants/SubTabRegistry 单一真值源 —— 从前在此手写副本,
-        // 每次新增子技法只改了各技法 Main、忘了这里,于是停在新技法上切走再切回来会被
-        // 静默打回该组首档(实测卜·其他漏 6 项、辅盘漏 4 项)。
-        const cnTraditionTabs = CNTRADITION_SUBTABS;
         const cnYiBuTabs = CNYIBU_SUBTABS;
         const auxChartTabs = AUX_SUBTABS;
-        // 回落三级:currentSubTab 合法用之;否则该组 runtime 记忆(宿主 rememberSubTab 所记的
-        // 最后停留子页签)合法用之;皆非法才回首档 —— 否则共享槽被别的主 tab 子键覆写后,
-        // 切回即被静默打回首档(灵棋经/塔罗 × 风水/AI分析 实测三组复现)。
         let nextSubTab = null;
-        if(key === 'cntradition'){
-            nextSubTab = recallSubTab('cntradition', cnTraditionTabs, currentSubTab, 'guasym');
-        }else if(key === 'cnyibu'){
+        if(nextKey === 'cnyibu'){
             nextSubTab = recallSubTab('cnyibu', cnYiBuTabs, currentSubTab, 'suzhan');
-        }else if(key === 'auxchart'){
+        }else if(nextKey === 'auxchart'){
             nextSubTab = recallSubTab('auxchart', auxChartTabs, currentSubTab, 'germanytech');
-        }else if(key === 'zeri'){
-            nextSubTab = recallSubTab('zeri', ZERI_SUBTABS, currentSubTab, 'tianxing');
-        }else if(key === 'direction' || key === 'relativechart'){
+        }else if(nextKey === 'direction' || nextKey === 'relativechart'){
             nextSubTab = currentSubTab;
         }
         
@@ -447,40 +384,33 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
             type: 'astro/save',
             payload:{
                 chartObj: chartObj,
-                currentTab: key,
+                currentTab: nextKey,
                 currentSubTab: nextSubTab,
             },
         });
 
-        // 盘变了才刷新目标技法,且延迟到切换 paint 之后(切换瞬间、刷新随后带 spinner);盘没变=跳过=纯瞬间。
         if(needRefresh){
-            tabRefreshSigRef.current[key] = currentSig;
+            tabRefreshSigRef.current[nextKey] = currentSig;
             setTimeout(()=>{
-                if(!(predictHook[key] && predictHook[key].fun)){ return; }
-                if(key === 'indiachart' || key === 'cntradition' || key === 'jieqichart'
-                    || key === 'otherbu' || key === 'cnyibu' || key === 'tarot' || key === 'germanytech'
-                    || key === 'guolao' || key === 'hellenastro'  || key === 'astrochart'
-                    || key === 'locastro' || key === 'admintools' || key === 'astrochart3D'
-                    || key === 'planetarium'
-                    || key === 'fengshui' || key === 'sanshiunited' || key === 'aianalysis'
-                    || key === 'bazi' || key === 'ziwei' || key === 'guazhan'
-                    || key === 'liureng' || key === 'dunjia' || key === 'taiyi'
-                    || key === 'shusuan' || key === 'mingother'
-                    || key === 'auxchart'){
-                    predictHook[key].fun(fields);
-                }else if(key === 'astroreader'){
-                    predictHook[key].fun();
+                if(!(predictHook[nextKey] && predictHook[nextKey].fun)){ return; }
+                if(nextKey === 'indiachart' || nextKey === 'jieqichart'
+                    || nextKey === 'cnyibu'
+                    || nextKey === 'guolao' || nextKey === 'hellenastro'  || nextKey === 'astrochart'
+                    || nextKey === 'sanshiunited' || nextKey === 'aianalysis'
+                    || nextKey === 'bazi' || nextKey === 'ziwei' || nextKey === 'guazhan'
+                    || nextKey === 'liureng' || nextKey === 'dunjia' || nextKey === 'taiyi'
+                    || nextKey === 'shusuan' || nextKey === 'mingother'
+                    || nextKey === 'auxchart'){
+                    predictHook[nextKey].fun(fields);
                 }else{
-                    predictHook[key].fun(chartObj);
+                    predictHook[nextKey].fun(chartObj);
                 }
             }, 0);
         }
 
-        // R4-B2((c) 时机):切到新技法页签 300ms 后(切换 paint 与可能的刷新已让路)按该技法
-        // 最近档位武装 ±depth —— 进页后第一下步进也命中。NO_ARM 技法由 shouldArmForTab 内部拦。
-        try{ setCurrentTechnique(key); }catch(e){ /* 观测归属失败无害 */ }
+        try{ setCurrentTechnique(nextKey); }catch(e){ /* 观测归属失败无害 */ }
         setTimeout(()=>{
-            try{ armStepPrefetch('tab-activate', { tabOverride: key }); }catch(e){ /* 武装失败静默 */ }
+            try{ armStepPrefetch('tab-activate', { tabOverride: nextKey }); }catch(e){ /* 武装失败静默 */ }
         }, 300);
 
     }
@@ -672,18 +602,8 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
     // 对入参的 name/value 补齐是幂等写(仅 undefined 时设),memo 化后首跑已施加,行为逐字节同。
     const aryfields = React.useMemo(()=>convertToArray(fields), [fields]);
     const arychartflds = React.useMemo(()=>convertToArray(currentChart), [currentChart]);
-    const arycaseflds = React.useMemo(()=>convertToArray(currentCase), [currentCase]);
-    const aryregflds = React.useMemo(()=>convertToArray(registerFields), [registerFields]);
-    const aryloginflds = React.useMemo(()=>convertToArray(loginFields), [loginFields]);
-    const drawerNavigationPages = navigationPages.concat(
-        userInfo ? [
-            { label: '书籍阅读', key: 'astroreader', icon: 'book', group: '内容' },
-            { label: '星阙直播', key: 'liveplayer', icon: 'live', group: '内容' },
-        ] : [],
-        admin ? [{ label: '管理工具', key: 'admintools', icon: 'admin', group: '管理' }] : []
-    );
-
-    const activeMainTab = currentTab === 'yanqin' ? 'mingother' : currentTab;
+    const drawerNavigationPages = navigationPages;
+    const activeMainTab = canonicalizeTabKey(currentTab);
     const isFullHeightWorkspaceTab = fullHeightWorkspaceTabs.has(activeMainTab);
     // 🔴 主 Tabs 高度统一用 model height(=外层 idxstyle 同源真值):
     // 旧 calc(100vh - 72px) 比外层真值多 16px(两套口径),全高档页整体溢出 → App webview 页面级
@@ -728,7 +648,6 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
 	                        schoolPreset={schoolPreset}
 	                        tripSystem={tripSystem}
 	                        voidClassical={voidClassical}
-	                        memo={memo}
 	                        dispatch={dispatch}
 	                        hook={predictHook.astrochart}
                             onNavigate={changeTab}
@@ -969,29 +888,6 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
                   </FreezeInactive>
                 </TabPane>
 
-                <TabPane tab={mainTab('风水')} key="fengshui">
-                  <FreezeInactive active={activeMainTab === "fengshui"}>
-                    <FengShuiMain
-                        height={height}
-                        fields={fields}
-                        fieldsAry={aryfields}
-                        dispatch={dispatch}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
-                <TabPane tab={mainTab('塔罗')} key="tarot">
-                  <FreezeInactive active={activeMainTab === "tarot"}>
-                    <TarotMain
-                        value={chartObj}
-                        height={height}
-                        fields={fields}
-                        hook={predictHook.tarot}
-                        dispatch={dispatch}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
                 <TabPane tab={mainTab('其他')} key="cnyibu">
                   <FreezeInactive active={activeMainTab === "cnyibu"}>
                     <CnYiBuMain
@@ -1021,148 +917,6 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
                   </FreezeInactive>
                 </TabPane>
 
-                <TabPane tab={mainTab('天文馆', '工具')} key="planetarium">
-                  <FreezeInactive active={activeMainTab === "planetarium"}>
-                    <PlanetariumMain
-                        height={height}
-                        fields={fields}
-                        fieldsAry={aryfields}
-                        dispatch={dispatch}
-                        hook={predictHook.planetarium}
-                        active={activeMainTab === 'planetarium'}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
-                <TabPane tab={mainTab('黄历')} key="calendar">
-                  <FreezeInactive active={activeMainTab === "calendar"}>
-                    <CalendarMain
-                        height={height} 
-                        fields={fields}
-                        fieldsAry={aryfields}
-                        hook={predictHook.calendar}
-                        dispatch={dispatch}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
-                <TabPane tab={mainTab('辅助')} key="cntradition">
-                  <FreezeInactive active={activeMainTab === "cntradition"}>
-                    <CnTraditionMain
-                        chart={chartObj}
-                        height={height}
-                        fields={fields}
-                        fieldsAry={aryfields}
-                        chartDisplay={chartDisplay}
-                        planetDisplay={planetDisplay}
-                        hook={predictHook.cntradition}
-                        dispatch={dispatch}
-                        currentSubTab={currentSubTab}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
-
-                <TabPane tab={mainTab('玄学史', '工具')} key="xuanshi">
-                  <FreezeInactive active={activeMainTab === "xuanshi"}>
-                    <XuanShiMain
-                        height={height}
-                        fields={fields}
-                        dispatch={dispatch}
-                        predictHook={predictHook}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
-                <TabPane tab={mainTab('数据库', '工具')} key="astrodata">
-                  <FreezeInactive active={activeMainTab === "astrodata"}>
-                    <AstrodataPage dispatch={dispatch} resolvedAppearance={resolvedAppearance} />
-                  </FreezeInactive>
-                </TabPane>
-
-                <TabPane tab={mainTab('3D星盘', '工具')} key="astrochart3D">
-                  <FreezeInactive active={activeMainTab === "astrochart3D"}>
-                    <AstroChartMain3D
-                        value={chartObj}
-                        onChange={changeCond}
-                        fields={fields}
-                        fieldsAry={aryfields}
-                        height={height}
-                        currentTab={activeMainTab}
-                        chartDisplay={chartDisplay}
-                        planetDisplay={planetDisplay}
-                        lotsDisplay={lotsDisplay}
-                        showPlanetHouseInfo={showPlanetHouseInfo}
-                        showAstroMeaning={showAstroMeaning}
-                        dispatch={dispatch}
-                        hook={predictHook.astrochart3D}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
-                <TabPane tab={mainTab('择日')} key="zeri">
-                  <FreezeInactive active={activeMainTab === "zeri"}>
-                    <ZeriMain
-                        wheelArt={wheelArt}
-                        chart={chartObj}
-                        height={height}
-                        fields={fields}
-                        chartDisplay={chartDisplay}
-                        planetDisplay={planetDisplay}
-                        lotsDisplay={lotsDisplay}
-                        showPlanetHouseInfo={showPlanetHouseInfo}
-                        showAstroMeaning={showAstroMeaning}
-                        showOnlyRulExaltReception={showOnlyRulExaltReception}
-                        voidClassical={voidClassical}
-                        dispatch={dispatch}
-                        currentSubTab={currentSubTab}
-                    />
-                  </FreezeInactive>
-                </TabPane>
-
-
-
-                {
-                    userInfo && (
-                        <TabPane tab={mainTab('书籍阅读', '内容与管理')} key="astroreader">
-                          <FreezeInactive active={activeMainTab === "astroreader"}>
-                            <BookMain 
-                                height={height}
-                                userInfo={userInfo}
-                                dispatch={dispatch}
-                                hook={predictHook.astroreader}
-                            />
-                          </FreezeInactive>
-                        </TabPane>
-                    )
-                }
-
-                {
-                    userInfo && (
-                        <TabPane tab={mainTab('星阙直播')} key="liveplayer">
-                          <FreezeInactive active={activeMainTab === "liveplayer"}>
-                            <MediaMain 
-                                height={height}
-                                dispatch={dispatch}
-                                userInfo={userInfo}
-                                currentSubTab={currentSubTab}
-                                admin={admin}
-                            />
-                          </FreezeInactive>
-                        </TabPane>
-                    )
-                }
-
-                {
-                    admin && (
-                        <TabPane tab={mainTab('管理工具')} key="admintools">
-                          <FreezeInactive active={activeMainTab === "admintools"}>
-                            <AdminToolsMain />
-                          </FreezeInactive>
-                        </TabPane>
-                    )
-                }
-
             </XQTabs>
             </React.Suspense>
 
@@ -1183,123 +937,6 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
             >
                 <AstroFormComp 
                     { ...fields }
-                    fields={fields}
-                    fieldsAry={aryfields}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='注册'
-                width={300}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.register}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <RegisterForm 
-                    {...registerFields}
-                    tokenImg={tokenImg}
-                    fields={registerFields}
-                    fieldsAry={aryregflds}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='登录'
-                width={300}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.login}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <LoginForm 
-                    {...loginFields}
-                    fields={loginFields}
-                    fieldsAry={aryloginflds}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='忘记密码'
-                width={300}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.resetpwd}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <ResetPwdForm 
-                    {...registerFields}
-                    tokenImg={tokenImg}
-                    fields={registerFields}
-                    fieldsAry={aryregflds}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='修改密码'
-                width={300}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.changepwd}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <ChangePwdForm 
-                    {...pwdFields}
-                    fields={pwdFields}
-                    fieldsAry={convertToArray(pwdFields)}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='修改参数'
-                width={700}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.changeparams}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <ChangeParamsFormComp 
-                    {...fields}
                     fields={fields}
                     fieldsAry={aryfields}
                     dispatch={dispatch}
@@ -1374,78 +1011,6 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
                     pageSize={pageSize}
                     pageIndex={pageIndex}
                     total={total}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='添加起课'
-                width={700}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.caseadd}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}
-            >
-                <CaseAddFormComp
-                    {...currentCase}
-                    fields={currentCase}
-                    fieldsAry={arycaseflds}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='编辑起课'
-                width={700}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.caseedit}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}
-            >
-                <CaseEditFormComp
-                    {...currentCase}
-                    fields={currentCase}
-                    fieldsAry={arycaseflds}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='起课列表'
-                width={950}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={false}
-                open={drawerVisible.caselist}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}
-            >
-                <CaseList
-                    height={height}
-                    userInfo={userInfo}
-                    cases={cases}
-                    casePageSize={casePageSize}
-                    casePageIndex={casePageIndex}
-                    caseTotal={caseTotal}
                     dispatch={dispatch}
                 />
             </Drawer>
@@ -1547,105 +1112,6 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
                 />
             </Drawer>
 
-            <Drawer
-                title='我的星盘分布'
-                width={900}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={true}
-                open={drawerVisible.chartsgps}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <ChartsGps
-                    height={height} 
-                    charts={charts}
-                    userInfo={userInfo}
-                    dispatch={dispatch}
-                />
-            </Drawer>
-
-            <Drawer
-                title='命盘批注'
-                width={500}
-                placement="right"
-                destroyOnClose={true}
-                onClose={closeDrawer}
-                maskClosable={true}
-                open={drawerVisible.memo}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <ChartMemo
-                    memoType={memoType}
-                    memo={memo}
-                    currentSubTab={currentSubTab}
-                    currentTab={activeMainTab}
-                    userInfo={userInfo}
-                    currentChart={currentChart}
-                    dispatch={dispatch}
-                    loading={loading}
-                />
-            </Drawer>
-
-            <Drawer
-                title='小工具'
-                width={960}
-                placement="left"
-                className="horosa-commtools-drawer"
-                destroyOnClose={true}
-                onClose={closeDrawer}
-                maskClosable={true}
-                open={drawerVisible.commtools}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <CommToolsMain
-                    fields={fields}
-                    dispatch={dispatch}
-                    loading={loading}
-                />
-            </Drawer>
-
-            <Drawer
-                title='人生事件设置'
-                width={1000}
-                placement="left"
-                onClose={closeDrawer}
-                maskClosable={true}
-                destroyOnClose={false}
-                open={drawerVisible.chartdeeplearn}
-                style={{
-                    height: 'calc(100% - 0px)',
-                    overflow: 'auto',
-                    paddingBottom: 53,
-                    backgroundColor: 'transparent',
-                }}        
-            >
-                <DLFeature
-                    {...currentChart}
-                    fields={currentChart}
-                    fieldsAry={arychartflds}
-                    deeplearn={deeplearn}
-                    height={height} 
-                    dispatch={dispatch}
-                    loading={loading}
-                />
-            </Drawer>
-
             <XQModal
                 title={null}
                 footer={null}
@@ -1667,7 +1133,6 @@ function AstroIndex({dispatch, astro, app, user, rules, }){
                         pages={drawerNavigationPages}
                         currentKey={activeMainTab}
                         onNavigate={changeTab}
-                        onOpenTools={()=>openDrawer('commtools')}
                         onClose={closeDrawer}
                     />
                 </div>

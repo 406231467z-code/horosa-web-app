@@ -44,6 +44,18 @@ describe('aiExport settings', ()=>{
 		});
 	});
 
+	it('hides removed product techniques from the export settings selector (historical presets remain parseable)', ()=>{
+		const keys = listAIExportTechniqueSettings().map((item)=>item.key);
+		['fengshui', 'calendar', 'huangli', 'tongshu', 'tarot', 'tianxing', 'qimenzeri',
+			'huanglizeri', 'bazizeri', 'taiyizeri', 'ziweizeri', 'liurengzeri', 'sanshizeri', 'qizhengzeri', 'indiazeri',
+		].forEach((key)=>{
+			expect(keys).not.toContain(key);
+		});
+		expect(keys).toContain('election');
+		expect(keys).toContain('geomancy');
+		expect(getAIExportPresetKeys()).toEqual(expect.arrayContaining(['fengshui', 'tarot', 'tianxing', 'calendar']));
+	});
+
 	it('exposes structured section groups for newly added techniques', ()=>{
 		const options = optionsByTechnique();
 		expect(options.suzhan).toEqual(expect.arrayContaining(['起盘信息', '宿盘宫位与二十八宿星曜']));
@@ -103,7 +115,7 @@ describe('aiExport settings', ()=>{
 		]);
 		matrix.filter((item)=>item.isJieQiSplit).forEach((item)=>{
 			expect(item.extractionKind).toBe('jieqi');
-			expect(item.presetSections.length).toBeLessThanOrEqual(3); // v39:四分点子盘 = 星盘/宿盘/3D盘 三段;meta ≤2
+			expect(item.presetSections.length).toBeLessThanOrEqual(2); // PHASE1:四分点子盘 = 星盘/宿盘;meta ≤2
 		});
 	});
 

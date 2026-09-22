@@ -99,17 +99,6 @@ const PAGES = {
 		netCache: 'existing', stepPrefetch: 'existing', stepSelect: 'na:年选择器无步长档(onlyYear 无步进)', optionPrefetch: 'na:已算沉淀(L1/L2/L3/paramhash)秒回+未命中路径最短;计算型后端投机变体预取判弊>利(开下拉即触真算),有据判不做',
 		dataPrewarm: 'na:进页即取+keep-stale 可见+全层缓存承接;预挂载预热需复刻实例构参(坑45 漂移类)判不做,有纯函数缝者(七政/六壬/奇门)已做', localMemo: 'na:网络型', scu: 'done', drawGuard: 'existing', keepStale: 'existing',
 	} },
-	fengshui: { kind: 'A', axes: {
-		netCache: 'na:本地理气引擎', stepPrefetch: 'na:无时间步进主轴(择日子面另计)', stepSelect: 'na:同左',
-		optionPrefetch: 'na:本地即时', dataPrewarm: 'na:本地即时', localMemo: 'existing', scu: 'done',
-		drawGuard: 'existing', keepStale: 'na:本地即时',
-	} },
-	// 塔罗 2026-08-15 升「卜」一级(性能语义自 cnyibu 聚合承袭:纯前端抽牌引擎,零后端排盘)。
-	tarot: { kind: 'A', axes: {
-		netCache: 'na:纯前端抽牌引擎(种子 RNG),零后端排盘请求', stepPrefetch: 'na:无时间步进主轴(种子模式手动抽)', stepSelect: 'na:同左',
-		optionPrefetch: 'na:本地即时(牌组/牌阵切换纯前端)', dataPrewarm: 'na:本地即时', localMemo: 'existing', scu: 'done',
-		drawGuard: 'na:声明式 React 渲染(无命令式画布)', keepStale: 'na:本地即时;抽牌「起出即冻结」无旧盘等待态',
-	} },
 	cnyibu: { kind: 'MIXED', axes: {
 		netCache: 'done', stepPrefetch: 'done', stepSelect: 'done:全局(/chart)+jinkou 本地 prefetchStepSelect(gods→pan ±1 双向,经内嵌 LiuRengInput onStepSelect 透传)', optionPrefetch: 'na:已算沉淀(L1/L2/L3/paramhash)秒回+未命中路径最短;计算型后端投机变体预取判弊>利(开下拉即触真算),有据判不做',
 		dataPrewarm: 'na:进页即取+keep-stale 可见+全层缓存承接;预挂载预热需复刻实例构参(坑45 漂移类)判不做,有纯函数缝者(七政/六壬/奇门)已做', localMemo: 'existing', scu: 'done', drawGuard: 'na:声明式 React SVG(金口/六壬画布各自已有守卫)', keepStale: 'na:聚合壳,loading 态由子技法自面(kentang 子面 Spin 包裹旧盘)',
@@ -118,49 +107,6 @@ const PAGES = {
 		netCache: 'na:SSE 流式(禁缓存)', stepPrefetch: 'na:AI 会话页', stepSelect: 'na:AI 会话页',
 		optionPrefetch: 'na:AI 会话页', dataPrewarm: 'na:挂载按需', localMemo: 'na:非引擎页', scu: 'existing',
 		drawGuard: 'na:非画布页', keepStale: 'na:会话流',
-	} },
-	planetarium: { kind: 'TOOL', axes: {
-		netCache: 'na:实时状态端点(NoCache 哨兵[71])', stepPrefetch: 'na:实时漫游', stepSelect: 'na:实时漫游',
-		optionPrefetch: 'na:实时漫游', dataPrewarm: 'na:实时漫游', localMemo: 'na:babylon 场景',
-		scu: 'existing', drawGuard: 'na:babylon 自管增量', keepStale: 'na:实时渲染',
-	} },
-	calendar: { kind: 'A', axes: {
-		netCache: 'existing', stepPrefetch: 'na:整月翻页本地缓存(localCalcCache+IDB)', stepSelect: 'na:同左',
-		optionPrefetch: 'na:本地即时', dataPrewarm: 'na:进页即取+keep-stale 可见+全层缓存承接;预挂载预热需复刻实例构参(坑45 漂移类)判不做,有纯函数缝者(七政/六壬/奇门)已做', localMemo: 'existing', scu: 'done',
-		drawGuard: 'na:声明式网格', keepStale: 'existing',
-	} },
-	cntradition: { kind: 'A', axes: {
-		netCache: 'na:静态参考内容', stepPrefetch: 'na:参考页', stepSelect: 'na:参考页', optionPrefetch: 'na:参考页',
-		dataPrewarm: 'na:参考页', localMemo: 'na:静态', scu: 'done', drawGuard: 'na:静态', keepStale: 'na:静态',
-	} },
-	xuanshi: { kind: 'C', axes: {
-		netCache: 'done', stepPrefetch: 'na:朝代/列传浏览非时间步进', stepSelect: 'na:同左', optionPrefetch: 'na:玄学史零动红线',
-		dataPrewarm: 'na:进页即取+keep-stale 可见+全层缓存承接;预挂载预热需复刻实例构参(坑45 漂移类)判不做,有纯函数缝者(七政/六壬/奇门)已做', localMemo: 'na:后端 SQLite', scu: 'na:玄学史零动红线,判不动', drawGuard: 'existing', keepStale: 'na:浏览页(玄学史零动红线)',
-	} },
-	astrochart3D: { kind: 'B', axes: {
-		netCache: 'existing', stepPrefetch: 'existing', stepSelect: 'done', optionPrefetch: 'na:3D 补间已消重建',
-		dataPrewarm: 'na:进页即取+keep-stale 可见+全层缓存承接;预挂载预热需复刻实例构参(坑45 漂移类)判不做,有纯函数缝者(七政/六壬/奇门)已做', localMemo: 'na:three 场景', scu: 'existing', drawGuard: 'existing(onDemand/morph)',
-		keepStale: 'existing',
-	} },
-	astrodata: { kind: 'TOOL', axes: {
-		netCache: 'existing', stepPrefetch: 'na:数据库检索页', stepSelect: 'na:同左', optionPrefetch: 'na:检索页',
-		dataPrewarm: 'na:检索按需', localMemo: 'na:非引擎页', scu: 'done', drawGuard: 'na:列表页', keepStale: 'existing',
-	} },
-	zeri: { kind: 'TOOL', axes: {
-		netCache: 'done:electionscan 走 cachedKentangFetch 三层(确定性扫描,按月段天然命中);奇门找局=纯本地引擎零 HTTP,无网络轴', stepPrefetch: 'existing:DivinationChartShell 本地预取器(fields 自持,同辅盘三盘)', stepSelect: 'existing:同左', optionPrefetch: 'na:征象扫描属重计算,投机预取判弊>利',
-		dataPrewarm: 'na:进页即可用,扫描按需触发', localMemo: 'na:网络型(奇门找局分块让主线程+命中/跨度双上限)', scu: 'existing:壳层 wrapperPropsEqual', drawGuard: 'existing', keepStale: 'na:扫描结果显式触发,无陈旧窗口',
-	} },
-	astroreader: { kind: 'TOOL', axes: {
-		netCache: 'na:阅读器(登录态内容)', stepPrefetch: 'na:阅读器', stepSelect: 'na:阅读器', optionPrefetch: 'na:阅读器',
-		dataPrewarm: 'na:阅读器', localMemo: 'na:阅读器', scu: 'na:内容滚动页', drawGuard: 'na:阅读器', keepStale: 'na:阅读器',
-	} },
-	liveplayer: { kind: 'TOOL', axes: {
-		netCache: 'na:直播流', stepPrefetch: 'na:直播流', stepSelect: 'na:直播流', optionPrefetch: 'na:直播流',
-		dataPrewarm: 'na:直播流', localMemo: 'na:直播流', scu: 'na:播放器', drawGuard: 'na:播放器', keepStale: 'na:直播流',
-	} },
-	admintools: { kind: 'TOOL', axes: {
-		netCache: 'na:管理页(登录态)', stepPrefetch: 'na:管理页', stepSelect: 'na:管理页', optionPrefetch: 'na:管理页',
-		dataPrewarm: 'na:管理页', localMemo: 'na:管理页', scu: 'na:低频管理页', drawGuard: 'na:管理页', keepStale: 'na:管理页',
 	} },
 };
 
@@ -178,7 +124,6 @@ const KENTANG_MODULES = {
 	jingjue:         { page: 'cnyibu',   policy: 'seedInBody',    axes: { netCache: 'done', stepPrefetch: 'na:揲蓍种子在体(同上,可缓存不可预取)' } },
 	shenyishu:       { page: 'cnyibu',   policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'done' } },
 	geomancy:        { page: 'cnyibu',   policy: 'seedInBody',    axes: { netCache: 'done', stepPrefetch: 'na:随机成卦冻结,绝不预取' } },
-	xuanshi:         { page: 'xuanshi',  policy: 'browse',        axes: { netCache: 'done', stepPrefetch: 'na:浏览型无步进' } },
 	shaozi:          { page: 'shusuan',  policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'done' } },
 	tieban:          { page: 'shusuan',  policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'done' } },
 	fendjing:        { page: 'shusuan',  policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'done' } },
@@ -189,7 +134,6 @@ const KENTANG_MODULES = {
 	cetian:          { page: 'mingother', policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'done' } },
 	qizhengkin:      { page: 'mingother', policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'done' } },
 	qizhengelection: { page: 'auxchart', policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'na:择日区间扫描型,无步进主轴' } },
-	electionscan:    { page: 'zeri', policy: 'deterministic', axes: { netCache: 'done', stepPrefetch: 'na:征象搜索区间扫描型,无步进主轴' } },
 };
 
 export function getPerfCoveragePages(){

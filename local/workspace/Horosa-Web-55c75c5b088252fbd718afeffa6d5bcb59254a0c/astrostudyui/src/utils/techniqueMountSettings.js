@@ -80,9 +80,6 @@ import { ELECTION_PARAM_SPEC } from '../divination/election/electionParams';
 import { LIUYAO_SCHOOL_OPTIONS } from '../components/gua/liuyaoSchools';
 import { YONGSHEN_CATEGORIES } from '../components/gua/liuyaoYongShen';
 import { SHENSHA_META, DEFAULT_SHENSHA_SET } from '../components/gua/liuyaoShenSha';
-// 通书用事全表 + 六十甲子(叶子数据)。
-import { TONGSHU_TERMS, TONGSHU_TERM_CATEGORIES } from '../components/calendar/tongshuData';
-import { GANZHI_60 } from '../components/fengshui/fengshuiData';
 // 择日手术部位(黄道 12 座 → 身体部位;叶子数据)。
 import { SIGNS, SIGN_ORDER } from '../divination/data/signs';
 // 推运 builder 的官方选项常量 + 默认 opts（三分主星 / Balbillus / 关键点）——纯 util，无循环，直接复用。
@@ -1911,33 +1908,7 @@ export const TECHNIQUE_SETTINGS_SCHEMA = {
 	sanshizeri: { kind: 'sectionsOnly', reason: '三式择日盘面口径由择日工作台冻结,快照(三式合一全文+择时三段)实时产出;内容勾选照常。' },
 	qizhengzeri: { kind: 'sectionsOnly', reason: '七政择日盘面口径由择日工作台冻结,快照(七政全文+择时三段)实时产出;内容勾选照常。' },
 	indiazeri: { kind: 'sectionsOnly', reason: '印度择日挂载=择时三段自足(印度页星盘系无独立快照槽;印度盘全文用主印度页挂载)。' },
-	// 通书择日:齿轮落 payload.tongshu(regenerate 读 {...defaults, ...p.tongshu} —— 该读点此前无任何写入方)
-	tongshu: { kind: 'payload', optionsPath: 'tongshu', group: '通书择日', fields: [
-		{ name: 'school', label: '流派', type: 'select', default: 'donggong', options: [
-			{ value: 'donggong', label: '董公择日' },
-			{ value: 'qimen', label: '奇门叠数（裴晋公·唐）' },
-			{ value: 'sanyuanliexiu', label: '三垣列宿加临（古法）' },
-			{ value: 'wutu', label: '天元乌兔' },
-			{ value: 'sanyuan', label: '三元玄空大卦' },
-		] },
-		// 用事:全流派快照「用事：」抬头行 + 董公宜忌判读消费(曾缺 → 挂载恒「嫁娶」)。全表按类分组平铺。
-		{ name: 'event', label: '用事', type: 'select', default: '嫁娶',
-			options: TONGSHU_TERM_CATEGORIES.reduce((acc, cat)=>{
-				(TONGSHU_TERMS[cat] || []).forEach((t)=>{ acc.push({ value: t.name, label: `${cat}·${t.name}` }); });
-				return acc;
-			}, []) },
-		{ name: 'liexiuUse', label: '列宿用事类', type: 'select', default: '建宅', options: [
-			{ value: '建宅', label: '建宅·营造' },
-			{ value: '修造', label: '修造·安门灶' },
-			{ value: '安葬', label: '安葬·丧事' },
-			{ value: '造命', label: '造命·择时立命' },
-		] },
-		// 主事仙命年(三元玄空档消费;曾缺 → 玄空派恒按甲子命年判)。when 对象式条件显隐。
-		{ name: 'mingYear', label: '主事仙命年(三元玄空)', type: 'select', default: '甲子', when: { school: 'sanyuan' },
-			options: GANZHI_60.map((g)=>({ value: g, label: g })) },
-		// zuoShan 已删:双重幽灵 —— 无任何流派声明 needs.zuoShan(页面控件永不渲染),快照 builder 全文不消费
-		// (三元玄空段末自注「坐向卦须六十四卦天圆图…本法从缺」);齿轮选它 100% 无效果。
-	] },
+	tongshu: { kind: 'sectionsOnly', reason: '通书/黄历页面已裁剪,挂载仅保留内容勾选兼容。' },
 	// 🔴 旧定性「sectionsOnly 不可改卦象」过宽:不可改的只有卦象本身;21 项判读口径经冻结卦重算恒安全。
 	sixyao: { kind: 'payload', optionsPath: 'liuyaoSettings', group: '六爻', fields: SIXYAO_FIELDS,
 		// 存档现状住 payload.gua.liuyaoSettings(存档层);optionsPath 顶层是覆盖层(merge 写入、
@@ -2021,65 +1992,7 @@ export const TECHNIQUE_SETTINGS_SCHEMA = {
 			{ value: 'travel', label: '行人' }, { value: 'lawsuit', label: '官讼' }, { value: 'home', label: '家宅' },
 		] },
 	] },
-	// 🔴 塔罗旧定性同上:牌面只由 deckId/spreadType/seed 决定(存档写死 manual+seed),
-	// settings 全落判读层 —— 同一副牌不同判读文本恒安全;deckId/spreadType/seed/question 不登。
-	tarot: { kind: 'payload', optionsPath: 'options', group: '塔罗', fields: [
-		{ name: 'meaningSystem', label: '牌义体系', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'manual', label: '逐牌义' }, { value: 'waite', label: 'Waite 1911' },
-			{ value: 'degrees', label: '数字度(马赛)' },
-		] },
-		{ name: 'reversalMode', label: '逆位读法', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'stored', label: '预存逆位义' }, { value: 'blocked', label: '受阻/压抑' },
-			{ value: 'internal', label: '内化/私密' }, { value: 'opposite', label: '相反/反义' },
-			{ value: 'reduced', label: '减弱' }, { value: 'excess', label: '过度/失衡' },
-			{ value: 'delayed', label: '延迟/时机' }, { value: 'projection', label: '投射' }, { value: 'misuse', label: '误用/错向' },
-			{ value: 'negation', label: '不是/没有' }, { value: 'breakthrough', label: '突破/解脱' }, { value: 're_words', label: '回撤/重审' },
-			{ value: 'retreat', label: '回退前课' },
-		] },
-		{ name: 'variant', label: '对应体系', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'A', label: 'A 金色黎明' }, { value: 'B', label: 'B 托特' }, { value: 'C', label: 'C 大陆' },
-		] },
-		{ name: 'verdictMode', label: '判定口径', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'majority', label: '多数' }, { value: 'orientation', label: '朝向' },
-			{ value: 'single', label: '首牌' }, { value: 'polarity', label: '极性' }, { value: 'numeric', label: '数字阈值' },
-			{ value: 'weighted_center', label: '中位加权' }, { value: 'anchor', label: '答案锚位' }, { value: 'single3', label: '单张三态' },
-		] },
-		{ name: 'dignities', label: '牌间尊卑(dignities)', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 1, label: '开' }, { value: 0, label: '关' },
-		] },
-		{ name: 'suitElementSwap', label: '火风互换(花色元素)', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 1, label: '开' }, { value: 0, label: '关' },
-		] },
-		// TP9 判读齿轮扩容(五书补齐):全部判读显示层——同一副牌不同判读文本;牌面(deckId/spreadType/seed/牌池/朝向生成)恒不入。
-		{ name: 'quintMode', label: '精华牌口径', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'standard', label: '通行' }, { value: 'fool22', label: '愚人廿二(数值加法)' },
-		] },
-		{ name: 'edVersion', label: '尊位版本', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'modern', label: '现行三档' }, { value: 'mathers', label: '原典四档' },
-		] },
-		{ name: 'ookTable', label: '开钥计数表', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'standard', label: '通行' }, { value: 'sephira', label: '质点' },
-		] },
-		{ name: 'astroModern', label: '现代行星注', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 1, label: '开' }, { value: 0, label: '关' },
-		] },
-		{ name: 'timingMethod', label: '计时法', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'suit_unit', label: '花色单位' }, { value: 'major_number', label: '大牌数字' },
-			{ value: 'major_zodiac', label: '大牌星座' }, { value: 'decan_full', label: '旬星全谱' }, { value: 'ace_hunt', label: '翻至王牌' },
-		] },
-		{ name: 'timingUnit', label: '计时单位(大牌数字法)', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: '天', label: '天' }, { value: '周', label: '周' }, { value: '月', label: '月' },
-		] },
-		{ name: 'courtElementSystem', label: '宫廷元素体系', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'gd', label: '元素中元素' }, { value: 'alt', label: '位阶制' },
-		] },
-		{ name: 'courtZodiacSystem', label: '宫廷星座体系', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 'gd_span', label: '跨段' }, { value: 'simple', label: '单座制' },
-		] },
-		{ name: 'crossingUpright', label: '交叉牌横置(恒正读)', type: 'select', default: '', group: '判读', options: [
-			{ value: '', label: '随档（默认）' }, { value: 1, label: '开' }, { value: 0, label: '关' },
-		] },
-	] },
+	tarot: { kind: 'sectionsOnly', reason: '塔罗页面已裁剪' },
 };
 
 // 星运系里「参数固定 = 现状」的纯推运技法：无可调重算项，但仍登记（显式 emptySchema）让自检无遗漏、UI 显示「仅内容勾选」。

@@ -7,6 +7,7 @@
 // aiAnalysisContext 反向 re-export listAnalysisSources 保兼容(旧 import 路径不破)。
 import { getCaseTypeLabel, getCaseTypeMeta, listLocalCases } from './localcases';
 import { listLocalCharts } from './localcharts';
+import { isRemovedAiTechniqueKey } from '../constants/ProductScope';
 
 export function safeParseJson(txt, defVal = null){
 	if(!txt){
@@ -167,7 +168,7 @@ export function listAnalysisSources(){
 			updatedAt: item.updateTime || '',
 			record: item,
 		};
-	});
+	}).filter((item)=>!isRemovedAiTechniqueKey(item.module) && !isRemovedAiTechniqueKey(item.record && item.record.caseType));
 	return charts.concat(cases).sort((a, b)=>{
 		const ta = Date.parse(a.updatedAt || a.time || '') || 0;
 		const tb = Date.parse(b.updatedAt || b.time || '') || 0;

@@ -38,6 +38,7 @@ import { safeLocalStorageSet } from './safeStorage';
 import { ELECTION_PARAM_SPEC } from '../divination/election/electionParams';
 // 埃及历七轴随盘键(egypt_*):挂载/存盘 record → fields 透传,astroAiSnapshot.egyptSchoolFromFields 优先消费。
 import { EGYPT_RECORD_KEYS } from '../divination/data/egyptianSchools';
+import { isRemovedAiTechniqueKey } from '../constants/ProductScope';
 import { getCaseTypeLabel, getCaseTypeMeta, listLocalCases } from './localcases';
 import { listLocalCharts } from './localcharts';
 // 「列挂载源」及其纯函数助手抽至轻模块 aiAnalysisSources —— 个别页面只需
@@ -94,10 +95,6 @@ import { buildJingJueSnapshotForFields } from '../components/jingjue/JingJueMain
 import { buildWuZhaoSnapshotForFields, WUZHAO_CALC_OPTION_KEYS } from '../components/wuzhao/WuZhaoMain';
 import { buildShenYiShuSnapshotForFields } from '../components/shenyishu/ShenYiShuMain';
 import { buildGeomancySnapshotForFields } from '../components/geomancy/GeomancyMain';
-import { buildTarotSnapshotForFields } from '../components/tarot/TarotMain';
-// parseDateParts:老黄历日课(case 'huangli')那支按 date 串拆年月日用它;
-// 此前只调用未导入 → 挂载黄历事盘时抛 ReferenceError(同型问题先例:
-// 调用点在运行时闭包里,模块加载与渲染阶段都踩不到)。
 import { parseYearFromDateStr, parseDateParts } from './dateStrSafe';
 import { ganzhiYearBase } from './ganzhiYearBase';
 import { buildGuolaoSnapshotForFields } from '../components/guolao/GuoLaoChartMain';
@@ -399,7 +396,8 @@ const TIME_CASTABLE_SET = new Set(TIME_CASTABLE_DIVINATION);
 // 仍排除 tongshefa/suzhan/mundane —— 需用户手动选盘或事先存盘(凭时间起会得无意义默认值,不如显示「缺失」让用户去事盘存好再挂载)。
 // 也排除 rizi(日子馆:builder 需 {year,persons,result} 页面级查询态,非单时刻可推)与
 // jieqipan(报告链专用 profile,无独立模块快照;分至内容走 jieqi_* 系列键)——二者标签仅供报告链取名。
-const TIMEPOINT_CASTABLE_SET = new Set([...TIME_CASTABLE_DIVINATION, 'sixyao', 'huangji', 'taixuan', 'jingjue', 'wuzhao', 'shenyishu', 'xiaoliuren', 'feigong', 'xiaochengtu', 'huangli', 'tongshu']); // 小六壬/飞宫按占时(农历月日时支)可起;小成图按梅花时间卦(年支序+月+日为上数,加时支序为下数)走既有两数式起
+const TIMEPOINT_CASTABLE_SET = new Set([...TIME_CASTABLE_DIVINATION, 'sixyao', 'huangji', 'taixuan', 'jingjue', 'wuzhao', 'shenyishu', 'xiaoliuren', 'feigong', 'xiaochengtu']); // 小六壬/飞宫按占时(农历月日时支)可起;小成图按梅花时间卦(年支序+月+日为上数,加时支序为下数)走既有两数式起
+// 老黄历/通书(huangli/tongshu)随黄历页裁剪,不再由起课时间源新建分析。
 
 function parseBirthString(text, zone = '+08:00'){
 	const raw = `${text || ''}`.trim();
@@ -1366,30 +1364,10 @@ export async function regenerateCaseTechniqueSnapshot(record, moduleName, payloa
 		zhanCategory: p.zhanCategory,
 	};
 	switch(key){
-	case 'huangli': {
-		// [D3] 老黄历日课:纯日期确定复算(动态 import 保 AI chunk 不吃 calendar 组件树)
-		const prm = buildCaseSnapshotParams(record);
-		const _hp = parseDateParts(`${prm.date}`) || {};
-		const hy = _hp.year, hm = _hp.month, hd = _hp.day;
-		const hh = Number(`${prm.time}`.split(':')[0]);
-		if(!(hy > 0 && hm > 0 && hd > 0)){ return ''; }
-		const mod = await import('../components/calendar/huangliSnapshot');
-		const fn = mod.buildHuangliSnapshotByDate || (mod.default && mod.default.buildHuangliSnapshotByDate);
-		return fn ? `${fn(hy, hm, hd, Number.isFinite(hh) ? hh : 12) || ''}` : '';
-	}
-	case 'tongshu': {
-		// [D3] 通书择日:按日期+默认设置(或 payload.tongshu 覆盖)起当日一派断语
-		const prm = buildCaseSnapshotParams(record);
-		if(!prm.date){ return ''; }
-		const [modT, modS] = await Promise.all([
-			import('../components/calendar/tongshuSnapshot'),
-			import('../components/calendar/tongshuSchools'),
-		]);
-		const build = modT.buildTongshuSnapshotText;
-		const defaults = modS.DEFAULT_TONGSHU_SETTINGS || {};
-		const settings = { ...defaults, ...(p.tongshu && typeof p.tongshu === 'object' ? p.tongshu : {}), date: prm.date };
-		return build ? `${build(settings, prm.date) || ''}` : '';
-	}
+	case 'huangli':
+		return '';
+	case 'tongshu':
+		return '';
 	case 'liureng':
 		return regenerateLiurengSnapshot(record, liurengOpts, p.runyear);
 	case 'jinkou':
@@ -1510,29 +1488,8 @@ export async function regenerateCaseTechniqueSnapshot(record, moduleName, payloa
 	case 'geomancy':
 		// 地占为问占型(无生时);选项嵌于 payload.options,builder 缺则回退已存 case。
 		return buildGeomancySnapshotForFields(buildFieldObject(record), (p.options && typeof p.options === 'object') ? p.options : p);
-	case 'tarot': {
-		// 塔罗为问占型(无生时);牌面由 deckId/spreadType/seed 冻结,齿轮只动判读层。
-		// 齿轮扁平键落 p.options 顶层,须提升进 settings 对象(engine buildReading 只读 settings.*);
-		// 1/0 三态齿轮值归一为布尔。
-		const to = (p.options && typeof p.options === 'object') ? p.options : p;
-		// TP9 判读齿轮扩容(与 techniqueMountSettings.tarot.fields 一一对应;牌面键恒不入):
-		const liftKeys = [
-			'meaningSystem', 'reversalMode', 'variant', 'verdictMode', 'dignities', 'suitElementSwap',
-			'quintMode', 'edVersion', 'ookTable', 'astroModern', 'timingMethod', 'timingUnit',
-			'courtElementSystem', 'courtZodiacSystem', 'crossingUpright',
-		];
-		const boolKeys = ['dignities', 'suitElementSwap', 'astroModern', 'crossingUpright'];
-		const lift = {};
-		liftKeys.forEach((k)=>{
-			const v = to[k];
-			if(v === undefined || v === null || v === ''){ return; }
-			lift[k] = boolKeys.includes(k) ? (v === 1 || v === '1' || v === true) : v;
-		});
-		const tOpts = Object.keys(lift).length
-			? { ...to, settings: { ...((to.settings && typeof to.settings === 'object') ? to.settings : {}), ...lift } }
-			: to;
-		return buildTarotSnapshotForFields(buildFieldObject(record), tOpts);
-	}
+	case 'tarot':
+		return '';
 	case 'lingqi': {
 		// 灵棋经为问占型(无生时);卦=冻结棋数自 payload.counts 取、绝不按时重掷(「不可再擲」)。
 		// 🔴 AI 核只 import 轻文件 lingqiSnapshot(纯函数+数据),不 import LingQiMain 组件(chunk 回灌案口径)。
@@ -3972,15 +3929,15 @@ export function listAnalysisTechniqueOptions(source){
 	let keys;
 	if(source && source.sourceType === 'timepoint'){
 		// 起课时间源:直接展开 TIMEPOINT_CASTABLE_SET 单源(此前手抄清单与集 drift——
-		// 小六壬/飞宫在可起集内却不在下拉=「新技法无法挂载」的根因;单源后入集即入下拉,
-		// 黄历/通书/私有扩展亦由集内成员自然带出,不再逐处补抄)。
+		// 小六壬/飞宫在可起集内却不在下拉=「新技法无法挂载」的根因;单源后入集即入下拉。
+		// 已删产品(黄历/通书/塔罗/择日工作台)由 isRemovedAiTechniqueKey 从下拉剔除。
 		keys = [...TIMEPOINT_CASTABLE_SET];
 	}else if(source && source.sourceType === 'case'){
 		keys = ANALYSIS_CASE_TECHNIQUES;
 	}else{
 		keys = ANALYSIS_CHART_TECHNIQUES;
 	}
-	return keys.map((key)=>({
+	return keys.filter((key)=>!isRemovedAiTechniqueKey(key)).map((key)=>({
 		value: key,
 		label: getTechniqueLabel(key),
 	}));
@@ -3991,7 +3948,7 @@ export function listAllAnalysisTechniqueOptions(){
 	const seen = new Set();
 	const out = [];
 	[...ANALYSIS_CHART_TECHNIQUES, ...ANALYSIS_CASE_TECHNIQUES].forEach((key)=>{
-		if(seen.has(key)){
+		if(seen.has(key) || isRemovedAiTechniqueKey(key)){
 			return;
 		}
 		seen.add(key);

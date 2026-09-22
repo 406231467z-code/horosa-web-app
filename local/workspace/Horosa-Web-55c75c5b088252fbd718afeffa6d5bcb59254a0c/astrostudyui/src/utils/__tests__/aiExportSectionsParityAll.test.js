@@ -60,9 +60,6 @@ const RECORD = {
 const LOCAL = {
 	qimen: { payload: { options: { paiPanType: 2, school: '转盘', qijuMethod: 'zhirun', sex: 1 } }, cond: { '日家占方（古籍金函系）': '金函形态专段(qimenSectionsParity 专测覆盖)' } },
 	bazi: { via: 'chart' },
-	huangji: { payload: { options: {} } },
-	huangli: {},
-	tongshu: {},
 	xiaoliuren: {},
 	xiaochengtu: {},
 	feigong: {},
@@ -77,7 +74,7 @@ const SOFT = {
 	sixyao: '六爻语义=已存卦恒冻结,需 payload.gua;装卦由 guazhan 域金标另测',
 	tongshefa: '统摄法需已起卦象 payload;算法由 tongshefa 域金标另测',
 	guice: '皇极轨策需起数 payload;算法由 guice 域 116 金标另测',
-	tarot: '塔罗需牌阵 seed payload;牌组由 tarot 域金标另测',
+	huangji: '皇极经世挂载链依赖农历/后端上下文;无后端时产空,由 huangji 域金标另测',
 	geomancy: '地占需成卦 payload;引擎由 geomancy 域金标另测',
 	qizhengkin: '七政 kentang 盘走 :8899 后端',
 	taiyi: '太乙盘走 :8899 后端',
@@ -115,7 +112,10 @@ const EXEMPT = {
 	xianqin: '仙禽走演禽宿主', cetian: '策天走演禽宿主', canping: '参评数走数算宿主', zhengchuan: '神数正传走数算宿主',
 	heluo: '河洛理数走数算宿主', yizhangjing: '一掌经快照取自组件态', germany: '量化盘走后端 chart',
 	babylon: '巴比伦盘走后端', jieqi: '节气盘走后端 chart', otherbu: '卜其他聚合键(子技法各自覆盖)',
-	fengshui: '风水理气快照取自画布组件态', calendar: '黄历聚合键(huangli/tongshu 已覆盖)',
+	fengshui: '风水页面已裁剪', calendar: '黄历聚合键已随黄历页裁剪',
+	huangli: '黄历页面已裁剪,挂载快照刻意空',
+	tongshu: '通书页面已裁剪,挂载快照刻意空',
+	tarot: '塔罗页面已裁剪,挂载快照刻意空',
 	// generic 已从 preset/设置面除名(E-3:运行时兜底 context 键,无固定产出,死设置行)——不再入注册表。
 };
 

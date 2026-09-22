@@ -1,7 +1,6 @@
 jest.mock('../../astro/AstroChartMain', ()=>null);
 jest.mock('../../amap/GeoCoordModal', ()=>null);
 jest.mock('../../suzhan/SuZhanMain', ()=>null);
-jest.mock('../../astro3d/AstroChartMain3D', ()=>null);
 jest.mock('../../../utils/request', ()=>jest.fn());
 jest.mock('../../../utils/moduleAiSnapshot', ()=>({
 	saveModuleAISnapshot: jest.fn(),

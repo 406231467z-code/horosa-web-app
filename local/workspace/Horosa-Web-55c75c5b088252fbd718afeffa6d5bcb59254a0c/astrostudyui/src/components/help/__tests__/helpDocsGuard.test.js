@@ -18,7 +18,7 @@ global.React = React;
 // eslint-disable-next-line import/first
 const { TECHNIQUE_HELP_DOCS, getTechniqueHelpDoc } = require('../techniqueHelpRegistry');
 // eslint-disable-next-line import/first
-const { AUX_SUBTABS, CNYIBU_SUBTABS, CNTRADITION_SUBTABS } = require('../../../constants/SubTabRegistry');
+const { AUX_SUBTABS, CNYIBU_SUBTABS } = require('../../../constants/SubTabRegistry');
 
 /** 递归收集 React element 树里的全部文本(含 kv() 产出的键值行) */
 function collectText(node, out){
@@ -72,7 +72,7 @@ const KEYS = Object.keys(TECHNIQUE_HELP_DOCS);
 
 describe('帮助文档护栏', ()=>{
 	it('注册表非空且每项都是可渲染组件', ()=>{
-		expect(KEYS.length).toBeGreaterThan(20);
+		expect(KEYS.length).toBeGreaterThanOrEqual(18);
 		KEYS.forEach((k)=>{
 			const Comp = TECHNIQUE_HELP_DOCS[k];
 			expect([k, typeof Comp === 'function' || typeof Comp === 'object']).toEqual([k, true]);
@@ -155,7 +155,7 @@ describe('帮助文档护栏', ()=>{
 		// 导航层必须直接引用真值源,不许再出现手写数组字面量
 		expect(idx).toContain('const auxChartTabs = AUX_SUBTABS;');
 		expect(idx).toContain('const cnYiBuTabs = CNYIBU_SUBTABS;');
-		expect(idx).toContain('const cnTraditionTabs = CNTRADITION_SUBTABS;');
+		expect(idx).not.toContain('const cnTraditionTabs = CNTRADITION_SUBTABS;');
 		// 真值源与各技法 Main 的 TabPane key 集合一致(Main 加了 tab 却忘了改真值源即红)
 		const auxSrc = fs.readFileSync(path.join(__dirname, '../../auxchart/AuxChartMain.js'), 'utf8');
 		const cnyibuSrc = fs.readFileSync(path.join(__dirname, '../../cnyibu/CnYiBuMain.js'), 'utf8');

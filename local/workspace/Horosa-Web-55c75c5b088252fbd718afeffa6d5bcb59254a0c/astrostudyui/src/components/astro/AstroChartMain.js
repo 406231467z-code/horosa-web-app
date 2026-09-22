@@ -987,7 +987,6 @@ class AstroChartMain extends Component{
 			{ label: '返照', icon: 'quickReturn', onClick: ()=>this.navigateDirectionTool('solarreturn') },
 			{ label: '合盘', icon: 'quickComposite', onClick: ()=>this.navigateFeature('relativechart') },
 			{ label: '星运', icon: 'quickTransit', onClick: ()=>this.navigateFeature('direction') },
-			{ label: '笔记', icon: 'quickNote', onClick: ()=>this.openDrawer('memo') },
 			{ label: 'AI助手', icon: 'quickAi', onClick: ()=>this.navigateFeature('aianalysis') },
 		];
 		return (

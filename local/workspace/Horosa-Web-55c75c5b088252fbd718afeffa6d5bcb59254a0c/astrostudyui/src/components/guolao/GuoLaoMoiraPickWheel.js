@@ -36,7 +36,7 @@ import * as AstroConst from '../../constants/AstroConst';
 import { guolaoShenShaTip } from './GuoLaoShenShaDoc';
 import { moiraGodsFromRuleHits, moiraLongLifeCharFor, moiraWeakSolidRowForZi, moiraWeakSolidMarkers, moiraZhiDegText, moiraIsEclipticDisplayChart, moiraMapCuspsToDisplay } from './GuoLaoMoiraWheel';
 import { azTheta, applyDeclination, mountainPosition, quickWheelAz, shanColor, PLATE_OFFSET, resolveRingShifts, PICK_LAYOUTS, pickLayoutMode, COMPASS_STELLAR } from './electionCore';
-import { SHAN_ORDER, SHAN_CENTER_DEG } from '../fengshui/fengshuiData';
+import { SHAN_ORDER, SHAN_CENTER_DEG } from '../../constants/shan24';
 import { hsysDisplayName } from './guolaoData';
 import { cornerTextBlock, riseSetLines } from './GuoLaoWheelCaptions';
 import './GuoLaoMoiraWheel.less';

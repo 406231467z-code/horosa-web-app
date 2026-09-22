@@ -113,15 +113,43 @@ describe('🔴 键等性:预取 param ≡ 用户真点会发出的 param', () =>
 
 describe('🔴 预算与 latest-wins', () => {
 	// R4-B1 行为变化点(落账):任务契约加 path 过运行时白名单;缺省预算 3→12。
+	// Jest 26 无 advanceTimersByTimeAsync:假时钟推进 setTimeout,微任务刷新 Promise.finally。
+	let restoreIdle;
+	const flushMicro = () => Promise.resolve().then(() => Promise.resolve());
+	const tick = async (ms) => {
+		jest.advanceTimersByTime(ms);
+		await flushMicro();
+	};
+	beforeEach(() => {
+		jest.useFakeTimers();
+		const prevIdle = window.requestIdleCallback;
+		window.requestIdleCallback = (fn) => setTimeout(fn, 0);
+		restoreIdle = () => {
+			if(prevIdle){
+				window.requestIdleCallback = prevIdle;
+			}else{
+				delete window.requestIdleCallback;
+			}
+		};
+	});
+	afterEach(() => {
+		if(restoreIdle){
+			restoreIdle();
+		}
+		jest.useRealTimers();
+	});
+
 	test('缺省预算 ≤12;新一轮 submit 整队替换,旧代任务全弃', async () => {
 		const ran = [];
 		const mk = (tag, n) => Array.from({ length: n }, (_, i) => ({
 			name: `${tag}${i}`, path: '/chart', run: () => { ran.push(`${tag}${i}`); return Promise.resolve(); },
 		}));
-		// rIC 不存在于 jsdom → 降级 setTimeout(250);用真 timer 等
 		submitStepPrefetch(mk('old', 14));          // 超预算的 14 个 → 只留 12
 		submitStepPrefetch(mk('new', 2));           // 立即换代
-		await new Promise((r) => setTimeout(r, 1400));
+		await tick(32);
+		await tick(80);
+		await tick(32);
+		await tick(80);
 		expect(ran.filter((x) => x.startsWith('old'))).toEqual([]);   // 旧代全弃
 		expect(ran.filter((x) => x.startsWith('new')).length).toBe(2);
 	});
@@ -132,7 +160,10 @@ describe('🔴 预算与 latest-wins', () => {
 			name: `t${i}`, path: '/chart', run: () => { ran.push(i); return Promise.resolve(); },
 		}));
 		submitStepPrefetch(mk(9), { budget: 9 });
-		await new Promise((r) => setTimeout(r, 2600));
+		for(let i = 0; i < 8; i += 1){
+			// eslint-disable-next-line no-await-in-loop
+			await tick(80);
+		}
 		expect(ran.length).toBe(5);
 	});
 
@@ -140,7 +171,7 @@ describe('🔴 预算与 latest-wins', () => {
 		window.localStorage.setItem('horosa.perf.stepPrefetch', '0');
 		const ran = [];
 		submitStepPrefetch([{ name: 'x', path: '/chart', run: () => { ran.push('x'); return Promise.resolve(); } }]);
-		await new Promise((r) => setTimeout(r, 500));
+		await tick(500);
 		expect(ran).toEqual([]);
 	});
 
@@ -150,7 +181,10 @@ describe('🔴 预算与 latest-wins', () => {
 			{ name: 'boom', path: '/chart', run: () => Promise.reject(new Error('x')) },
 			{ name: 'ok', path: '/chart', run: () => { ran.push('ok'); return Promise.resolve(); } },
 		]);
-		await new Promise((r) => setTimeout(r, 1200));
+		await tick(32);
+		await tick(80);
+		await tick(32);
+		await tick(80);
 		expect(ran).toEqual(['ok']);
 	});
 
@@ -167,9 +201,9 @@ describe('🔴 预算与 latest-wins', () => {
 		for(let i = 0; i < 20; i += 1){
 			submitStepPrefetch(mk());
 			// eslint-disable-next-line no-await-in-loop
-			await new Promise((r) => setTimeout(r, 300));
+			await tick(300);
 		}
-		await new Promise((r) => setTimeout(r, 800));
+		await tick(800);
 		expect(ran).toBeGreaterThanOrEqual(15);
 	});
 });
@@ -179,9 +213,7 @@ describe('🔴 纪律:白名单绝不含随机/AI 端点', () => {
 	// 改为 kentang deterministic 15 条逐条枚举 + 通用计算端点族 + /bazi 精确条目。
 	test('允许集快照(增删须过此关)', () => {
 		expect(PREFETCH_ALLOWED_PATHS).toEqual([
-			// [Windows-only] '/chart3d':3D 星盘状态路由(v3.5.0 起),AstroChartMain3D 步进预取
-			// 声明它;上游列表无此路由,Windows 补位(requestDedupe 落桶同款一行)。
-			'/chart', '/chart3d', '/predict/', '/ziwei/', '/liureng/',
+			'/chart', '/predict/', '/ziwei/', '/liureng/',
 			'/india/', '/germany/', '/modern/', '/astroextra/', '/nongli/', '/jieqi/',
 			'/bazi/birth', '/bazi/direct',
 			'/qimen/pan', '/taiyi/pan', '/jinkou/pan', '/wangji/pan', '/wuzhao/pan',

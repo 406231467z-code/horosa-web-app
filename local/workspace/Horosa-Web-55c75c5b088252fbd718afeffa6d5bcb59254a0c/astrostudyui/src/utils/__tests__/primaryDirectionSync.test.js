@@ -46,8 +46,7 @@ describe('primaryDirectionSync', ()=>{
 
 	test('keeps valid direction sub tabs and falls back only for invalid keys', ()=>{
 		expect(normalizePrimaryDirectionSubTabKey('primarydirchart')).toBe('primarydirchart');
-		// WS-3 主限天球:三件套登记之 jest 枚举断言(缺登=tab 键被吞回 primarydirect)。
-		expect(normalizePrimaryDirectionSubTabKey('primarydirsphere')).toBe('primarydirsphere');
+		expect(normalizePrimaryDirectionSubTabKey('primarydirsphere')).toBe('primarydirect');
 		expect(normalizePrimaryDirectionSubTabKey('firdaria')).toBe('firdaria');
 		expect(normalizePrimaryDirectionSubTabKey('unexpected')).toBe('primarydirect');
 	});

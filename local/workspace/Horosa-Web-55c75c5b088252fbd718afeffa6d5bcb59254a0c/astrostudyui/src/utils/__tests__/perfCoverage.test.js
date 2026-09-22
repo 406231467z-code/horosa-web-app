@@ -34,7 +34,7 @@ describe('[R3-A0] 全技法性能覆盖矩阵哨兵', ()=>{
 
 	test('页面级:真源(导航行)↔矩阵 双向零缺零多', ()=>{
 		const nav = navKeysFromSource();
-		expect(nav.size).toBeGreaterThanOrEqual(25); // 解析器自检:真源行数量级(private 剥离后仍 ≥25)
+		expect(nav.size).toBeGreaterThanOrEqual(15); // 解析器自检:KEEP 导航数量级
 		const manifestKeys = new Set(Object.keys(pages));
 		const missing = [...nav].filter((k)=>!manifestKeys.has(k));
 		const extra = [...manifestKeys].filter((k)=>!nav.has(k));

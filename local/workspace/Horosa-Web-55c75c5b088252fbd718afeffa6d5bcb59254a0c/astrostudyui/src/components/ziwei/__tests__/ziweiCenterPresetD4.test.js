@@ -111,8 +111,9 @@ describe('[D4] 显示预设', ()=>{
 	});
 	test('🔴 apply:全键写入 LS 相等+恰一次 bump(源码断言:循环写+末尾单 bump;JSX 挂三按钮)', ()=>{
 		const src = fs.readFileSync(path.join(__dirname, '..', 'ZiWeiInput.js'), 'utf8');
-		const fn = src.slice(src.indexOf('applyDisplayPreset(name)'));
-		const body = fn.slice(0, fn.indexOf('\n\t}\n'));
+		const bodyMatch = src.match(/applyDisplayPreset\(name\)\{[\s\S]*?\n\t\}/);
+		expect(bodyMatch).toBeTruthy();
+		const body = bodyMatch[0];
 		expect(body.includes('ZW_DISPLAY_PRESET_KEYS.forEach((k)=>{ safeLocalStorageSet(k')).toBe(true);
 		const bumps = (body.match(/bumpZwDisplayRev\(/g) || []).length;
 		expect(bumps).toBe(1);

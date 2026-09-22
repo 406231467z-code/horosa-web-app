@@ -59,9 +59,8 @@ describe('🔴 导出判定 · 无一漏登（漏一个 = 那一页导出静默�
 		expect(AI_EXPORT_PRESET_SECTIONS.guice.length).toBe(10);
 	});
 
-	test('顺带修的两个既有技法也登记了（其漏得比轨策还久）', () => {
+	test('顺带修的既有技法也登记了', () => {
 		expect(MAP.geomancy).toBe('geomancy');
-		expect(MAP.tarot).toBe('tarot');
 	});
 });
 

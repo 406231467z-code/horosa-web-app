@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { Popconfirm, message, Modal, Dropdown, Checkbox, } from 'antd';
+import { Popconfirm, message, Modal, Checkbox, } from 'antd';
 import * as AstroText from '../../constants/AstroText';
 import {TableOddRowBgColor, } from '../../utils/constants';
 import EditableTags from '../comp/EditableTags';
@@ -962,7 +962,6 @@ class ChartList extends Component{
 							<a href={null} title="选择" style={primaryActionLinkStyle} onClick={(evt)=>{this.handleOpClick(evt, ()=>{this.clickInfo(record);});}}><XQIcon name="select" style={primaryActionIconStyle} /></a>
 							<a href={null} title="编辑" style={primaryActionLinkStyle} onClick={(evt)=>{this.handleOpClick(evt, ()=>{this.clickEdit(record);});}}><XQIcon name="edit" style={primaryActionIconStyle} /></a>
 							{this.renderDeleteAction(record, `星盘：${record.name} `)}
-							<a href={null} title="明细" style={primaryActionLinkStyle} onClick={(evt)=>{this.handleOpClick(evt, ()=>{this.clickDLFeature(record);});}}><XQIcon name="list" style={primaryActionIconStyle} /></a>
 							<a href={null} title="另存副本" style={primaryActionLinkStyle} onClick={(evt)=>{this.handleOpClick(evt, ()=>{this.clickDuplicate(record);});}}><XQIcon name="copy" style={primaryActionIconStyle} /></a>
 						</span>
 					);
@@ -985,28 +984,6 @@ class ChartList extends Component{
 				<div style={listToolbarStyle}>
 					<XQButton type="primary" iconName="newChart" onClick={this.clickAdd}>添加星盘</XQButton>
 					<XQButton onClick={this.openTrash}>回收站</XQButton>
-					<Dropdown
-						trigger={['click']}
-						menu={{
-							items: [
-								{ key: 'import', label: '导入本地命盘(JSON)' },
-								{ key: 'export', label: '导出本地命盘(JSON)' },
-								{ type: 'divider' },
-								{ key: 'unifiedBackup', label: '全量备份(zip)' },
-								{ key: 'unifiedRestore', label: '恢复全量备份' },
-								{ type: 'divider' },
-								{ key: 'health', label: '存储健康' },
-								{ key: 'dedupe', label: '查重与合并' },
-								{ type: 'divider' },
-								{ key: 'importOther', label: '从其他软件导入(CSV/QCK/AAF)' },
-								{ key: 'exportNdjson', label: '导出 NDJSON(机器格式)' },
-								{ key: 'exportMarkdown', label: '导出 Markdown 档案' },
-							],
-							onClick: this.onDataMenuClick,
-						}}
-					>
-						<XQButton>数据管理 ▾</XQButton>
-					</Dropdown>
 					<div style={toolbarSpacerStyle} />
 					<XQSelect
 						value={this.state.viewMode}
@@ -1060,18 +1037,6 @@ class ChartList extends Component{
 							<XQButton size='small'>批量删除</XQButton>
 						</Popconfirm>
 						<XQButton size='small' onClick={()=>{this.setState({ batchTagOpen: true, batchTags: [] });}}>批量打标签</XQButton>
-						<Dropdown
-							trigger={['click']}
-							menu={{
-								items: [
-									{ key: 'json', label: '导出选中(JSON)' },
-									{ key: 'csv', label: '导出选中(CSV)' },
-								],
-								onClick: ({ key })=>{ if(key === 'json'){ this.clickBatchExport(); }else{ this.clickExportCsv(); } },
-							}}
-						>
-							<XQButton size='small'>导出 ▾</XQButton>
-						</Dropdown>
 						<XQButton size='small' onClick={()=>{this.setState({ selectedKeys: [], selectedRows: [] });}}>取消选择</XQButton>
 					</div>
 				) : null}

@@ -8,17 +8,6 @@ import QuickDockBar from '../common/QuickDockBar';
 import AstroChartMain from '../astro/AstroChartMain';
 import GeoCoordModal from '../amap/GeoCoordModal';
 import SuZhanMain from '../suzhan/SuZhanMain';
-// 🔴 3D 盘必须懒加载,绝不可改回静态 import(与星运页同族病灶,2026-08-01 一并治理):
-//   静态引它 → AstroChartMain3D → AstroChart3D → Astro3D → three + OrbitControls/GLTFLoader/
-//   DRACOLoader/Stats/lil-gui/FontLoader + 两个大 JSON 字体&模型资产,整条链成为本页 chunk 的
-//   **同步依赖** —— 进节气页(24 节气各自的星盘/宿盘页签)就得先解析完这一大坨,而只有「3D盘」
-//   那个页签用得着。本页已有 render3d 条件门(不激活不挂载),懒化后「不打开=零成本」天然成立。
-//   注:本页无 FreezeInactive,故边界由 makeLazyBoundary 自带的 TechniqueErrorBoundary 提供。
-import { makeLazyBoundary, idleWarm } from '../../utils/lazyBoundary';
-const AstroChartMain3D = makeLazyBoundary(
-	() => import(/* webpackChunkName: "astro-chart-3d" */ '../astro3d/AstroChartMain3D'),
-	{ label: '3D 盘', tip: '3D 盘加载中…' }
-);
 import * as Constants from '../../utils/constants';
 import * as AstroConst from '../../constants/AstroConst';
 import request from '../../utils/request';
@@ -923,8 +912,9 @@ function parseJieQiTab(currentTab, jieqis){
 		if(currentTab === `宿盘${title}`){
 			return { title, type: 'suzhan' };
 		}
+		// 旧版 3D 盘 tab key 回落到 2D 星盘,避免白屏。
 		if(currentTab === `3D盘${title}`){
-			return { title, type: 'astro3d' };
+			return { title, type: 'astro' };
 		}
 	}
 	return null;
@@ -949,7 +939,7 @@ function buildJieQiCurrentSnapshotText(currentTab, result, baseFields, jieqis, p
 		lines.push(`[${info.title}宿盘]`);
 		lines.push(buildJieQiSuSection(one, flds, planetDisplay) || '无数据');
 	}else{
-		const panelName = info.type === 'astro3d' ? `${info.title}3D盘` : `${info.title}星盘`;
+		const panelName = `${info.title}星盘`;
 		lines.push(`[${panelName}]`);
 		lines.push(buildAstroSnapshotContent(one, flds, { headerless: true }) || '无数据');
 	}
@@ -991,9 +981,6 @@ export class JieQiChartsMain extends Component{
 				suzhan:{
 					fun: null
 				},
-				chart3d:{
-					fun: null
-				},	
 			},
 		}
 
@@ -1671,11 +1658,6 @@ export class JieQiChartsMain extends Component{
 						<div style={{ padding: 12 }}>加载中...</div>
 					</TabPane>
 				);
-				tabs.push(
-					<TabPane tab={title+'3D盘'} key={'3D盘'+title}>
-						<div style={{ padding: 12 }}>加载中...</div>
-					</TabPane>
-				);
 				continue;
 			}
 			let flds = {
@@ -1687,10 +1669,8 @@ export class JieQiChartsMain extends Component{
 			}
 			const starKey = title;
 			const suKey = '宿盘'+title;
-			const d3Key = '3D盘'+title;
 			const renderStar = this.state.currentTab === starKey;
 			const renderSu = this.state.currentTab === suKey;
-			const render3d = this.state.currentTab === d3Key;
 			let tab = (
 				<TabPane tab={title+'星盘'} key={starKey}>
 					{renderStar ? (
@@ -1733,27 +1713,6 @@ export class JieQiChartsMain extends Component{
 			);
 			tabs.push(sztab);
 
-			let tab3d = (
-				<TabPane tab={title+'3D盘'} key={d3Key}>
-					{render3d ? (
-						<AstroChartMain3D
-							hidehsys={1}
-							hidezodiacal={1}
-							hidedateselector={true}
-							needChart3D={true}
-							value={chart}
-							height={height}
-							fields={flds}
-							chartDisplay={this.props.chartDisplay}
-							planetDisplay={this.props.planetDisplay}
-							lotsDisplay={this.props.lotsDisplay}	
-							showPlanetHouseInfo={this.props.showPlanetHouseInfo}
-							showAstroMeaning={this.props.showAstroMeaning}
-						/>) : null}
-				</TabPane>
-			);
-			tabs.push(tab3d);
-
 		}
 
 		return tabs;
@@ -1779,8 +1738,7 @@ export class JieQiChartsMain extends Component{
 		if(!info){
 			return;
 		}
-		const key = type === 'astro' ? info.title
-			: (type === 'suzhan' ? `宿盘${info.title}` : `3D盘${info.title}`);
+		const key = type === 'astro' ? info.title : `宿盘${info.title}`;
 		this.changeTab(key);
 	}
 
@@ -1806,7 +1764,6 @@ export class JieQiChartsMain extends Component{
 					{ key: 'nextYear', label: '下一年', icon: 'quickTransit', needsResult: false, onClick: ()=>this.shiftJieQiYear(1) },
 					{ key: 'viewAstro', label: '星盘', icon: 'quickNote', disabled: !onChartTab, active: onChartTab && info.type === 'astro', onClick: ()=>this.switchJieQiView('astro') },
 					{ key: 'viewSuzhan', label: '宿盘', icon: 'quickReturn', disabled: !onChartTab, active: onChartTab && info.type === 'suzhan', onClick: ()=>this.switchJieQiView('suzhan') },
-					{ key: 'view3d', label: '3D盘', icon: 'quickComposite', disabled: !onChartTab, active: onChartTab && info.type === 'astro3d', onClick: ()=>this.switchJieQiView('astro3d') },
 				]}
 				dispatch={this.props.dispatch}
 			/>
@@ -1815,8 +1772,6 @@ export class JieQiChartsMain extends Component{
 
 	componentDidMount(){
 		this.unmounted = false;
-		// 3D 盘 chunk 空闲预热:不打开 3D 页签=零成本,真去点时通常已就绪。卸载时必须 cancel。
-		this._cancel3dWarm = idleWarm(AstroChartMain3D, { timeout: 2500 });
 		if(typeof window !== 'undefined'){
 			window.addEventListener('horosa:refresh-module-snapshot', this.handleSnapshotRefreshRequest);
 		}
@@ -1856,7 +1811,6 @@ export class JieQiChartsMain extends Component{
 
 	componentWillUnmount(){
 		this.unmounted = true;
-		if(this._cancel3dWarm){ this._cancel3dWarm(); this._cancel3dWarm = null; }
 		if(typeof window !== 'undefined'){
 			window.removeEventListener('horosa:refresh-module-snapshot', this.handleSnapshotRefreshRequest);
 		}

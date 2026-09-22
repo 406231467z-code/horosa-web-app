@@ -166,9 +166,6 @@ export function getPdTimeKeyLabel(value){
 const VALID_DIRECTION_SUB_TABS = new Set([
 	'primarydirect',
 	'primarydirchart',
-	// WS-3 主限天球(3D):三件套登记之一 —— 本表 + models/astro shouldIncludePrimaryDirection
-	// + jest 枚举断言,缺一即「tab 键被吞回 primarydirect / 载入不带 PD 数据」的隐性坏。
-	'primarydirsphere',
 	'firdaria',
 	'profection',
 	'solararc',

@@ -1943,7 +1943,7 @@ class TongSheFaMain extends Component{
 						</Row>
 						<Row style={{ marginTop: 8 }}>
 							<Col span={24}>
-								<Button style={{ width: '100%' }} onClick={this.clickSaveCase}>保存为事盘</Button>
+								{/* PHASE 1: 事盘保存已从产品范围移除 */}
 							</Col>
 						</Row>
 						<Divider />

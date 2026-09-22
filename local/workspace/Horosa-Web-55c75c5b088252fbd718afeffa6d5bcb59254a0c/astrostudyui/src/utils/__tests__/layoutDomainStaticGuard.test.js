@@ -122,16 +122,6 @@ describe('T3 壳内三页:同一标准', () => {
 // 「读数÷标识符」,抓不到这种跨域直写,故按「文件同时含 gBCR 与 style 尺寸写」粗筛+
 // 豁免表精判。豁免必须带一行可自证的判定依据,严禁为绿而豁免。
 const RECT_WRITE_EXEMPT = [
-	// rect 仅用于鼠标坐标换算(注释自证「getBoundingClientRect 本就是 CSS px」);
-	// canvas 尺寸写回值源自 host.clientWidth(布局域)——读写同域。
-	'components/fengshui/fengshuiEngine.js',
-	// rect 用于克隆节点测自然高(clone 脱离布局流,与写回目标同一元素同域)。
-	'components/calendar/NongLi.js',
-	// rect 用于阅读器翻页几何(与滚动坐标同域消费),尺寸写回源自 clientWidth。
-	'components/reader/BookReader.js',
-	// 3D 视图:rect 用于 pointer 拾取(物理域正当消费);画布尺寸走 clientWidth+dpr。
-	'components/astro3d/Astro3D.js',
-	'components/astro3d/AstroChart3D.js',
 	// 方盘边长已改 clientWidth 优先,残余 rect 仅作 0 兜底且经 getEffectiveScale 换域,
 	// 以及 rect.top 域内相减后显式 /zScale 换回布局域(见各自 [Tahoe 域混根修] 注释)。
 	'components/suzhan/SuZhanChart.js',

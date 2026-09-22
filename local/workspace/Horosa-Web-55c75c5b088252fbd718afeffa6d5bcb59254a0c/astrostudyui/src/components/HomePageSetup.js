@@ -14,10 +14,6 @@ const Pages = [{
 	path: ['ziwei'],
 	label: '紫微',
 	key: 'ziwei',
-},{
-	path: ['astroreader'],
-	label: '书籍阅读',
-	key: 'astroreader',
 }];
 
 // 导航搜索匹配：模块标题 + 分组 + 模块内术法关键词（rec.keywords，见 pages/index.js navigationPages）。
@@ -99,18 +95,7 @@ class HomePageSetup extends Component{
 		}
 
 		clickTools(){
-			if(this.props.onOpenTools){
-				this.props.onOpenTools();
-				return;
-			}
-			if(this.props.dispatch){
-				this.props.dispatch({
-					type: 'astro/openDrawer',
-					payload: {
-						key: 'commtools',
-					},
-				});
-			}
+			// PHASE 1: 辅助工具抽屉已删除。保留方法以免旧调用点 ReferenceError。
 		}
 
 	changeSearch(e){
@@ -149,20 +134,20 @@ class HomePageSetup extends Component{
 			groups[groupName].push(rec);
 			return groups;
 		}, {});
-		const groupOrder = ['命', '卜', '工具', '内容与管理', '其他'].filter((name)=>allGroupedPages[name]);
+		const groupOrder = ['命', '卜', '工具', '管理', '其他'].filter((name)=>allGroupedPages[name]);
 		const contentGroupOrder = searchValue ? groupOrder.filter((name)=>groupedPages[name]) : groupOrder;
 		const railLabels = {
 			'命': '命盘与推运',
 			'卜': '易与三式',
-			'工具': '工具工作台',
-			'内容与管理': '内容与管理',
+			'工具': 'AI分析',
+			'管理': '命盘',
 			'其他': '其他模块',
 		};
 		const railMarks = {
 			'命': '命',
 			'卜': '卜',
 			'工具': '工',
-			'内容与管理': '管',
+			'管理': '管',
 			'其他': '其',
 		};
 		const recentKeys = [currentKey, 'aianalysis', 'sanshiunited'];
@@ -242,18 +227,6 @@ class HomePageSetup extends Component{
 											</button>
 										);
 									})}
-									{groupName === '工具' ? (
-										<div className="xq-nav-tool-launcher">
-											<button
-												type="button"
-												className="xq-nav-tool-button"
-												onClick={this.clickTools}
-													onMouseEnter={()=>preloadNavByKey('commtools')}
-											>
-												<span>小工具</span>
-											</button>
-										</div>
-									) : null}
 								</div>
 							</section>
 						))}

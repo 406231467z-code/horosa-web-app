@@ -356,7 +356,10 @@ describe('aiAnalysisContext', ()=>{
 		expect(tpOptions).toContain('feigong');
 		expect(tpOptions).toContain('liureng');
 		expect(tpOptions).toContain('sixyao');
-		expect(tpOptions).toContain('huangli');
+		expect(tpOptions).not.toContain('huangli');
+		expect(tpOptions).not.toContain('tongshu');
+		expect(tpOptions).not.toContain('tarot');
+		expect(tpOptions).not.toContain('tianxing');
 		expect(tpOptions).not.toContain('tongshefa');    // 非时间可推仍不进(挂事盘)
 		// 真空壳技法已从下拉移除（选了挂不出内容）：节气盘×6/辅助(cntradition)/骰子(otherbu)/风水
 		// [D2] relative 已回归清单:buildTechniqueContext 特判读合盘页模块快照(可挂出内容,不再空壳)。

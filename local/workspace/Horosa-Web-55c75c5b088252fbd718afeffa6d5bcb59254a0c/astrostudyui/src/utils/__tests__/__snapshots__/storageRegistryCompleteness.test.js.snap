@@ -67,6 +67,7 @@ Array [
   "horosa.ui.skipDeleteConfirm.v1 :: settings :: backup=true",
   "horosa.uranian.dial.v1 :: settings :: backup=true",
   "horosa.uranian.gephem.v1 :: settings :: backup=true",
+  "horosa.user-records.v1 :: user-data :: backup=dedicated",
   "horosa.window.size.v1 :: device-local :: backup=false",
   "horosa.xiaochengtu.settings.v1 :: settings :: backup=true",
   "horosa.xiaoliuren.settings.v1 :: settings :: backup=true",

@@ -1,7 +1,5 @@
 import { Component } from 'react';
 import * as AstroText from '../../constants/AstroText';
-import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import { TableOddRowBgColor } from '../../utils/constants';
 import { listLocalCharts } from '../../utils/localcharts';
 import { XQButton as Button, XQInput as Input, XQModal as Modal, XQTable as Table } from '../xq-ui';
@@ -35,20 +33,7 @@ class ChartSearchModal extends Component{
 		const params = {
 			name: this.state.commonSearch
 		};
-		const token = localStorage.getItem(Constants.TokenKey);
-		let res = null;
-		if(token){
-			const data = await request(`${Constants.ServerRoot}/allowedcharts`, {
-				body: JSON.stringify(params),
-			});
-			if(data && data[Constants.ResultKey]){
-				if(!data){ return; }   // 空载荷守卫:request() 吞错 resolve undefined(网络层失败),此次不更新、重试即恢复
-				res = data[Constants.ResultKey];
-			}
-		}
-		if(res === null){
-			res = listLocalCharts(params);
-		}
+		const res = listLocalCharts(params);
 		
 		const st = {
 			dataSource: res,

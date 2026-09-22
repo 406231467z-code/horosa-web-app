@@ -4,7 +4,7 @@
 // 度空间约定(全部在「罗盘空间」作图,永不携带 Moira 内部 135/315 盘度):
 //   罗盘方位 az:0=子(北),顺时针 90=卯东?否——罗盘 90=东。传统盘「子下卯左」由
 //   azTheta 负责:SVG y 向下,theta = 90 + az ⇒ az0 在正下、az90(东)在左。
-import { SHAN_ORDER, SHAN_CENTER_DEG } from '../fengshui/fengshuiData';
+import { SHAN_ORDER, SHAN_CENTER_DEG } from '../../constants/shan24';
 
 export function normDeg(deg){
 	let v = Number(deg) % 360;

@@ -30,7 +30,7 @@ function listMainFiles(){
 describe('QuickDockBar 组件契约', () => {
 	const btnCount = (html)=>(html.match(/horosa-bottom-quick-button/g) || []).length;
 
-	test('默认恒含 AI 助手,且总键数 ≤8', () => {
+	test('默认恒含 AI 助手,且总键数 ≤8;传入 save 也不再渲染事盘保存', () => {
 		const html = renderToStaticMarkup(
 			<QuickDockBar
 				page="t1"
@@ -41,12 +41,13 @@ describe('QuickDockBar 组件契约', () => {
 			/>
 		);
 		expect(html).toContain('AI助手');
-		// 1 主键 + 3 行内 + 更多(占第4槽) + 保存 + AI = 7(6 个 extras 溢出折叠)
+		expect(html).not.toContain('>保存<');
+		expect(html).not.toContain('>载入<');
 		expect(html).toContain('更多');
 		expect(btnCount(html)).toBeLessThanOrEqual(8);
 	});
 
-	test('无盘态:专属动词与保存禁用,主键与 AI 不禁用;needsResult:false 豁免', () => {
+	test('无盘态:专属动词禁用,主键与 AI 不禁用;needsResult:false 豁免', () => {
 		const html = renderToStaticMarkup(
 			<QuickDockBar
 				page="t2"
@@ -62,18 +63,17 @@ describe('QuickDockBar 组件契约', () => {
 		const seg = (label)=>{
 			const idx = html.indexOf(label);
 			expect(idx).toBeGreaterThan(-1);
-			// 该按钮开标签在 label 之前最近一个 <button
 			const open = html.lastIndexOf('<button', idx);
 			return html.slice(open, idx);
 		};
 		expect(seg('要盘的动词')).toContain('disabled');
-		expect(seg('保存')).toContain('disabled');
+		expect(html).not.toContain('>保存<');
 		expect(seg('此刻起课')).not.toContain('disabled');
 		expect(seg('起课')).not.toContain('disabled');
 		expect(seg('AI助手')).not.toContain('disabled');
 	});
 
-	test('恒序:主键 → 动词 → 保存 → AI(肌肉记忆锚)', () => {
+	test('恒序:主键 → 动词 → AI(肌肉记忆锚)', () => {
 		const html = renderToStaticMarkup(
 			<QuickDockBar
 				page="t3"
@@ -83,7 +83,7 @@ describe('QuickDockBar 组件契约', () => {
 				save={()=>{}}
 			/>
 		);
-		const order = ['主键甲', '动词乙', '保存', 'AI助手'].map((s)=>html.indexOf(s));
+		const order = ['主键甲', '动词乙', 'AI助手'].map((s)=>html.indexOf(s));
 		expect([...order].sort((a, b)=>a - b)).toEqual(order);
 	});
 
@@ -152,21 +152,19 @@ describe('全站快捷栏静态契约(源码扫描)', () => {
 		expect(offenders).toEqual([]);
 	});
 
-	test('卜类页 dock 必带保存(事例入库),命类不経 dock 复置命例保存', () => {
+	test('卜类页 dock 仍可传 save 回调,但命类不得在 dock 里放「保存」', () => {
 		const DIVINATION = [
 			'lrzhan/LiuRengMain.js', 'dunjia/DunJiaMain.js', 'taiyi/TaiYiMain.js', 'sanshi/SanShiUnitedMain.js',
 			'guazhan/GuaZhanMain.js', 'suzhan/SuZhanMain.js', 'jinkou/JinKouMain.js', 'tongshefa/TongSheFaMain.js',
 			'huangji/HuangJiMain.js', 'wuzhao/WuZhaoMain.js', 'taixuan/TaiXuanMain.js', 'jingjue/JingJueMain.js',
-			'shenyishu/ShenYiShuMain.js', 'geomancy/GeomancyMain.js', 'tarot/TarotMain.js',
+			'shenyishu/ShenYiShuMain.js', 'geomancy/GeomancyMain.js',
 		];
 		const missing = DIVINATION.filter((rel)=>{
 			const src = read(path.join(COMPONENTS_DIR, rel));
-			// tongshefa/tarot 等 config-only 子页无独立 dock 渲染,由 cnyibu 容器透传
 			const wired = src.includes('QuickDockBar') || src.includes('getQuickDockConfig()');
 			return !(/save[:=]\s*[\({]|save=\{/.test(src) && wired);
 		});
 		expect(missing).toEqual([]);
-		// 命类(紫微/印度/七政/辅盘/节气)不得在 dock 里放「保存」——页头命例保存已有
 		['ziwei/ZiWeiMain.js', 'astro/IndiaChartMain.js', 'guolao/GuoLaoChartMain.js', 'auxchart/AuxChartMain.js', 'jieqi/JieQiChartsMain.js'].forEach((rel)=>{
 			const src = read(path.join(COMPONENTS_DIR, rel));
 			const dockSpan = src.slice(src.indexOf('QuickDockBar'));
@@ -174,8 +172,8 @@ describe('全站快捷栏静态契约(源码扫描)', () => {
 		});
 	});
 
-	test('cnyibu 十子页均自述 getQuickDockConfig,容器零硬编码分支', () => {
-		const SUBPAGES = ['suzhan/SuZhanMain.js', 'jinkou/JinKouMain.js', 'tongshefa/TongSheFaMain.js', 'huangji/HuangJiMain.js', 'wuzhao/WuZhaoMain.js', 'taixuan/TaiXuanMain.js', 'jingjue/JingJueMain.js', 'shenyishu/ShenYiShuMain.js', 'geomancy/GeomancyMain.js', 'tarot/TarotMain.js'];
+	test('cnyibu 子页均自述 getQuickDockConfig,容器零硬编码分支', () => {
+		const SUBPAGES = ['suzhan/SuZhanMain.js', 'jinkou/JinKouMain.js', 'tongshefa/TongSheFaMain.js', 'huangji/HuangJiMain.js', 'wuzhao/WuZhaoMain.js', 'taixuan/TaiXuanMain.js', 'jingjue/JingJueMain.js', 'shenyishu/ShenYiShuMain.js', 'geomancy/GeomancyMain.js'];
 		SUBPAGES.forEach((rel)=>{
 			expect(read(path.join(COMPONENTS_DIR, rel))).toContain('getQuickDockConfig()');
 		});

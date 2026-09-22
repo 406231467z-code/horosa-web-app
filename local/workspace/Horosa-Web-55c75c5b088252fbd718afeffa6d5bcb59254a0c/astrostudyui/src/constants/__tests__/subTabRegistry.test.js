@@ -1,20 +1,16 @@
 // 子页签 runtime 记忆哨兵:redux currentSubTab 共享单槽被别的主 tab 子键覆写后,
-// 导航层回落必须优先取各组 runtime 记忆(合法才用),皆非法才回首档 ——
-// 否则停在任意子技法切走再切回被静默打回首档(灵棋经/塔罗 × 风水/AI分析 实测三组复现的病)。
+// 导航层回落必须优先取各组 runtime 记忆(合法才用),皆非法才回首档。
 import {
-	CNYIBU_SUBTABS, AUX_SUBTABS, ZERI_SUBTABS, CNTRADITION_SUBTABS,
-	firstSubTab, resolveSubTab, rememberSubTab, recallSubTab,
+	CNYIBU_SUBTABS, AUX_SUBTABS,
+	firstSubTab, rememberSubTab, recallSubTab,
 } from '../SubTabRegistry';
 
 const GROUPS = [
 	['cnyibu', CNYIBU_SUBTABS, 'suzhan'],
 	['auxchart', AUX_SUBTABS, 'germanytech'],
-	['cntradition', CNTRADITION_SUBTABS, 'guasym'],
-	['zeri', ZERI_SUBTABS, 'tianxing'],
 ];
 const RUNTIME_KEY = {
 	cnyibu: '__horosaCnyibuCurrentTab', auxchart: '__horosaAuxchartCurrentTab',
-	cntradition: '__horosaCnTraditionCurrentTab', zeri: '__horosaZeriCurrentTab',
 };
 
 afterEach(() => { Object.values(RUNTIME_KEY).forEach((k) => { delete window[k]; }); });
@@ -28,14 +24,10 @@ describe('recallSubTab 回落三级', () => {
 	});
 
 	test('🔴 病灶场景:current 被别组子键污染 → 取 runtime 记忆(核心修复)', () => {
-		// 停在灵棋经 → 切风水(currentSubTab 被写成风水子键)→ 切回 cnyibu
 		rememberSubTab('cnyibu', 'lingqi', CNYIBU_SUBTABS);
 		expect(recallSubTab('cnyibu', CNYIBU_SUBTABS, 'liqi-bazhai', 'suzhan')).toBe('lingqi');
-		// 塔罗同验
-		// 样例子键用 geomancy(tarot 已升一级不在 cnyibu 集,2026-08-15)。
 		rememberSubTab('cnyibu', 'geomancy', CNYIBU_SUBTABS);
 		expect(recallSubTab('cnyibu', CNYIBU_SUBTABS, undefined, 'suzhan')).toBe('geomancy');
-		// 辅盘组
 		rememberSubTab('auxchart', 'draconic', AUX_SUBTABS);
 		expect(recallSubTab('auxchart', AUX_SUBTABS, 'whatever-alien', 'germanytech')).toBe('draconic');
 	});
@@ -80,15 +72,19 @@ describe('宿主接线哨兵(remember 调用点在位)', () => {
 	const read = (rel) => fs.readFileSync(path.join(__dirname, rel), 'utf8');
 	test('导航各组回落分支全部走 recallSubTab(手写 indexOf 回落=复辟)', () => {
 		const src = read('../../pages/index.js');
-		const groups = ['cntradition', 'cnyibu', 'auxchart', 'zeri'];
-		groups.forEach((g) => {
+		['cnyibu', 'auxchart'].forEach((g) => {
 			expect(src).toContain(`recallSubTab('${g}'`);
 		});
+		expect(src).not.toContain("recallSubTab('cntradition'");
+		expect(src).not.toContain("recallSubTab('zeri'");
 	});
 	test('各宿主 changeTab 带 rememberSubTab(CnYiBuMain 走既有 setRuntimeCnYiBuTab 同键豁免)', () => {
 		expect(read('../../components/auxchart/AuxChartMain.js')).toContain("rememberSubTab('auxchart'");
-		expect(read('../../components/cntradition/CnTraditionMain.js')).toContain("rememberSubTab('cntradition'");
-		expect(read('../../components/zeri/ZeriMain.js')).toContain("rememberSubTab('zeri'");
 		expect(read('../../components/cnyibu/CnYiBuMain.js')).toContain('__horosaCnyibuCurrentTab');
+	});
+	test('PHASE1.5:已删页的子页签注册不得再导出', () => {
+		const src = read('../SubTabRegistry.js');
+		expect(src).not.toContain('ZERI_SUBTABS');
+		expect(src).not.toContain('CNTRADITION_SUBTABS');
 	});
 });

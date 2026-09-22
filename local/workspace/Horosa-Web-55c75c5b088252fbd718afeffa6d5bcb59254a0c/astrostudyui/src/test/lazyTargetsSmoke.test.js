@@ -22,8 +22,8 @@ while ((m = re.exec(indexSource))) {
 }
 
 describe('全技法 lazy 目标可载入(marker 投影悬空第三道锁)', () => {
-	it('解析到的 lazy 目标数量应覆盖全技法(>=20)', () => {
-		expect(targets.length).toBeGreaterThanOrEqual(20);
+	it('解析到的 lazy 目标数量应覆盖 KEEP 技法(>=15)', () => {
+		expect(targets.length).toBeGreaterThanOrEqual(15);
 	});
 
 	targets.forEach((rel) => {

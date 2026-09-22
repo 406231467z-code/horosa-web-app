@@ -68,20 +68,9 @@ const PAGE_LABELS = {
 	guazhan: '六爻',
 	taiyi: '太乙',
 	jieqichart: '分至',
-	fengshui: '风水',
 	cnyibu: '其他',
 	aianalysis: 'AI分析',
-	calendar: '黄历',
-	cntradition: '辅助',
-	astroreader: '书籍阅读',
-	liveplayer: '星阙直播',
-	admintools: '管理工具',
-	// 2026-07-16 补缺:以下五键此前漏登 → 页头模块名 fallback 显示「导航」(与 navigationPages 对齐)
-	astrochart3D: '3D星盘',
-	planetarium: '天文馆',
-	xuanshi: '玄学史',
-	astrodata: '数据库',
-	zeri: '择日',
+	__charts__: '命盘',
 };
 
 function PageHeader(props){
@@ -466,9 +455,6 @@ function PageHeader(props){
 		key: 'chartlist',
 		label: menuLabel('astro', '管理命盘')
 	},{
-		key: 'caselist',
-		label: menuLabel('note', '管理事盘')
-	},{
 		key: 'chartadd',
 		label: menuLabel('newChart', '新增命盘')
 	}];
@@ -477,27 +463,8 @@ function PageHeader(props){
 		key: 'chartlist',
 		label: menuLabel('astro', '我的星盘列表')
 	},{
-		key: 'caselist',
-		label: menuLabel('note', '管理事盘')
-	},{
-		key: 'chartsgps',
-		label: menuLabel('locastro', '我的星盘分布')
-	},{
 		key: 'chartadd',
 		label: menuLabel('newChart', '新增星盘数据')
-	},{
-		key: 'changeparams',
-		label: menuLabel('aiSettings', '星盘参数修改')
-	},{
-		key: 'changepwd',
-		label: menuLabel('admin', '密码修改')
-	},{
-		key: 'divider',
-		label: (<hr />),
-		disabled: true
-	},{
-		key: 'logout',
-		label: menuLabel('support', '退出登录')
 	}];
 
 	let menu = pubmenu;

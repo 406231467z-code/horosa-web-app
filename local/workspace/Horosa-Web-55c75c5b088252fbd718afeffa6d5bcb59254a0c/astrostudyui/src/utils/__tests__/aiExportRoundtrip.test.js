@@ -161,10 +161,8 @@ describe('AI 导出 roundtrip 哨兵:源扫静态段头 ⊆ AI_EXPORT_PRESET_SEC
 		expect(headers).toEqual(expect.arrayContaining(['Shadbala 六力', 'Panchanga 五要素', '宫位力（Bhava Bala）', 'Āyurdāya 寿命基础', 'KP 意义者 Significators', '座运·X']));
 	});
 
-	test('节气盘 buildJieQiSnapshot/CurrentSnapshot:季节×盘型 派生段头(四分点 × 星盘/宿盘/3D盘)全部登记进节气分点子盘 preset', ()=>{
-		// 段头由模板插值产出:`[${title}星盘]` / `[${title}宿盘]` / panelName=`${info.title}3D盘` → `[${panelName}]`。
-		// 季节 title/info.title 来自四分点数据(与四子盘 preset 键 chunfen/xiazhi/qiufen/dongzhi 一一对应);
-		// 「盘型后缀」从源派生(新增盘型如 3D盘 会自动进集合,防再漏登记——正是第 3 轮 checker 捕到 3D盘的类)。
+	test('节气盘 buildJieQiSnapshot/CurrentSnapshot:季节×盘型 派生段头(四分点 × 星盘/宿盘)全部登记进节气分点子盘 preset', ()=>{
+		// 段头由模板插值产出:`[${title}星盘]` / `[${title}宿盘]`。3D 盘已从产品范围删除。
 		const src = readSrc('../../components/jieqi/JieQiChartsMain.js');
 		const region = sliceFrom(src, 'function buildJieQiSnapshotText', 4200); // 覆盖 Snapshot + CurrentSnapshot 两 builder
 		const suffixes = new Set();
@@ -172,7 +170,8 @@ describe('AI 导出 roundtrip 哨兵:源扫静态段头 ⊆ AI_EXPORT_PRESET_SEC
 		let m;
 		while((m = re.exec(region))){ if(m[1]){ suffixes.add(m[1]); } }
 		const tails = Array.from(suffixes);
-		expect(tails).toEqual(expect.arrayContaining(['星盘', '宿盘', '3D盘'])); // 扫描确实抓到三种盘型
+		expect(tails).toEqual(expect.arrayContaining(['星盘', '宿盘']));
+		expect(tails).not.toEqual(expect.arrayContaining(['3D盘']));
 		const splitPreset = new Set([
 			...presetSet('jieqi_chunfen'),
 			...presetSet('jieqi_xiazhi'),
@@ -184,17 +183,7 @@ describe('AI 导出 roundtrip 哨兵:源扫静态段头 ⊆ AI_EXPORT_PRESET_SEC
 		expect(expected.filter((h)=>!splitPreset.has(h))).toEqual([]);
 	});
 
-	test('塔罗 buildReadingText:源内字面量段头(含新增「对读」「开钥」「组合读法」)全部登记进 tarot preset', ()=>{
-		const src = readSrc('../../components/tarot/engine/reportText.js');
-		// 窗口须覆盖整个 buildReadingText:函数随补齐轮次增长(4000 字窗曾把尾部段头截在窗外,
-		// 造成「段头数不足」的假红——扫描型哨兵的窗口必须跟着被扫函数一起长)。
-		const region = sliceFrom(src, 'export function buildReadingText', 20000);
-		const headers = Array.from(sourceBracketHeaders(region));
-		const preset = presetSet('tarot');
-		expect(headers.length).toBeGreaterThanOrEqual(8);
-		expect(headers.filter((h)=>!preset.has(h))).toEqual([]);
-		expect(headers).toEqual(expect.arrayContaining(['牌阵综览', '逐牌详解', '综合断语', '定局', '对读', '生命牌', '开钥', '组合读法']));
-	});
+	test.skip('塔罗已从产品范围移除', ()=>{});
 
 	// 大六壬全流派补齐:buildLiuRengSnapshotText 的断卦层段头(年月神煞/课体结构/三传旺衰/空亡真假/旬空落点/陷空/遁干特殊/
 	// 年命上神/占断向导)条件产出(每盘几乎必出)。源扫(builder 依赖后端 gods+chartObj,夹具偏重)→ 字面量段头 ⊆ liureng preset。

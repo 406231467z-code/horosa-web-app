@@ -17,11 +17,6 @@ const SRC = path.resolve(__dirname, '..', '..');
 // 豁免清单:每条都必须有可自证的同域理由。
 const EXEMPT = [
 	{
-		file: 'components/astro3d/Astro3D.js',
-		reason: 'xy = transPosition() 是 THREE 投影出的 canvas 内部像素(布局域);'
-			+ 'planetHintDiv = .astro3dtap{position:absolute} 挂同一 canvas 容器 ⇒ 两端同域,加换算反而错位。',
-	},
-	{
 		file: 'utils/zoomDomain.js',
 		reason: '换算层自身:内部探针元素写 style.left 用于实测映射,不能自我换算(会循环)。',
 	},
@@ -105,7 +100,7 @@ describe('T5 手写浮层缩放域静态哨兵', () => {
 	const hits = scan();
 
 	it('扫描确实命中了写回点(哨兵本身没瞎——防 grep 失效导致空集假绿)', () => {
-		expect(hits.length).toBeGreaterThan(8);
+		expect(hits.length).toBeGreaterThan(5);
 		// 已知的真实收口点必须在命中集里,否则说明 pattern 漂了
 		expect(hits.some((h) => h.file === 'utils/helper.js' && isCompensated(h.text))).toBe(true);
 	});

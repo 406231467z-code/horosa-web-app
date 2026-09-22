@@ -71,11 +71,14 @@ describe('[R3] 回收站', ()=>{
 		expect(listLocalChartsTrash().length).toBe(0);
 		// 过期清理:手工注入 31 天前删除的条目
 		const old = new Date(Date.now() - 31 * 24 * 3600 * 1000);
+		const fresh = new Date(Date.now() - 1 * 24 * 3600 * 1000);
 		const pad = (n)=>String(n).padStart(2, '0');
-		const oldStr = `${old.getFullYear()}-${pad(old.getMonth() + 1)}-${pad(old.getDate())} 00:00:00`;
+		const fmt = (d)=>`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} 00:00:00`;
+		const oldStr = fmt(old);
+		const freshStr = fmt(fresh);
 		window.localStorage.setItem(TRASH_KEY, JSON.stringify([
 			{ cid: 'local-expired', name: '过期', deletedAt: oldStr },
-			{ cid: 'local-fresh', name: '新鲜', deletedAt: '2026-08-13 00:00:00' },
+			{ cid: 'local-fresh', name: '新鲜', deletedAt: freshStr },
 		]));
 		expect(listLocalChartsTrash().map((r)=>r.cid)).toEqual(['local-fresh']);
 	});

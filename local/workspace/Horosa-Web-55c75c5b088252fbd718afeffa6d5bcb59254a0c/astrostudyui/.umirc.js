@@ -32,25 +32,6 @@ export default {
 					// 回退 kill-switch:HOROSA_SPLIT_MAXREQ=16。
 					maxAsyncRequests: Number(process.env.HOROSA_SPLIT_MAXREQ || 56),
 					cacheGroups: {
-						vendorsGl: {
-							name: 'vendors-gl',
-							test: /[\\/]node_modules[\\/](three|astronomy-engine)[\\/]/,
-							chunks: 'async',
-							priority: 30,
-							minChunks: 2,
-							reuseExistingChunk: true,
-						},
-						// 🔴 2026-08-01:原本 echarts 与 d3 同组(vendors-viz),这是把 echarts 懒加载
-						// 完全抵消掉的隐形通道 —— 二者「用途宽窄」根本不同:
-						//   · d3 是**星盘 SVG 绘制的基础设施**(AstroHelper 用 d3.arc() 画盘,全仓
-						//     101 个文件在用),首屏 p__index 的同步图里就要它 → 该 vendor chunk
-						//     必然成为 p__index 的同批兄弟,这本身正确。
-						//   · echarts 只服务玄学史的两个子页(全仓仅 2 个文件 import)。
-						// 同组 = echarts 被 d3 捎带着在**首屏**就拉下来。实测:合并组 1228KB,
-						// p__index 的 Promise.all 里赫然含它 —— 玄史页改懒加载等于白做。
-						// 故按「宽窄」拆成两组。判据不是体积,是「有几个消费者」(同 heavyEngineImportGraph
-						// 测试里 HEAVY_ENGINES 清单的那条边界)。
-						// 反向验证:拆前 p__index 批次含该 chunk,拆后只含 vendors-d3、不含 vendors-echarts。
 						vendorsD3: {
 							name: 'vendors-d3',
 							test: /[\\/]node_modules[\\/](d3|d3-[^\\/]+)[\\/]/,
@@ -59,24 +40,6 @@ export default {
 							minChunks: 1,
 							reuseExistingChunk: true,
 						},
-						// WS-N5:minChunks 2→1。echarts 的 async 消费者少,minChunks:2 恒不命中 →
-						// 内容匿名内联在数字 id chunk,增删 chunk 时数字 id 重排 = hash 全变,
-						// 更新包/HTTP 缓存被无谓击穿。1 = 收编为稳定命名(字节不变,只换名)。
-						vendorsChart: {
-							name: 'vendors-echarts',
-							test: /[\\/]node_modules[\\/](echarts|zrender|@antv)[\\/]/,
-							chunks: 'async',
-							priority: 29,
-							minChunks: 1,
-							reuseExistingChunk: true,
-						},
-						// (WS-N5)原 vendorsCalendar 规则已删:lunar-javascript/sxtwl 被 eager 八字带进
-						// p__index/vendors~p__index(有意),async 子 chunk 因父可用性优化不再含它 →
-						// 规则永不命中,是死配置(2026-07-16 dist 逆向证实,勿凭它推断 calendar 已提取)。
-						// 神数正传:引擎 + 秘数表(~250KB)。其文件在 src/utils/ 下 → 会被 sharedTechnique 的
-						// test 命中,且被组件 chunk 与挂载 builder 两处引用即满足 minChunks:2 → 遭提取进
-						// shared-technique(全技法共载)。此处以更高 priority 的窄规则截下,令其只随本技法走。
-						// 条文库另有 magic comment 的 zhengchuan-verses-* chunk,不受此规则影响。
 						zhengchuanEngine: {
 							name: 'zhengchuan-engine',
 							test: /[\\/]src[\\/]utils[\\/](zhengchuan[A-Za-z]+\.js|data[\\/]zhengchuan(?!.*Verses)[A-Za-z]+\.json)$/,

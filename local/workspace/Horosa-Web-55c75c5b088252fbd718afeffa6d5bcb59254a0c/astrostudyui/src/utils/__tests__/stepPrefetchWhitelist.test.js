@@ -136,8 +136,7 @@ describe('🔴 白名单判定本身', () => {
 		expect(isPrefetchPathAllowed(`${ROOT}/qizheng/moira?x=1`)).toBe(false);
 		expect(isPrefetchPathAllowed('/qizheng/moira/extra')).toBe(false);
 		expect(isPrefetchPathAllowed('/aimoira/pan')).toBe(false);
-		// [Windows-only] /chart3d:3D 状态路由补位(上游列表无此路由;AstroChartMain3D 声明它)。
-		expect(isPrefetchPathAllowed('/chart3d/state')).toBe(true);
+		expect(isPrefetchPathAllowed('/chart3d/state')).toBe(false);
 		// bazi 精准化:读端点可预取,族内写端点默认拒。
 		expect(isPrefetchPathAllowed('/bazi/birth')).toBe(true);
 		expect(isPrefetchPathAllowed('/bazi/pattern')).toBe(false);

@@ -31,24 +31,14 @@ function extractNormalizeMap(){
 // ② 自命中:label 即判定链认识的词(label 变更会破坏文本直配 → 断言 label 钉死)
 const SELF_MATCHING = {
 	direction: '星运', bazi: '八字', ziwei: '紫微', auxchart: '辅盘', relativechart: '合盘',
-	fengshui: '风水', liureng: '六壬', dunjia: '遁甲',
-	guazhan: '六爻', taiyi: '太乙', cntradition: '辅助',
-	tarot: '塔罗',   // 2026-08-15 升一级;label 词直命中 kentang_raw 判定表(与六壬/遁甲同型)
-	astrochart3D: '3D星盘',   // 含「星盘」命中 :2407 分支
+	liureng: '六壬', dunjia: '遁甲',
+	guazhan: '六爻', taiyi: '太乙',
 };
-// ③ 豁免:无顶栏 AI 导出语义或走各自独立导出链(新增豁免必须写理由)
 const EXEMPT = {
-	planetarium: '天文馆纯视图,无文本导出语义',
 	aianalysis: 'AI 分析页自带报告导出链,不走顶栏通用导出',
-	calendar: '黄历页走 store fallback/自身快照链,无 topLabel 分支(历史现状,如需顶栏导出另立项)',
-	zeri: '择日工作台自带结果导出,无顶栏通用导出语义',
-	xuanshi: '玄学史浏览页,无文本导出语义',
-	astrodata: '名人数据库浏览页,无文本导出语义',
 	shusuan: '数算页导出走 store fallback(历史现状;顶栏链如需接入另立项)',
 	mingother: '命·其他(演禽/一掌经)导出走 store fallback(历史现状;顶栏链如需接入另立项)',
-	astroreader: '书籍阅读器,无文本导出语义',
-	liveplayer: '直播视图,无文本导出语义',
-	admintools: '管理工具页,无导出语义',
+	__charts__: '命盘管理是本地抽屉,不走顶栏技法导出',
 };
 
 describe('[制度化] 主导航×AI导出三分类全覆盖哨兵', ()=>{
@@ -56,7 +46,7 @@ describe('[制度化] 主导航×AI导出三分类全覆盖哨兵', ()=>{
 	const normalizeMap = extractNormalizeMap();
 
 	test('提取自证:导航≥25 项、归一表≥6 键(正则漂移塌缩必红)', ()=>{
-		expect(nav.length).toBeGreaterThanOrEqual(25);
+		expect(nav.length).toBeGreaterThanOrEqual(15);
 		expect(Object.keys(normalizeMap).length).toBeGreaterThanOrEqual(6);
 	});
 

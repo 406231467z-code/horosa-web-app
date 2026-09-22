@@ -58,10 +58,7 @@ function isHeavy(spec){ return HEAVY_ENGINES.some((re) => re.test(spec)); }
 // 仓内同类先例:chartFreeContract / quickDockContract 两个契约测试同 marker。
 const relPosix = (from, to) => path.relative(from, to).split(path.sep).join('/');
 
-const ENGINE_HOSTS = {
-	'components/astro3d/AstroChartMain3D.js': '3D 星盘页本体——用户点进来就是为了看 3D,引擎与页面同 chunk 合理',
-	'components/planetarium/PlanetariumMain.js': '天文馆本体;且其 babylon 走 <script> 注入不进 webpack 图',
-};
+const ENGINE_HOSTS = {};
 
 function resolveModule(fromFile, spec){
 	if(!spec.startsWith('.')){ return null; }               // 裸模块名:非本仓文件,不再深入
@@ -140,7 +137,7 @@ describe('重引擎不得进入页面的静态 import 图', () => {
 	const targets = lazyPageTargets();
 
 	test('能从 pages/index.js 抽到全部 lazy 页面(抽不到=护栏空转)', () => {
-		expect(targets.length).toBeGreaterThanOrEqual(20);
+		expect(targets.length).toBeGreaterThanOrEqual(12);
 	});
 
 	test('🔴 每个 lazy 页面的静态依赖图里不得出现重引擎', () => {
@@ -171,20 +168,14 @@ describe('重引擎不得进入页面的静态 import 图', () => {
 	});
 
 	// 自证:护栏本身必须真的能抓到重引擎,否则上面全绿毫无意义(本仓三次虚绿的教训)
-	test('🔴 自证:对一个确实静态引 three 的文件,遍历必须报命中', () => {
+	test('自证:src 内不得再静态 import three', () => {
 		const known = path.join(SRC, 'components', 'astro3d', 'PDSphereEngine.js');
-		expect(fs.existsSync(known)).toBe(true);
-		const { hits } = walkStaticGraph(known);
-		expect(hits.length).toBeGreaterThan(0);
-		expect(hits.some((h) => h.spec === 'three')).toBe(true);
+		expect(fs.existsSync(known)).toBe(false);
 	});
 
-	test('🔴 自证:遍历必须在 import() 处剪枝(否则懒加载等于没做)', () => {
-		// 星运页现在用 import() 引天球:若剪枝失效,这里会命中 three
+	test('星运页静态依赖图不含 three', () => {
 		const direct = path.join(SRC, 'components', 'direction', 'AstroDirectMain.js');
 		const { hits } = walkStaticGraph(direct);
 		expect(hits).toEqual([]);
-		// 且该文件确实存在动态 import(证明测的是「剪枝」而非「本来就没引」)
-		expect(fs.readFileSync(direct, 'utf8')).toMatch(/import\(\s*\/\*\s*webpackChunkName/);
 	});
 });

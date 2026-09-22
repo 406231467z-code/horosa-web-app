@@ -10,6 +10,27 @@ const SRC = path.join(__dirname, '..', 'GuiceMain.js');
 const src = fs.readFileSync(SRC, 'utf8');
 const scuBody = (src.match(/shouldComponentUpdate\(nextProps, nextState\) \{[\s\S]*?\n\t\}/) || [''])[0];
 
+function extractMethod(source, name){
+	const start = source.search(new RegExp(`\\n\\t${name}\\([^)]*\\) \\{`));
+	if(start < 0){
+		return '';
+	}
+	const brace = source.indexOf('{', start);
+	let depth = 0;
+	for(let i = brace; i < source.length; i += 1){
+		const ch = source[i];
+		if(ch === '{'){
+			depth += 1;
+		}else if(ch === '}'){
+			depth -= 1;
+			if(depth === 0){
+				return source.slice(start, i + 1);
+			}
+		}
+	}
+	return '';
+}
+
 describe('轨策·性能 · shouldComponentUpdate 覆盖完备(漏一键=改了不重渲)', () => {
 	test('sCU 存在', () => {
 		expect(scuBody).toContain('nextState');
@@ -162,14 +183,14 @@ describe('轨策 · 宿主范式相符(照错=左右两栏消失)', () => {
 	});
 
 	test('🔴 故组件在无 slot 时须自出三栏 —— 左(input-panel)/中(chart-stage)/右(inspector-panel)', () => {
-		const render = (src.match(/\n\trender\(\) \{[\s\S]*?\n\t\}\n\}/) || [''])[0];
+		const render = extractMethod(src, 'render');
 		expect(render).toContain('horosa-astro-input-panel');
 		expect(render).toContain('horosa-chart-stage');
 		expect(render).toContain('horosa-inspector-panel');
 	});
 
 	test('🔴 无 slot 之路须同时唤起控件与右栏(只唤中栏=旧病复发)', () => {
-		const render = (src.match(/\n\trender\(\) \{[\s\S]*?\n\t\}\n\}/) || [''])[0];
+		const render = extractMethod(src, 'render');
 		const tail = render.slice(render.indexOf('// 无 slot'));
 		expect(tail).toContain('this.renderControls()');
 		expect(tail).toContain('this.renderCenter(p)');
@@ -177,7 +198,7 @@ describe('轨策 · 宿主范式相符(照错=左右两栏消失)', () => {
 	});
 
 	test('未起卦时三栏俱在(左栏可选法,中示空,右栏子tab常驻示占位 —— 非整页一句空话)', () => {
-		const render = (src.match(/\n\trender\(\) \{[\s\S]*?\n\t\}\n\}/) || [''])[0];
+		const render = extractMethod(src, 'render');
 		const tail = render.slice(render.indexOf('// 无 slot'));
 		// 空态:左栏(控件)恒在 → 用户永远能择法起卦;中栏示空占位
 		expect(tail).toMatch(/renderControls\(\)[\s\S]*p \? this\.renderCenter\(p\) : empty/);

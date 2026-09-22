@@ -1329,7 +1329,6 @@ class ZiWeiMain extends Component{
 				extras={[
 					{ key: 'luckToday', label: '运限对齐今天', icon: 'quickTransit', onClick: ()=>this.alignLuckToToday() },
 					{ key: 'luckClear', label: '清除运限', icon: 'quickReturn', disabled: !hasChart || !hasLuck, onClick: ()=>{ markInteractionStart('ziwei'); this.setState({ luckSel: emptyLuckSel() }, ()=>{ markPanelReady('ziwei'); }); } },
-					{ key: 'memo', label: '笔记', icon: 'quickNote', needsResult: false, onClick: ()=>this.openDrawer('memo') },
 				]}
 				dispatch={this.props.dispatch}
 			/>

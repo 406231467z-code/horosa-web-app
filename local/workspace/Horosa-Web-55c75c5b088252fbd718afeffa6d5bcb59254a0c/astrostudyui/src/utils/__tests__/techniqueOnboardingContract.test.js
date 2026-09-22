@@ -23,7 +23,7 @@ function parseNavigationKeys(){
 	const block = text.match(/const navigationPages = \[([\s\S]*?)\n\];/);
 	expect(block).toBeTruthy();
 	const keys = [...block[1].matchAll(/key:\s*'([A-Za-z0-9_]+)'/g)].map((m)=>m[1]);
-	expect(keys.length).toBeGreaterThan(20);   // 塌缩守卫
+	expect(keys.length).toBeGreaterThan(15);   // 塌缩守卫
 	return keys;
 }
 

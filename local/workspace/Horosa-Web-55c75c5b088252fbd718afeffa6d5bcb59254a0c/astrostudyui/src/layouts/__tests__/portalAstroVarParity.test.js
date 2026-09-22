@@ -72,8 +72,8 @@ describe('portal 层 astro 变量与作用域内定义等价', ()=>{
 		});
 	});
 
-	it('🔴 塔罗单卡详情抽屉的正文色确实走这套变量(回归原案)', ()=>{
-		const drawer = fs.readFileSync(path.join(__dirname, '../../components/tarot/CardDetailDrawer.js'), 'utf8');
-		expect(drawer).toContain('var(--horosa-astro-text');
+	it('KEEP 技法正文色走这套 portal 变量(塔罗抽屉已随产品裁剪删除)', ()=>{
+		const board = fs.readFileSync(path.join(__dirname, '../../components/guazhan/LiuYaoBoard.js'), 'utf8');
+		expect(board).toContain('var(--horosa-astro-text');
 	});
 });

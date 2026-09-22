@@ -46,10 +46,6 @@ import { stepPrefetchEnabled, stepSelectPrefetchEnabled, stepPrefetchFastFirstEn
  *  (=seedInBody,Windows 版把它放进白名单是漏洞,此处按 Mac 政策表修正,禁词兜底)。 */
 export const PREFETCH_ALLOWED_PATHS = [
 	'/chart',        // 共享出盘(chartMem+requestDedupe 双层承接;含 chart12/chart13 前缀)
-	// [Windows-only] /chart3d/state:3D 星盘状态,确定性纯计算(v3.5.0 起独立路由;
-	// AstroChartMain3D 的步进预取任务声明此路径 —— 上游列表无此路由,Windows 补位,
-	// 缺它 = 3D 页步进预取在提交层被静默丢弃)。
-	'/chart3d',
 	'/predict/',     // 推运(dice 由 FORBIDDEN 拦)
 	'/ziwei/',       // 紫微
 	'/liureng/',     // 六壬/金口诀共用神将
@@ -83,6 +79,7 @@ export const PREFETCH_ALLOWED_PATHS = [
  *  取现时(moira 流年默认过运时刻=「现在」)、资源/配置类。 */
 export const PREFETCH_FORBIDDEN_MARKERS = [
 	'dice', 'gua', 'tarot', 'geomancy', 'aianalysis', 'heartbeat', 'planetarium',
+	'chart3d',     // 3D 盘已裁剪; '/chart' 前缀不得误放行 /chart3d
 	'taixuan',     // 太玄(蓍法种子在体,预取恐钉死起课 —— Mac 政策表 seedInBody)
 	'jingjue',     // 荆诀(揲蓍种子在体,同上)
 	'lingqi',      // 灵棋经(v3.9.0 新增,卜·其他第 15 门):十二棋一掷成卦、起出即冻结。
