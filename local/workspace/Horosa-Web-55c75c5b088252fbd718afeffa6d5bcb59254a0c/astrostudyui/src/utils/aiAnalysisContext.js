@@ -1,5 +1,6 @@
 import DateTime from '../components/comp/DateTime';
 import request from './request';
+import { fetchLiurengGods } from './liurengGodsLocal';
 import * as Constants from './constants';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from './dayBoundary';
 import { applyAIExportSectionFilterToSnapshot, splitContentSections, exportSettingKeyForSnapshotModule, applyPlanetInfoFilterByContext } from './aiExport';
@@ -846,7 +847,7 @@ async function requestLiurengGods(record){
 		after23NewDay: fields.after23NewDay.value,
 		lateZiHourUseNextDay: fields.lateZiHourUseNextDay && fields.lateZiHourUseNextDay.value !== undefined ? fields.lateZiHourUseNextDay.value : defaultLateZiHourUseNextDay(),
 	};
-	const data = await request(`${Constants.ServerRoot}/liureng/gods`, {
+	const data = await fetchLiurengGods(params, {
 		body: JSON.stringify(params),
 		silent: true,
 		timeoutMs: 45000,

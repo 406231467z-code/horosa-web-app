@@ -127,6 +127,12 @@ const COMMON_QUERY_KEYS = ['kentangSrv', 'chartSrv', 'kinSrv'];
 // for a local Java backend (:9999) every engine must resolve to the chart service port instead.
 const LOCAL_KENTANG_CHART_PORT = 8899;
 
+// PHASE 4-E: 浏览器移植关着。盘面仍走 Python 服务。
+// MIT 快照以后可以另开阶段再议移植。taixuanshifa / jingjue / shenyishu 没有明示许可，不在这里打开。
+export function kentangBrowserPortEnabled(){
+	return false;
+}
+
 export function isValidHttpUrl(value){
 	return !!(value && /^https?:\/\/.+/i.test(`${value}`));
 }

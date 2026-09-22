@@ -70,4 +70,80 @@ describe('[V5-A3] 影子副本', ()=>{
 		expect(window.localStorage.getItem('horosa.localCharts.v1')).toContain('影子恢复');
 		expect(window.localStorage.getItem('horosa.localCases.v1')).toBe('[{"cid":"local-main"}]');
 	});
+
+	it('PHASE 2-E TEST D: primaryReady 后 shadow 不得回写四键 LS,也不改 IDB primary', async ()=>{
+		const {
+			hydrateUserRecordsPrimary,
+			flushUserRecordsWrites,
+			isUserRecordsPrimaryReady,
+			listUserRecordEnvelopes,
+			USER_RECORDS_STORES,
+			USER_RECORDS_FOUR_LS_KEYS,
+			__installUserRecordsMemoryBackendForTests,
+			__resetUserRecordsForTests,
+			__startFourKeyWriteRatchetForTests,
+			__getFourKeyWriteCountsForTests,
+			__stopFourKeyWriteRatchetForTests,
+		} = require('../userRecordsStore');
+		window.localStorage.clear();
+		__resetUserRecordsForTests();
+		__installUserRecordsMemoryBackendForTests();
+		upsertLocalChart({ cid: 'local-prim', name: '主存真值', birth: '1990-01-01 08:00:00', zone: '+08:00', updateTime: '2026-09-01 10:00:00', preserveUpdateTime: true });
+		await flushUserRecordsWrites();
+		await hydrateUserRecordsPrimary();
+		expect(isUserRecordsPrimaryReady()).toBe(true);
+		const beforeCharts = window.localStorage.getItem('horosa.localCharts.v1');
+		const beforeCases = window.localStorage.getItem('horosa.localCases.v1');
+		const beforeChartsTrash = window.localStorage.getItem('horosa.localCharts.trash.v1');
+		const beforeCasesTrash = window.localStorage.getItem('horosa.localCases.trash.v1');
+		const idbBefore = await listUserRecordEnvelopes(USER_RECORDS_STORES.charts);
+		isDesktopBridgeAvailable.mockReturnValue(true);
+		invokeDesktopCommand.mockResolvedValue({
+			'horosa.localCharts.v1': '[{"cid":"old-chart","name":"影子旧命盘"}]',
+			'horosa.localCases.v1': '[{"cid":"old-case","event":"影子旧事盘"}]',
+			'horosa.localCharts.trash.v1': '[{"cid":"old-ct"}]',
+			'horosa.localCases.trash.v1': '[{"cid":"old-xt"}]',
+		});
+		__startFourKeyWriteRatchetForTests();
+		// 清空四键以模拟「主存缺失」——若无 primary guard 会触发 shadow 回写。
+		USER_RECORDS_FOUR_LS_KEYS.forEach((k)=>window.localStorage.removeItem(k));
+		const r = await reconcileShadowOnBoot();
+		expect(r.skippedPrimary).toBe(true);
+		expect(r.restored).toEqual([]);
+		USER_RECORDS_FOUR_LS_KEYS.forEach((key)=>{
+			expect(__getFourKeyWriteCountsForTests()[key]).toBe(0);
+			expect(window.localStorage.getItem(key)).toBe(null);
+		});
+		const idbAfter = await listUserRecordEnvelopes(USER_RECORDS_STORES.charts);
+		expect(idbAfter.map((e)=>e.cid)).toEqual(idbBefore.map((e)=>e.cid));
+		expect(idbAfter[0].record.name).toBe('主存真值');
+		__stopFourKeyWriteRatchetForTests();
+		__resetUserRecordsForTests();
+		// restore LS snapshot strings for isolation of following tests in file (none after)
+		if(beforeCharts){ window.localStorage.setItem('horosa.localCharts.v1', beforeCharts); }
+		if(beforeCases){ window.localStorage.setItem('horosa.localCases.v1', beforeCases); }
+		if(beforeChartsTrash){ window.localStorage.setItem('horosa.localCharts.trash.v1', beforeChartsTrash); }
+		if(beforeCasesTrash){ window.localStorage.setItem('horosa.localCases.trash.v1', beforeCasesTrash); }
+	});
+
+	it('PHASE 2-E TEST E: primaryReady=false 时 shadow 回写兼容仍在', async ()=>{
+		const {
+			__resetUserRecordsForTests,
+			__setUserRecordsUnavailableForTests,
+			isUserRecordsPrimaryReady,
+		} = require('../userRecordsStore');
+		__resetUserRecordsForTests();
+		__setUserRecordsUnavailableForTests();
+		expect(isUserRecordsPrimaryReady()).toBe(false);
+		isDesktopBridgeAvailable.mockReturnValue(true);
+		window.localStorage.clear();
+		invokeDesktopCommand.mockResolvedValue({
+			'horosa.localCharts.v1': '[{"cid":"local-from-shadow","name":"影子恢复"}]',
+		});
+		const r = await reconcileShadowOnBoot();
+		expect(r.skippedPrimary).toBe(false);
+		expect(r.restored).toEqual(['horosa.localCharts.v1']);
+		expect(window.localStorage.getItem('horosa.localCharts.v1')).toContain('影子恢复');
+		__resetUserRecordsForTests();
+	});
 });

@@ -205,7 +205,7 @@ const PROMPT_CACHE_BP = '[[__CACHE_BP__]]';
 // 逐项之间不再靠 && 串联,增删一项不必改表达式,且各构建可按自身式法集裁剪本表。
 const QUICK_MOUNT_EXCLUDED_KEYS = ['qimen', 'huangli', 'tongshu'];
 
-const COMMON_PROVIDER_OPTION_KEYS = ['extraHeaders', 'extraBody', 'apiVersion', 'requestTimeoutMs', 'streamStallMs', 'streamMaxStreamMs'];
+const COMMON_PROVIDER_OPTION_KEYS = ['extraHeaders', 'extraBody', 'apiVersion', 'requestTimeoutMs', 'streamStallMs', 'streamMaxStreamMs', 'aiTransport'];
 const PROVIDER_OPTION_KEY_MAP = {
 	openai: [],
 	openrouter: [],
@@ -327,6 +327,7 @@ function buildProviderFormValues(profile){
 		providerType,
 		apiKey: profile ? profile.apiKey : '',
 		baseUrl: profile ? profile.baseUrl : preset.baseUrl,
+		aiTransport: providerOptions.aiTransport === 'direct' ? 'direct' : 'proxy',
 		manualModels: joinModelLines(manualModels),
 		embeddingModels: joinModelLines(embeddingModels),
 		extraHeadersText: JSON.stringify(providerOptions.extraHeaders || {}, null, 2),
@@ -375,6 +376,9 @@ function buildProviderOptionsFromForm(values){
 	const streamMaxStreamMs = parseNumberText(values.streamMaxStreamMs, '流式总时长上限', { integer: true });
 	if(streamMaxStreamMs){
 		providerOptions.streamMaxStreamMs = streamMaxStreamMs;
+	}
+	if(values.aiTransport === 'direct'){
+		providerOptions.aiTransport = 'direct';
 	}
 	if(providerType === 'anthropic'){
 		const maxTokens = parseNumberText(values.anthropicMaxTokens, 'Anthropic max tokens', { integer: true });
@@ -5796,6 +5800,12 @@ function AIAnalysisMain(props){
 					</Form.Item>
 					<Form.Item name="baseUrl" label="Base URL">
 						<Input />
+					</Form.Item>
+					<Form.Item name="aiTransport" label="连接方式">
+						<Select>
+							<Select.Option value="proxy">经本机 Java 代理</Select.Option>
+							<Select.Option value="direct">浏览器直连供应商</Select.Option>
+						</Select>
 					</Form.Item>
 					<Form.Item shouldUpdate noStyle>
 						{({ getFieldValue })=>(

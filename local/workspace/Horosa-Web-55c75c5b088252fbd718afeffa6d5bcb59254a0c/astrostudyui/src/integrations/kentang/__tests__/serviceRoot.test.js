@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 describe('kentang service root isolation', ()=>{
 	const originWindow = window;
 
@@ -83,5 +86,37 @@ describe('kentang service root isolation', ()=>{
 		expect(serviceRoot.buildKentangEndpoint('shaozi', 'pan')).toBe('http://127.0.0.1:8892/shaozi/pan');
 		expect(serviceRoot.buildKentangEndpoint('xianqin', 'pan')).toBe('http://127.0.0.1:8892/xianqin/pan');
 		expect(serviceRoot.buildKentangEndpoint('cetian', 'pan')).toBe('http://127.0.0.1:8892/cetian/pan');
+	});
+
+	test('phase 4-E keeps the browser port off and every module on an http service', ()=>{
+		const serviceRoot = loadServiceRoot(
+			'http://127.0.0.1:3001/?srv=http%3A%2F%2F127.0.0.1%3A9999'
+		);
+		expect(serviceRoot.kentangBrowserPortEnabled()).toBe(false);
+		Object.keys(serviceRoot.KENTANG_SERVICE_CONFIG).forEach((key)=>{
+			expect(serviceRoot.buildKentangEndpoint(key, 'pan')).toMatch(/^https?:\/\//);
+		});
+		expect(serviceRoot.buildKentangEndpoint('qimen', 'pan')).toBe('http://127.0.0.1:8899/qimen/pan');
+		expect(serviceRoot.buildKentangEndpoint('shenyishu', 'pan')).toBe('http://127.0.0.1:8899/shenyishu/pan');
+	});
+});
+
+describe('phase 4-E vendor snapshots stay on disk', ()=>{
+	const vendor = path.resolve(__dirname, '../../../../../vendor');
+	const mit = ['kintaiyi', 'kinjinkou', 'kinqimen', 'kinwangji', 'kinwuzhao', 'kinastro'];
+	const noGrant = ['taixuanshifa', 'jingjue', 'shenyishu'];
+
+	test('MIT engines keep their license files', ()=>{
+		mit.forEach((name)=>{
+			const text = fs.readFileSync(path.join(vendor, name, 'LICENSE'), 'utf8');
+			expect(text.startsWith('MIT License')).toBe(true);
+		});
+	});
+
+	test('engines without a grant stay in vendor and have no LICENSE file', ()=>{
+		noGrant.forEach((name)=>{
+			expect(fs.existsSync(path.join(vendor, name))).toBe(true);
+			expect(fs.existsSync(path.join(vendor, name, 'LICENSE'))).toBe(false);
+		});
 	});
 });

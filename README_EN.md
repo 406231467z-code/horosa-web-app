@@ -6,17 +6,17 @@
 
 # Horosa
 
-**Western astrology and Chinese metaphysics, in one native Windows workstation**
+**A browser client. Local Java and Python stay as calculation services**
 
 Fate · Divination · Tools — **26 primary disciplines, 60+ sub-techniques & schools** (full catalog in [What's Inside](#whats-inside))
 
 [![Version](https://img.shields.io/badge/version-3.10.0-2ea043?style=flat-square)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/tag/v3.10.0)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-dc2626?style=flat-square)](LICENSE)
 [![Windows](https://img.shields.io/badge/Windows%2010%2F11-x64-111111?style=flat-square&logo=windows&logoColor=white)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/tag/v3.10.0)
-[![Installer](https://img.shields.io/badge/NSIS-bundled%20runtime-1f6feb?style=flat-square)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/tag/v3.10.0)
+[![Client](https://img.shields.io/badge/client-browser-1f6feb?style=flat-square)](docs/PHASE4I_INSTALLER_EXIT.md)
 [![Stars](https://img.shields.io/github/stars/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows?style=flat-square)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/stargazers)
 
-[Download](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/latest/download/Horosa-Setup-3.10.0.exe) ·
+[Open in a browser](README.md#四网页版一键启动从源码) ·
 [Portal](README.md) ·
 [中文说明](README_ZH.md) ·
 [All Releases](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases)
@@ -27,28 +27,15 @@ Fate · Divination · Tools — **26 primary disciplines, 60+ sub-techniques & s
 
 ## What Horosa Is
 
-Horosa is a desktop workstation for traditional cosmology. Western astrology—natal reading, the full timing chain, and relationship work—sits beside Chinese systems like Bazi, Ziwei, Qimen, Liuren, and Taiyi, all inside one native Windows application. The point is that you stop juggling a dozen single-purpose web tools, and you never hand-assemble the Python, Java, and ephemeris pieces underneath. You download an offline NSIS installer and open a finished app.
+The Horosa client is a browser. Western astrology, Bazi, Ziwei, Qimen, Liuren, and Taiyi live on that page. There is no `Horosa.exe` and no NSIS installer to run.
 
-This repository is the Windows delivery of that app: the application source, the shared runtime, the Electron desktop shell, and the publishing flow that turns all of it into a single NSIS installer (`Horosa-Setup-3.10.0.exe`).
+Local Java (`:9999`) and Python (`:8899`) still serve Swiss Ephemeris, part of kentang, and other endpoints that have not moved into the browser. Those processes are calculation services, not a desktop shell.
 
-## Download
+## Open
 
-Regular users should go straight to the offline installer and open Horosa like any other Windows app.
-
-**[⬇︎ Horosa-Setup-3.10.0.exe](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/latest/download/Horosa-Setup-3.10.0.exe)**
-
-Best for:
-
-- Windows 10 / 11 on `x64`
-- weak-network or fully offline environments
-- a first install, or forwarding the package to someone else
-- anyone who wants the first launch to work without a separate runtime download
-
-You do not need to install Python or Java yourself—the runtime ships inside the package. Updates replace the program and the shared runtime; they are not designed to touch your saved charts and cases.
+Double-click `START_HERE.bat` at the repository root. It starts those services, then opens the system browser.
 
 - **Legal & privacy**: Terms of Service / Privacy Policy / Security / Network / Open-source notices — see [docs/legal](docs/legal/) (Chinese & English).
-
-> The installer is not yet Authenticode-signed, so on first launch Windows SmartScreen may say "Windows protected your PC"—choose "More info → Run anyway" to continue; you can verify the installer against the official `SHA256SUMS.txt`.
 
 ## Screenshots
 
@@ -128,13 +115,12 @@ Charts and cases save locally with tags, snapshots, and raw backend payloads. Ev
 
 - **Frontend** — React 17 + Umi 3 + TypeScript with Ant Design; D3 for chart drawing, Babylon.js / Three.js for 3D, Plotly for astrocartography maps, and Monaco for editing AI-export templates
 - **Backend** — Java 17 / Spring Boot hosts the core astrology and Chinese-method services; a Python 3.11 service layer wraps Swiss Ephemeris (`pyswisseph`) and the vendored kentang traditional-method engines
-- **Desktop shell** — Electron, which starts the local Python/Java services in the background with health checks, and persists window, zoom, and settings state
-- **Runtime** — the bundled Python is a pinned python-build-standalone build (reproducible and self-contained), shipped with the VC++ runtime, offline wheels, and the backend jar; a native-dependency gate and a pre-release preflight guard the build
-- **Distribution** — an offline NSIS installer targeting Windows 10 / 11 (`x64`) with directory selection and upgrades; `latest.yml`, `.blockmap`, and `SHA256SUMS.txt` accompany the release
+- **Client** — the system browser. Electron, NSIS, and `Horosa.exe` are not in this checkout and are not the entry
+- **Local services** — the launcher starts Java `:9999` and Python `:8899`. Swiss Ephemeris and part of kentang still go there
 
 ## Run the Web Version from Source
 
-Skip the installer and run Horosa as a local web app straight from the source tree (for developers or anyone who prefers the source):
+This is the client entry. No installer:
 
 - **Start**: double-click `local\Horosa_Local_Windows.bat` in the repo — it opens the browser within seconds when a build already exists; on first run it auto-provisions the bundled Python / Java / Node runtime and builds (Mongo / Redis are optional for this product and skipped by default). It serves web `8000` / chart `8899` / backend `9999` on `127.0.0.1`, auto-switching to free ports if any are taken.
 - **Stop**: return to the console window it opened and press Enter, or just close it (the script only reclaims processes carrying this product's fingerprint — it never touches other software). Set `HOROSA_NO_BROWSER=1` to skip auto-opening the browser.
@@ -143,41 +129,20 @@ Skip the installer and run Horosa as a local web app straight from the source tr
 
 ## FAQ
 
-**Do I need to clone the repo to use Horosa?**
-No. Download `Horosa-Setup-3.10.0.exe` from the latest release.
+**How do I open it?**
+Double-click `START_HERE.bat`. It starts local Java `:9999` and Python `:8899`, then opens the system browser. It does not install `Horosa.exe`.
 
-**Do I need to install Python or Java myself?**
-No. The Windows installer carries the runtime the released app needs. The first launch is a little slower while those pieces are extracted and verified locally; later launches reuse the cache.
+**Do I still need Python or Java?**
+Yes, for the calculation services. The launcher uses a runtime already prepared in the tree when one is present. Those processes are backends, not an installer. Swiss Ephemeris and part of kentang still go there.
 
-**Can I choose the install directory?**
-Yes. The v2.2.0 Beta installer offers an assisted flow with directory selection, write checks, shortcut repair, and elevation when Windows requires it.
+**Does closing the browser delete saved charts?**
+No. Charts and cases stay in browser storage. Stopping Java or Python only pauses charts that still depend on those services.
 
-**Why are there other files in the release?**
-`latest.yml`, `.blockmap`, and `SHA256SUMS.txt` support the updater and verification flows. For end users, `Horosa-Setup-3.10.0.exe` is the only thing that matters.
+**Can I skip opening a browser?**
+Set `HOROSA_NO_BROWSER=1` before the launcher. The services still start.
 
-**Will updates remove my data?**
-No. App replacement and runtime switching update the program and shared runtime; they are not designed to erase your saved charts and cases.
-
-**Windows says "Windows protected your PC" (SmartScreen). Is the download unsafe?**
-The installer is not Authenticode-signed, so SmartScreen shows an "Unknown publisher" notice on fresh downloads. Verify your download against `SHA256SUMS.txt` from the release page, then click **More info → Run anyway**. In-app updates are additionally protected by an Ed25519 signature check that refuses any tampered package.
-
-**My antivirus quarantined part of the app, or it says a local service failed to start.**
-Some antivirus products occasionally flag the bundled Python/Java runtime. Add the install folder and `%LOCALAPPDATA%\HorosaDesktop` to your antivirus allowlist, restore anything quarantined, and relaunch — or simply reinstall. When the app can tell, its error screen names the blocked directory so you know exactly what to allow.
-
-**How much disk space do I need, and does the install path matter?**
-Have at least 6 GB free when installing (~2 GB program, ~1.4 GB runtime extracted on first launch, plus caches). Keep the install path under 100 characters and avoid drive roots or system folders — the installer enforces both and suggests a dedicated folder such as `C:\Horosa`.
-
-**Does Horosa work fully offline?**
-Yes. Every computation runs locally; no internet is needed to install or use it. The network is only touched to check GitHub for updates — if that is unreachable, the app simply keeps working, and you can update manually by downloading a newer installer. (Advanced: the `HOROSA_UPDATE_FEED_URL` environment variable points the updater at a custom feed.)
-
-**Does it run on ARM laptops (Snapdragon)?**
-Windows 11 on ARM runs Horosa through the system's built-in x64 emulation — fully functional, slightly slower than native x64. Windows 10 on ARM has no x64 emulation and is not supported; the installer detects this and says so instead of leaving a broken install.
-
-**Does it work on Windows S-mode or company-managed PCs?**
-Windows S-mode only allows Microsoft Store apps and blocks side-loaded installers (including Horosa's setup itself) — a system-level restriction; switch out of S-mode (Settings → Activation) before installing. Enterprise AppLocker / software-restriction policies behave the same way; ask your IT admin to allow the app.
-
-**Does my Windows display language or region affect anything?**
-No. Install and use are locale-independent by design: any system language, Turkish/Thai/Arabic regional settings, legacy GBK/Shift-JIS code pages, the "Beta: UTF-8 worldwide" option, and non-ASCII Windows user names all work. Blocking installer errors are shown in Chinese plus a short English line.
+**SmartScreen blocks the unsigned script.**
+Choose "More info → Run anyway". The prompt is about the startup script, not an installer.
 
 ## For Maintainers
 

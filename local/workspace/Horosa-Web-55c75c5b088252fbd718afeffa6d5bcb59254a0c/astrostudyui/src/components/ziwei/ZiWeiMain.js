@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import UpdatingBadge from '../common/UpdatingBadge';
-import { silentTechniquePanelsEnabled, stepPrefetchEnabled, techniqueResultCacheEnabled, chartSCUEnabled } from '../../utils/perfFlags';
-import { cachedPost } from '../../services/_requestCache';
+import { silentTechniquePanelsEnabled, stepPrefetchEnabled, chartSCUEnabled } from '../../utils/perfFlags';
 // R4-B2(horosa_prefetch_registry_v1):/ziwei/birth 步进预取登记 + 本地漏斗 settle 武装。
 import { registerStepPrefetcher, unregisterStepPrefetcher } from '../../utils/stepPrefetch';
 import { armStepPrefetch } from '../../utils/stepPrefetchArm';
@@ -12,7 +11,8 @@ import { Row, Col, message } from 'antd';
 import { XQButton as Button, XQModal as Modal, XQTabs as Tabs } from '../xq-ui';
 import XQIcon from '../xq-icons';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
+import { fetchZiweiBirth } from '../../utils/ziweiBirthLocal';
+import { getZiweiRulesEnvelope } from '../../utils/ziweiRulesLocal';
 import { createSignatureMemo, stableSignature } from '../../utils/memoBySignature';
 import {randomStr,} from '../../utils/helper';
 import ZiWeiInput from './ZiWeiInput';
@@ -41,7 +41,6 @@ import * as ZWConst from '../../constants/ZWConst';
 import { isLaiyinPalace } from './ziweiSchools';
 import DateTime from '../comp/DateTime';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
-import { ziweirulesCached } from '../../services/rules';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
 import { calcZiwei, deriveSanPan, applyLifeMasterOption } from './ZiweiCalc';
 import { detectPatterns } from './ziweiPatterns';
@@ -658,13 +657,7 @@ export async function warmZiweiBirth(fields){
 			return null;
 		}
 		const opts = { silent: true, retry: { retries: 0 } };
-		if(techniqueResultCacheEnabled()){
-			return await cachedPost(`${Constants.ServerRoot}/ziwei/birth`, params, opts, { ns: 'ziwei/birth' });
-		}
-		return await request(`${Constants.ServerRoot}/ziwei/birth`, {
-			body: JSON.stringify(params),
-			...opts,
-		});
+		return await fetchZiweiBirth(params, opts);
 	}catch(e){
 		return null;   // 预热失败静默:首点回到冷即付的现状
 	}
@@ -732,10 +725,7 @@ export async function buildZiweiSnapshotForParams(params){
 		if(school && school !== 'beipai'){
 			p.sihua = ZWConst.getActiveSiHuaGan();
 		}
-		const data = await request(`${Constants.ServerRoot}/ziwei/birth`, {
-			body: JSON.stringify(p),
-			silent: true,
-		});
+		const data = await fetchZiweiBirth(p, { silent: true });
 		const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
 		if(!result || !result.chart){
 			return '';
@@ -908,12 +898,7 @@ class ZiWeiMain extends Component{
 					return [{
 						name: 'ziwei:birth',
 						path: '/ziwei/birth',
-						run: ()=> (techniqueResultCacheEnabled()
-							? cachedPost(`${Constants.ServerRoot}/ziwei/birth`, params, opts, { ns: 'ziwei/birth' })
-							: request(`${Constants.ServerRoot}/ziwei/birth`, {
-								body: JSON.stringify(params),
-								...opts,
-							})),
+						run: ()=> fetchZiweiBirth(params, opts),
 					}];
 				};
 				registerStepPrefetcher('ziwei', this._ziweiStepPrefetcher);
@@ -998,10 +983,7 @@ class ZiWeiMain extends Component{
 					};
 					const params = this.genParams(flds2);
 					if(!params){ return; }
-					request(`${Constants.ServerRoot}/ziwei/birth`, {
-						body: JSON.stringify(params),
-						silent: true,
-					}).catch(()=>null);
+					fetchZiweiBirth(params, { silent: true }).catch(()=>null);
 				}catch(e){ /* 预取失败无害 */ }
 			}, 150);
 		}catch(e){ /* 预取失败无害 */ }
@@ -1049,13 +1031,8 @@ class ZiWeiMain extends Component{
 		// 新盘到达单次 setState 整体替换)。关 silentTechniquePanels 开关=旧全屏。
 		this.setState({ updating: true });
 		const [data, rules] = await Promise.all([
-			techniqueResultCacheEnabled()
-				? cachedPost(`${Constants.ServerRoot}/ziwei/birth`, params, { silent: silentTechniquePanelsEnabled() }, { ns: 'ziwei/birth' })
-				: request(`${Constants.ServerRoot}/ziwei/birth`, {
-					body: JSON.stringify(params),
-					silent: silentTechniquePanelsEnabled(),
-				}),
-			ziweirulesCached({}),
+			fetchZiweiBirth(params, { silent: silentTechniquePanelsEnabled() }),
+			Promise.resolve(getZiweiRulesEnvelope()),
 		]);
 		// 🔴 空载荷守卫:request() 网络层失败会吞错 resolve undefined(非 reject)。
 		// 缺守卫时 data[ResultKey]/rules[ResultKey] 直接崩(Unhandled Rejection)→ 生产白屏/选项永无反应。

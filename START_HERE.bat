@@ -4,11 +4,10 @@ for %%I in ("%~dp0.") do set "REPO_ROOT=%%~fI"
 set "HOROSA_REPO_ROOT=%REPO_ROOT%"
 if not defined HOROSA_WORKSPACE_DIR set "HOROSA_WORKSPACE_DIR=%REPO_ROOT%\local\workspace"
 
-title Horosa Windows Stable Launcher
-echo Horosa Windows stable one-click start
-echo Stable channel: fixed-window startup build
-
-echo Only run this file. Do not open other scripts.
+title Horosa browser client
+echo Horosa browser client
+echo Starts local Java :9999 and Python :8899, then opens a browser.
+echo Does not install Horosa.exe.
 echo.
 call "%REPO_ROOT%\local\Horosa_Local_Windows.bat" %*
 set "EXIT_CODE=%ERRORLEVEL%"

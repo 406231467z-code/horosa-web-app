@@ -22,15 +22,15 @@
 
 export const STORAGE_KEY_REGISTRY = [
 	// ── 两库 + 回收站(全量备份专段:信封嵌套 / trash 并集) ──────────────────────────
-	{ key: 'horosa.localCharts.v1', kind: 'user-data', backup: 'dedicated', label: '命盘库(信封嵌套专段)' },
-	{ key: 'horosa.localCases.v1', kind: 'user-data', backup: 'dedicated', label: '事盘库(信封嵌套专段)' },
-	{ key: 'horosa.localCharts.trash.v1', kind: 'user-data', backup: 'dedicated', label: '命盘回收站(并集恢复保本机)' },
-	{ key: 'horosa.localCases.trash.v1', kind: 'user-data', backup: 'dedicated', label: '事盘回收站(并集恢复保本机)' },
+	{ key: 'horosa.localCharts.v1', kind: 'user-data', backup: 'dedicated', label: '命盘库遗留兼容快照(非主存;信封专段;primaryReady 后业务不读写)' },
+	{ key: 'horosa.localCases.v1', kind: 'user-data', backup: 'dedicated', label: '事盘库遗留兼容快照(非主存;信封专段;primaryReady 后业务不读写)' },
+	{ key: 'horosa.localCharts.trash.v1', kind: 'user-data', backup: 'dedicated', label: '命盘回收站遗留兼容快照(非主存;primaryReady 后业务不读写)' },
+	{ key: 'horosa.localCases.trash.v1', kind: 'user-data', backup: 'dedicated', label: '事盘回收站遗留兼容快照(非主存;primaryReady 后业务不读写)' },
 
 	// ── IndexedDB 数据库(非 localStorage 键;字面量在源码,登记以过哨兵) ─────────────
 	{ key: 'horosa.ai.analysis.v1', kind: 'user-data', backup: 'dedicated', label: 'AI 分析工作区 IndexedDB(对话/消息/元数据,aiWorkspace 专段全 store dump)' },
 	{ key: 'horosa.record.revisions.v1', kind: 'device-local', backup: false, label: '记录版本历史 IndexedDB(本机撤销栈语义,每记录 10 版;备份带走的是当前真值,快照不随迁)' },
-	{ key: 'horosa.user-records.v1', kind: 'user-data', backup: 'dedicated', label: '命盘/事盘 IndexedDB(per-cid 双写副本;备份仍走两库信封,本库名登记以过哨兵)' },
+	{ key: 'horosa.user-records.v1', kind: 'user-data', backup: 'dedicated', label: '命盘/事盘 IndexedDB 主存(备份仍走两库信封,本库名登记以过哨兵)' },
 
 	// ── 用户内容资产(raw 整值直通) ────────────────────────────────────────────────
 	{ key: 'horosa.lc.lifeEvents.v1', kind: 'user-data', backup: true, label: '人生事件(按事件 id 并集,同 id 保本机)' },

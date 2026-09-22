@@ -8,7 +8,7 @@ import {
 	getJieqiSeedLocalCache,
 	setJieqiSeedLocalCache,
 } from './localCalcCache';
-import { buildLocalBaziResult } from './baziLunarLocal';
+import { buildLocalBaziResult, buildLocalNongliLite } from './baziLunarLocal';
 import { buildLocalJieqiYearSeed } from './localNongliAdapter';
 import { neighborPrefetchEnabled } from './perfFlags';
 
@@ -252,21 +252,40 @@ function buildLocalJieqiYearFallback(params){
 	if(!year || Number.isNaN(year)){
 		return null;
 	}
+	// 公元前不在 lunar-javascript 可靠域。用正年号去查会得到公元表，必须留给后端。
+	if(params && Number(params.ad) < 0){
+		return null;
+	}
 	const seed = buildLocalJieqiYearSeed(year, params && params.zone);
 	if(!seed){
 		return null;
 	}
-	const jieqi24 = Object.keys(seed).map((term)=>({
-		jieqi: term,
-		time: safe(seed[term] && seed[term].time),
-		bazi: {
-			fourColumns: {
-				day: {
-					ganzi: safe(seed[term] && seed[term].dayGanzhi),
-				},
-			},
-		},
-	}));
+	const jieqi24 = Object.keys(seed).map((term)=>{
+		const time = safe(seed[term] && seed[term].time);
+		const dayGanzhi = safe(seed[term] && seed[term].dayGanzhi);
+		let fourColumns = {
+			day: { ganzi: dayGanzhi },
+		};
+		const parts = time.split(' ');
+		if(parts[0]){
+			try{
+				const lite = buildLocalNongliLite({
+					date: parts[0],
+					time: parts[1] || '00:00:00',
+					zone: params && params.zone,
+					ad: 1,
+				});
+				if(lite && lite.bazi && lite.bazi.fourColumns){
+					fourColumns = lite.bazi.fourColumns;
+				}
+			}catch(e){ /* 交节四柱失败时保留日干支，不改用后端冒充 */ }
+		}
+		return {
+			jieqi: term,
+			time,
+			bazi: { fourColumns },
+		};
+	});
 	return {
 		year,
 		jieqi24,
@@ -414,6 +433,19 @@ export async function fetchPreciseNongli(params){
 export async function fetchPreciseJieqiYear(params){
 	const reqParams = normalizeJieqiParams(params);
 	const key = buildKey(reqParams, JIE_QI_YEAR_KEYS);
+	// PHASE 4-B: 可靠域（公元 1–9999）用本地 24 节气表，不请求 Java/Python。
+	// 域外或公元前本地表会错位，下面仍走 /jieqi/year。
+	if(key && jieqiYearMem.has(key) && jieqiYearMem.get(key) && jieqiYearMem.get(key).local){
+		return jieqiYearMem.get(key);
+	}
+	const localTable = buildLocalJieqiYearFallback(reqParams);
+	if(localTable){
+		if(key){
+			pushCache(jieqiYearMem, key, localTable);
+		}
+		setJieqiYearLocalCache(reqParams, localTable);
+		return localTable;
+	}
 	if(key && jieqiYearMem.has(key)){
 		return jieqiYearMem.get(key);
 	}

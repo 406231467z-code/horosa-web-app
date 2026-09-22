@@ -1,6 +1,6 @@
 import React from 'react';
 import { ServerRoot } from '../../utils/constants';
-import { markServiceOnline } from '../../utils/serviceStatus';
+import { markServiceOnline, markServiceOffline, isDesktopCalcShell } from '../../utils/serviceStatus';
 import { renegotiateLocalServerRoot } from '../../utils/backendIdentity';
 
 // 2026-07-04 事故复盘:探测地址必须每次从活绑定 ServerRoot 现算——旧版 useMemo 把 URL 冻结,
@@ -85,6 +85,13 @@ export default function StartupGate() {
             if (cancelled) return;
             // 超时/中断 = 后端在世只是慢 → 放行,避免卡在慢启动。
             if (err && (err.name === 'AbortError' || err.name === 'TimeoutError')) { pass(); return; }
+            // PHASE 4-A: 纯浏览器没有桌面壳拉起 Java/Python。连接被拒时放行主界面，
+            // 由横幅标明「需要计算服务」，避免全屏覆盖变成永久白屏。桌面壳仍无限重试。
+            if (!isDesktopCalcShell()) {
+              markServiceOffline();
+              setReady(true);
+              return;
+            }
             // 连败若干次 → 触发一次服务地址再协商(单飞+节流,便宜):
             // 地址可疑(端口被占/存储陈旧)时,换到已验证的根后本环自动跟上。
             if (attempt > 0 && attempt % 4 === 0) {

@@ -4,6 +4,7 @@ import { ServerRoot } from '../../utils/constants';
 import { verifyBackendIdentity, renegotiateLocalServerRoot } from '../../utils/backendIdentity';
 import { invokeLightServiceRestart } from '../../utils/serviceRecovery';
 import { copyTextSmart } from '../../utils/clipboardText';
+import { isDesktopCalcShell, CALC_SERVICE_REQUIRED_MESSAGE } from '../../utils/serviceStatus';
 
 // Mac issue #12 / Win #11 #14: 排盘失败 → 本地服务未就绪 时的可操作对话框。
 // 把「重试 / 重启后端 / 打开诊断中心 / 复制诊断信息」全部集成,
@@ -94,6 +95,7 @@ function buildDiagText(root, extraDetail) {
 export function showChartServiceError(extraDetail) {
   const root = ServerRoot || '';
   const hasTauri = typeof window !== 'undefined' && !!window.__TAURI__;
+  const desktopShell = isDesktopCalcShell();
   const diagText = buildDiagText(root, extraDetail);
 
   // audit 修:clipboard.writeText 是 async,之前不 await 用户看到假成功。
@@ -107,16 +109,24 @@ export function showChartServiceError(extraDetail) {
   const content = (
     <div style={{ lineHeight: 1.7, fontSize: 13 }}>
       <div style={headerBoxStyle}>
-        本地排盘服务 (<code style={codeChipStyle}>{root || '未知地址'}</code>) 暂时不可达。
+        {desktopShell
+          ? <>本地排盘服务 (<code style={codeChipStyle}>{root || '未知地址'}</code>) 暂时不可达。</>
+          : CALC_SERVICE_REQUIRED_MESSAGE}
       </div>
-      <div style={{ marginBottom: 6, fontWeight: 600 }}>常见原因：</div>
-      <ul style={ulStyle}>
-        <li>首次启动需解压运行时 (≈ 10–60s)，请稍候再试</li>
-        <li>系统代理可能拦截了本地回环（v2.5.1+ 已修，请确认是最新版）</li>
-        <li>端口被其它程序占用 → 可点「重启后端」让 app 换口重启</li>
-        <li>杀毒软件 / 防火墙拦截 Java 进程 → 加入白名单</li>
-      </ul>
-      <div style={hintStyle}>下方可任选一个操作；多数情况「立即重试」即可恢复。</div>
+      {desktopShell ? (
+        <>
+          <div style={{ marginBottom: 6, fontWeight: 600 }}>常见原因：</div>
+          <ul style={ulStyle}>
+            <li>首次启动需解压运行时 (≈ 10–60s)，请稍候再试</li>
+            <li>系统代理可能拦截了本地回环（v2.5.1+ 已修，请确认是最新版）</li>
+            <li>端口被其它程序占用 → 可点「重启后端」让 app 换口重启</li>
+            <li>杀毒软件 / 防火墙拦截 Java 进程 → 加入白名单</li>
+          </ul>
+          <div style={hintStyle}>下方可任选一个操作；多数情况「立即重试」即可恢复。</div>
+        </>
+      ) : (
+        <div style={hintStyle}>本次没有生成盘面。计算服务启动后点「立即重试」，再重新排盘。</div>
+      )}
     </div>
   );
 
@@ -139,7 +149,7 @@ export function showChartServiceError(extraDetail) {
   );
 
   Modal.confirm({
-    title: '排盘失败：本地服务未就绪',
+    title: desktopShell ? '排盘失败：本地服务未就绪' : '需要计算服务',
     width: 520,
     icon: null,
     content,
@@ -162,7 +172,12 @@ export function showChartServiceError(extraDetail) {
       } else if (ok) {
         Modal.success({ title: '后端已在线', content: '重新执行您的排盘操作即可。' });
       } else {
-        Modal.warning({ title: '仍不可达', content: '后端可能还在启动中。建议等几秒后再试，或点「重启后端」。' });
+        Modal.warning({
+          title: '仍不可达',
+          content: isDesktopCalcShell()
+            ? '后端可能还在启动中。建议等几秒后再试，或点「重启后端」。'
+            : '计算服务仍不可达，没有生成盘面。请确认 Java :9999 与 Python :8899 已启动后再排盘。',
+        });
       }
     },
   });

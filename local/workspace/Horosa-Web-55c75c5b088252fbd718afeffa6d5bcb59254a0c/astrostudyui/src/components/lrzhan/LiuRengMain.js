@@ -9,6 +9,7 @@ import { XQButton as Button, XQCard as Card, XQSelect as Select, XQTabs as Tabs,
 import XQIcon from '../xq-icons';
 import * as Constants from '../../utils/constants';
 import request from '../../utils/request';
+import { fetchLiurengGods } from '../../utils/liurengGodsLocal';
 import * as AstroConst from '../../constants/AstroConst';
 import {randomStr, randomNum, littleEndian,} from '../../utils/helper';
 import * as LRConst from '../liureng/LRConst';
@@ -4824,7 +4825,7 @@ class LiuRengMain extends Component{
 				try{
 					const params = this.genGodsParams(flds || this.props.fields);
 					if(params){
-						request(`${Constants.ServerRoot}/liureng/gods`, {
+						fetchLiurengGods(params, {
 							body: JSON.stringify(params),
 							silent: true,
 							retry: { retries: 0 },
@@ -4853,7 +4854,7 @@ class LiuRengMain extends Component{
 					return [{
 						name: 'liureng:gods',
 						path: '/liureng/gods',
-						run: ()=> request(`${Constants.ServerRoot}/liureng/gods`, {
+						run: ()=> fetchLiurengGods(params, {
 							body: JSON.stringify(params),
 							silent: true,
 							retry: { retries: 0 },
@@ -5287,7 +5288,7 @@ class LiuRengMain extends Component{
 			lateZiHourUseNextDay: flds.lateZiHourUseNextDay && flds.lateZiHourUseNextDay.value !== undefined ? flds.lateZiHourUseNextDay.value : defaultLateZiHourUseNextDay(),
 		};
 		try{
-			const data = await request(`${Constants.ServerRoot}/liureng/gods`, {
+			const data = await fetchLiurengGods(params, {
 				body: JSON.stringify(params),
 				silent: true,
 			});
@@ -5317,7 +5318,7 @@ class LiuRengMain extends Component{
 		}else if(godsKey && this.godsInflight.has(godsKey)){
 			result = clonePlain(await this.godsInflight.get(godsKey));
 		}else{
-			const req = request(`${Constants.ServerRoot}/liureng/gods`, {
+			const req = fetchLiurengGods(params, {
 				body: JSON.stringify(params),
 				silent: true,
 			}).then((data)=>{

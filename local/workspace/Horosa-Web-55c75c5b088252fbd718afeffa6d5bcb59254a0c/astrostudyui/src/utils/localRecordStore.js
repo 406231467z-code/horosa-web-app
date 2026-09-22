@@ -819,6 +819,44 @@ export function createLocalRecordStore(config){
 		return all.length;
 	}
 
+	// PHASE 2-E: 统一备份 trash 段并集恢复 —— 经 writeTrashRaw(主存 snapshot/IDB 或 LS fallback),
+	// 禁止 unifiedBackup 直写四键。本机 cid 优先;合并后按 deletedAt 降序裁到 TRASH_MAX。
+	function mergeTrashFromBackup(incomingRaw){
+		if(!trashKey){
+			return false;
+		}
+		let incoming = incomingRaw;
+		if(typeof incomingRaw === 'string'){
+			try{
+				incoming = JSON.parse(incomingRaw);
+			}catch(_e){
+				return false;
+			}
+		}
+		if(!Array.isArray(incoming)){
+			return false;
+		}
+		let local = [];
+		try{
+			local = readTrashRaw();
+		}catch(_e){
+			local = [];
+		}
+		if(!Array.isArray(local)){
+			local = [];
+		}
+		const seen = new Set(local.map((r)=>(r && r.cid) || null).filter(Boolean));
+		const merged = local.slice();
+		incoming.forEach((r)=>{
+			if(r && r.cid && !seen.has(r.cid)){
+				merged.push(r);
+				seen.add(r.cid);
+			}
+		});
+		merged.sort((a, b)=>`${(b && b.deletedAt) || ''}`.localeCompare(`${(a && a.deletedAt) || ''}`));
+		return writeTrashRaw(merged.slice(0, TRASH_MAX));
+	}
+
 	function exportBackup(){
 		const items = sortByUpdateTimeDesc(readRaw().slice());
 		const envelope = {
@@ -965,5 +1003,5 @@ export function createLocalRecordStore(config){
 		newerSchemaNotified = false;
 	}
 
-	return { list, listTags, getPaged, upsert, remove, setPin, moveRecord, setFlag, touchRecord, exportBackup, importBackup, validateBackupEnvelope, previewImportBackup, getHealth, listTrash, restoreFromTrash, purgeTrashItem, clearTrash, getWriteVersion, __resetForTests };
+	return { list, listTags, getPaged, upsert, remove, setPin, moveRecord, setFlag, touchRecord, exportBackup, importBackup, validateBackupEnvelope, previewImportBackup, getHealth, listTrash, restoreFromTrash, purgeTrashItem, clearTrash, mergeTrashFromBackup, getWriteVersion, __resetForTests };
 }

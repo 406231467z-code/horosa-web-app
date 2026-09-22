@@ -39,6 +39,8 @@ import {
 	__putUserRecordsMetaForTests,
 	__startFourKeyWriteRatchetForTests,
 	__getFourKeyWriteCountsForTests,
+	__getFourKeyReadCountsForTests,
+	__getFourKeyRemoveCountsForTests,
 	__stopFourKeyWriteRatchetForTests,
 } from '../userRecordsStore';
 
@@ -610,4 +612,107 @@ describe('PHASE 2-D IndexedDB primary write', ()=>{
 		expect(window.localStorage.getItem(CHARTS_KEY)).toBe(lsCharts);
 		expect(listLocalCharts({ includeArchived: true }).find((r)=>r.cid === 'local-2d-n-0').name).toBe('命改');
 	}, 60000);
+});
+
+function expectFourKeyAccessZero(){
+	USER_RECORDS_FOUR_LS_KEYS.forEach((key)=>{
+		expect(__getFourKeyReadCountsForTests()[key]).toBe(0);
+		expect(__getFourKeyWriteCountsForTests()[key]).toBe(0);
+		expect(__getFourKeyRemoveCountsForTests()[key]).toBe(0);
+	});
+}
+
+describe('PHASE 2-F four-key LS exit under primary', ()=>{
+	beforeEach(()=>{
+		window.localStorage.clear();
+		__resetUserRecordsForTests();
+		__installUserRecordsMemoryBackendForTests();
+	});
+
+	afterEach(()=>{
+		__stopFourKeyWriteRatchetForTests();
+		__resetUserRecordsForTests();
+		window.localStorage.clear();
+	});
+
+	function seedLsRecord(key, rec){
+		window.localStorage.setItem(key, JSON.stringify([rec]));
+	}
+
+	it('A/C/E: old LS-only live+trash migrate once, stay idempotent, updateTime unchanged', async ()=>{
+		seedLsRecord(CHARTS_KEY, { cid: 'old-c', name: '旧命', birth: '1990-01-01 08:00:00', updateTime: '2020-01-01 08:00:00', schemaVersion: 2 });
+		seedLsRecord(CASES_KEY, { cid: 'old-x', event: '旧事', caseType: 'liuyao', divTime: '2020-01-01 09:00:00', updateTime: '2020-01-02 08:00:00', schemaVersion: 2 });
+		seedLsRecord(CHARTS_TRASH, { cid: 'old-ct', name: '旧废命', deletedAt: '2026-09-18 10:00:00', updateTime: '2020-03-01 08:00:00' });
+		seedLsRecord(CASES_TRASH, { cid: 'old-xt', event: '旧废事', deletedAt: '2026-09-18 11:00:00', updateTime: '2020-03-02 08:00:00' });
+		const lsCharts = window.localStorage.getItem(CHARTS_KEY);
+		const first = await hydrateUserRecordsPrimary();
+		expect(first.ok).toBe(true);
+		expect(isUserRecordsPrimaryReady()).toBe(true);
+		expect((await getUserRecordsMeta()).migrated).toBe(true);
+		expect(listLocalCharts({ includeArchived: true })[0].updateTime).toBe('2020-01-01 08:00:00');
+		expect(listLocalCases({ includeArchived: true })[0].updateTime).toBe('2020-01-02 08:00:00');
+		expect(listLocalChartsTrash()[0].cid).toBe('old-ct');
+		expect(listLocalCasesTrash()[0].cid).toBe('old-xt');
+		const n1 = (await listUserRecordEnvelopes(USER_RECORDS_STORES.charts)).length;
+		await hydrateUserRecordsPrimary();
+		await hydrateUserRecordsPrimary();
+		expect((await listUserRecordEnvelopes(USER_RECORDS_STORES.charts)).length).toBe(n1);
+		expect((await listUserRecordEnvelopes(USER_RECORDS_STORES.chartsTrash)).length).toBe(1);
+		expect(listLocalCharts({ includeArchived: true })[0].updateTime).toBe('2020-01-01 08:00:00');
+		expect(window.localStorage.getItem(CHARTS_KEY)).toBe(lsCharts);
+		expect(window.localStorage.getItem(CHARTS_KEY)).not.toBe(null);
+	});
+
+	it('B/D: unavailable and schema>1 do not set migrated or delete four keys', async ()=>{
+		seedLsRecord(CHARTS_KEY, { cid: 'keep-c', name: '留', updateTime: '2020-01-01 08:00:00' });
+		const before = window.localStorage.getItem(CHARTS_KEY);
+		__setUserRecordsUnavailableForTests();
+		const blocked = await hydrateUserRecordsPrimary();
+		expect(blocked.ok).toBe(false);
+		expect(isUserRecordsPrimaryReady()).toBe(false);
+		expect(window.localStorage.getItem(CHARTS_KEY)).toBe(before);
+		__resetUserRecordsForTests();
+		__installUserRecordsMemoryBackendForTests();
+		window.localStorage.setItem(CHARTS_KEY, before);
+		await __putUserRecordsMetaForTests({ version: 99, migrated: true });
+		const schema = await hydrateUserRecordsPrimary();
+		expect(schema.reason).toBe('schema');
+		expect(isUserRecordsPrimaryReady()).toBe(false);
+		expect(window.localStorage.getItem(CHARTS_KEY)).toBe(before);
+		const meta = await getUserRecordsMeta();
+		expect(meta.migrated).toBe(true);
+		expect(parseInt(meta.version, 10)).toBe(99);
+	});
+
+	it('F/G/H/I/L/M/N: primaryReady CRUD/backup do not get/set/remove four keys', async ()=>{
+		upsertLocalChart(chartSeed('abc', { name: '命' }));
+		upsertLocalCase(caseSeed('abc', { event: '事' }));
+		await hydrateUserRecordsPrimary();
+		expect(isUserRecordsPrimaryReady()).toBe(true);
+		__startFourKeyWriteRatchetForTests();
+		listLocalCharts();
+		listLocalCases();
+		listLocalChartsTrash();
+		listLocalCasesTrash();
+		upsertLocalChart({ cid: 'abc', name: '命改' });
+		removeLocalChart('abc');
+		restoreLocalChartFromTrash('abc');
+		const backup = exportLocalChartsBackup();
+		expect(backup.format).toBe('horosa-local-charts');
+		expect(backup.version).toBe(1);
+		expect(backup.charts[0].name).toBe('命改');
+		['createdAt', 'updatedAt', 'writeSeq', 'kind', 'slot'].forEach((k)=>{
+			expect(Object.prototype.hasOwnProperty.call(backup.charts[0], k)).toBe(false);
+		});
+		const casesBackup = (await import('../localcases')).exportLocalCasesBackup();
+		expect(casesBackup.format).toBe('horosa-local-cases');
+		expect(casesBackup.version).toBe(1);
+		importLocalChartsBackup({ format: 'horosa-local-charts', version: 1, charts: [{ cid: 'imp-1', name: '导入', birth: '1990-01-01 08:00:00', updateTime: '2026-09-01 10:00:00' }] });
+		await flushUserRecordsWrites();
+		expectFourKeyAccessZero();
+		expect(listLocalCharts().find((r)=>r.cid === 'abc').name).toBe('命改');
+		expect(listLocalCases().find((r)=>r.cid === 'abc').event).toBe('事');
+		expect(listLocalChartsTrash().find((r)=>r.cid === 'abc')).toBeFalsy();
+		expect(window.localStorage.getItem(CHARTS_KEY)).toContain('命');
+	});
 });

@@ -1,0 +1,12 @@
+{
+  "name": "phase4d-sweph-wasm",
+  "private": true,
+  "type": "module",
+  "description": "Isolated Swiss Ephemeris WASM spike. Not imported by astrostudyui.",
+  "scripts": {
+    "check": "node run.mjs"
+  },
+  "dependencies": {
+    "swisseph-wasm": "0.1.0"
+  }
+}

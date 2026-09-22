@@ -9,6 +9,14 @@ import { signRequest } from '../utils/request';
 import { encryptRSA } from '../utils/rsahelper';
 import { NeedEncrypt } from '../utils/constants';
 import { aiBodyEncryptEnabled } from '../utils/perfFlags';
+import {
+	buildAiTransportPlan,
+	createVendorSseBridge,
+	extractDirectChatContent,
+	extractEmbeddingVectors,
+	redactSecret,
+	stripAiTransport,
+} from '../utils/aiDirectTransport';
 
 function safeParseJson(text, defVal = null){
 	try{
@@ -121,7 +129,7 @@ function getTokenSafe(){
 // [G2] 请求体 RSA 会话束封套(与排盘 API 同机制):AES 密文 + 会话钥 RSA 块。
 // Signature 仍按明文计算(后端解封后核签,校验链不变);SSE/JSON 响应不加密。
 // NeedEncrypt=false 或回退阀关 → 明文(后端明文直通宽容,双向兼容)。
-function encryptAIAnalysisBody(bodyText){
+export function sealAiProxyBody(bodyText){
 	if(!NeedEncrypt || !bodyText || !aiBodyEncryptEnabled()){ return bodyText; }
 	try{
 		return encryptRSA(bodyText);
@@ -175,12 +183,12 @@ function withTimeout(promiseFactory, timeoutMs, externalSignal){
 
 async function requestJson(url, values, options = {}){
 	return withTimeout(async (signal)=>{
-		const bodyText = JSON.stringify(values || {});
+		const bodyText = JSON.stringify(stripProxyValues(values));
 		const response = await fetch(url, {
 			method: 'POST',
 			cache: 'no-store',
 			headers: buildAIAnalysisHeaders(bodyText, options.headers),
-			body: encryptAIAnalysisBody(bodyText),
+			body: sealAiProxyBody(bodyText),
 			signal,
 		});
 		const text = await response.text();
@@ -216,26 +224,117 @@ export function extractMaterialContent(values){
 	});
 }
 
+function stripProxyValues(values){
+	return stripAiTransport(values || {});
+}
+
+async function readDirectError(response, secret){
+	const text = await response.text();
+	const payload = safeParseJson(text, null);
+	const errorText = payload && (payload.error && payload.error.message || payload.message)
+		? (payload.error && payload.error.message || payload.message)
+		: `${response.status} ${response.statusText || ''}`.trim();
+	throw new Error(redactSecret(errorText || 'direct.request.failed', secret));
+}
+
 export function requestEmbeddingVectors(values){
+	const plan = buildAiTransportPlan(values, { embedding: true });
+	if(plan.mode === 'direct'){
+		return requestDirectEmbeddings(plan.embedding);
+	}
 	return requestJson(`${ServerRoot}/aianalysis/embeddings`, values, {
 		timeoutMs: resolveRequestTimeout(values),
 	});
 }
 
+async function requestDirectEmbeddings(embedding){
+	const vectors = [];
+	for(let i = 0; i < embedding.requests.length; i++){
+		const one = embedding.requests[i];
+		const response = await fetch(one.url, {
+			method: 'POST',
+			cache: 'no-store',
+			headers: one.headers,
+			body: JSON.stringify(one.body),
+		});
+		if(!response.ok){
+			await readDirectError(response, embedding.apiKey);
+		}
+		const payload = safeParseJson(await response.text(), null);
+		if(embedding.kind === 'gemini'){
+			const valuesList = payload && payload.embedding && Array.isArray(payload.embedding.values)
+				? payload.embedding.values
+				: [];
+			vectors.push(valuesList);
+		}else{
+			extractEmbeddingVectors(payload).forEach((vec)=>vectors.push(vec));
+		}
+	}
+	return {
+		Result: {
+			vectors,
+			model: embedding.model,
+			providerType: embedding.providerType,
+		},
+	};
+}
+
 export function requestAIAnalysisChat(values){
+	const plan = buildAiTransportPlan(values, { stream: false });
+	if(plan.mode === 'direct'){
+		return requestDirectChat(plan.vendor, values);
+	}
 	return requestJson(`${ServerRoot}/aianalysis/chat`, values, {
 		timeoutMs: resolveRequestTimeout(values),
 	});
 }
 
-export async function requestAIAnalysisChatStream(values, handlers = {}){
+async function requestDirectChat(vendor, values){
 	const response = await withTimeout(async (signal)=>{
-		const bodyText = JSON.stringify(values || {});
+		const rsp = await fetch(vendor.url, {
+			method: 'POST',
+			cache: 'no-store',
+			headers: vendor.headers,
+			body: JSON.stringify(vendor.body),
+			signal,
+		});
+		if(!rsp.ok){
+			await readDirectError(rsp, vendor.apiKey);
+		}
+		return rsp;
+	}, resolveRequestTimeout(values), null);
+	const payload = safeParseJson(await response.text(), null);
+	return {
+		Result: {
+			content: extractDirectChatContent(vendor.family, payload),
+			model: vendor.body && vendor.body.model ? vendor.body.model : (values && values.model),
+			providerType: vendor.providerType,
+		},
+	};
+}
+
+export async function requestAIAnalysisChatStream(values, handlers = {}){
+	const plan = buildAiTransportPlan(values, { stream: true });
+	const response = await withTimeout(async (signal)=>{
+		if(plan.mode === 'direct'){
+			const rsp = await fetch(plan.vendor.url, {
+				method: 'POST',
+				cache: 'no-store',
+				headers: plan.vendor.headers,
+				body: JSON.stringify(plan.vendor.body),
+				signal,
+			});
+			if(!rsp.ok){
+				await readDirectError(rsp, plan.vendor.apiKey);
+			}
+			return rsp;
+		}
+		const bodyText = JSON.stringify(stripProxyValues(values));
 		const rsp = await fetch(`${ServerRoot}/aianalysis/chat/stream`, {
 			method: 'POST',
 			cache: 'no-store',
 			headers: buildAIAnalysisHeaders(bodyText),
-			body: encryptAIAnalysisBody(bodyText),
+			body: sealAiProxyBody(bodyText),
 			signal,
 		});
 		if(!rsp.ok){
@@ -244,10 +343,11 @@ export async function requestAIAnalysisChatStream(values, handlers = {}){
 			const errorText = payload && (payload.ResultMessage || payload.Result || payload.message)
 				? (payload.ResultMessage || payload.Result || payload.message)
 				: `${rsp.status} ${rsp.statusText || ''}`.trim();
-			throw new Error(errorText || 'chat.stream.failed');
+			throw new Error(redactSecret(errorText || 'chat.stream.failed', values && values.apiKey));
 		}
 		return rsp;
 	}, handlers.timeoutMs || resolveRequestTimeout(values), handlers.signal);
+	const vendorBridge = plan.mode === 'direct' ? createVendorSseBridge(plan.vendor.family) : null;
 	const reader = response.body && response.body.getReader ? response.body.getReader() : null;
 	if(!reader){
 		throw new Error('chat.stream.not.supported');
@@ -315,7 +415,8 @@ export async function requestAIAnalysisChatStream(values, handlers = {}){
 				break;
 			}
 			if(aborted || (sig && sig.aborted)){ break; }
-			parser.push(decoder.decode(chunk.value, { stream: true })); // 不再每字节续命;改由上面 delta 事件续命
+			const decoded = decoder.decode(chunk.value, { stream: true });
+			parser.push(vendorBridge ? vendorBridge.push(decoded) : decoded);
 		}
 		clearWatchdog();
 		clearHard();
@@ -330,6 +431,9 @@ export async function requestAIAnalysisChatStream(values, handlers = {}){
 		if(hardTimedOut){
 			throw new Error(`AI 单次生成超过总时长上限 ${Math.round(MAX_STREAM_MS / 60000)} 分钟,已停止等待。超长任务可在提供商高级参数「流式总时长上限」调大;可点「重新生成」重试。`);
 		}
+		if(vendorBridge){
+			parser.push(vendorBridge.end());
+		}
 		parser.end();
 		if(handlers.onDone){
 			handlers.onDone();
@@ -340,7 +444,10 @@ export async function requestAIAnalysisChatStream(values, handlers = {}){
 		clearWatchdog();
 		clearHard();
 		detachAbort();
-		try{ parser.end(); }catch(_){ /* flush buffered SSE (e.g. a final error event) before propagating */ }
+		try{
+			if(vendorBridge){ parser.push(vendorBridge.end()); }
+			parser.end();
+		}catch(_){ /* flush buffered SSE (e.g. a final error event) before propagating */ }
 		if(handlers.onError){
 			handlers.onError(e);
 		}

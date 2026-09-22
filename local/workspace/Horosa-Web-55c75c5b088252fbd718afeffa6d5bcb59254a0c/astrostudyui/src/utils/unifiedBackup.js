@@ -21,8 +21,20 @@
 // - 导入侧按注册表再过滤:cache/device-local 键即使出现在包里也拒写(手改包防呆)。
 // - zip 信封与 AI 工作区备份互为 format 防呆(此处验 format 不符即拒并指路)。
 import JSZip from 'jszip';
-import { exportLocalChartsBackup, importLocalChartsBackup, previewLocalChartsBackup } from './localcharts';
-import { exportLocalCasesBackup, importLocalCasesBackup, previewLocalCasesBackup } from './localcases';
+import {
+	exportLocalChartsBackup,
+	importLocalChartsBackup,
+	previewLocalChartsBackup,
+	listLocalChartsTrash,
+	mergeLocalChartsTrashFromBackup,
+} from './localcharts';
+import {
+	exportLocalCasesBackup,
+	importLocalCasesBackup,
+	previewLocalCasesBackup,
+	listLocalCasesTrash,
+	mergeLocalCasesTrashFromBackup,
+} from './localcases';
 import { safeLocalStorageGet, safeLocalStorageSet } from './safeStorage';
 import { classifyStorageKey, collectBackupKeys } from './storageKeyRegistry';
 import { AI_ANALYSIS_STORES, listStoreRecords, getStoreRecord, putStoreRecord } from './aiAnalysisStore';
@@ -37,11 +49,8 @@ export const UNIFIED_BACKUP_MIN_READER = 1;
 export const UNIFIED_MANIFEST_NAME = 'manifest.json';
 
 const LIFE_EVENTS_KEY = 'horosa.lc.lifeEvents.v1';
-const TRASH_KEYS = {
-	charts: 'horosa.localCharts.trash.v1',
-	cases: 'horosa.localCases.trash.v1',
-};
-const TRASH_CAP = 200;
+// PHASE 2-E: trash 段 slot 名(charts|cases);读写一律经域层 list*/merge*Trash,不再直达四键 LS。
+const TRASH_SLOTS = ['charts', 'cases'];
 
 function rawLabel(k){
 	const e = classifyStorageKey(k);
@@ -49,6 +58,27 @@ function rawLabel(k){
 		return e.label;
 	}
 	return `${k}(未登记键,按用户资产带走)`;
+}
+
+// PHASE 2-E: trash 导出走 list*Trash → localRecordStore(primaryReady=snapshot/IDB;fallback=LS)。
+function collectTrashSection(){
+	const trash = {};
+	const chartsTrash = listLocalChartsTrash();
+	if(chartsTrash instanceof Array && chartsTrash.length){
+		trash.charts = JSON.stringify(chartsTrash);
+	}
+	const casesTrash = listLocalCasesTrash();
+	if(casesTrash instanceof Array && casesTrash.length){
+		trash.cases = JSON.stringify(casesTrash);
+	}
+	return trash;
+}
+
+function mergeTrashSlot(slot, incomingRaw){
+	if(slot === 'cases'){
+		return mergeLocalCasesTrashFromBackup(incomingRaw);
+	}
+	return mergeLocalChartsTrashFromBackup(incomingRaw);
 }
 
 // 基础段(同步,localStorage 面):raw 面 = 注册表 backup:true 全键 + 未登记键(防呆带走)。
@@ -61,13 +91,6 @@ export function buildUnifiedBackupManifest(){
 			raw[k] = v;
 		}
 	});
-	const trash = {};
-	Object.keys(TRASH_KEYS).forEach((slot)=>{
-		const v = safeLocalStorageGet(TRASH_KEYS[slot]);
-		if(v !== null && v !== undefined){
-			trash[slot] = v;
-		}
-	});
 	return {
 		format: UNIFIED_BACKUP_FORMAT,
 		version: UNIFIED_BACKUP_VERSION,
@@ -77,7 +100,7 @@ export function buildUnifiedBackupManifest(){
 		cases: exportLocalCasesBackup(),
 		raw,
 		unknownKeys,
-		trash,
+		trash: collectTrashSection(),
 	};
 }
 
@@ -219,7 +242,7 @@ export function previewUnifiedRestore(manifest){
 		rows.push({ key: 'cases', label: '事盘', detail: p.ok ? `新增 ${p.adds} 条、按 ID 合并覆盖 ${p.updates} 条` : '信封无效，将跳过' });
 	}
 	const trash = manifest.trash && typeof manifest.trash === 'object' ? manifest.trash : {};
-	Object.keys(TRASH_KEYS).forEach((slot)=>{
+	TRASH_SLOTS.forEach((slot)=>{
 		if(trash[slot] === undefined){
 			return;
 		}
@@ -292,36 +315,9 @@ function mergeLifeEventsRaw(incomingRaw){
 }
 
 // 回收站并集:按 cid 保本机;合并后按 deletedAt 降序裁到容量上限(与 trash FIFO 语义一致)。
-function mergeTrashRaw(trashKey, incomingRaw){
-	let incoming = null;
-	try{
-		incoming = JSON.parse(incomingRaw);
-	}catch(e){
-		return false;
-	}
-	if(!Array.isArray(incoming)){
-		return false;
-	}
-	let local = [];
-	try{
-		const cur = safeLocalStorageGet(trashKey);
-		local = cur ? JSON.parse(cur) : [];
-	}catch(e){
-		local = [];
-	}
-	if(!Array.isArray(local)){
-		local = [];
-	}
-	const seen = new Set(local.map((r)=>(r && r.cid) || null).filter(Boolean));
-	const merged = local.slice();
-	incoming.forEach((r)=>{
-		if(r && r.cid && !seen.has(r.cid)){
-			merged.push(r);
-			seen.add(r.cid);
-		}
-	});
-	merged.sort((a, b)=>`${(b && b.deletedAt) || ''}`.localeCompare(`${(a && a.deletedAt) || ''}`));
-	return safeLocalStorageSet(trashKey, JSON.stringify(merged.slice(0, TRASH_CAP)));
+// PHASE 2-E: 经域层 merge*TrashFromBackup → writeTrashRaw(primaryReady=IDB;fallback=LS)。
+function mergeTrashRaw(slot, incomingRaw){
+	return mergeTrashSlot(slot, incomingRaw);
 }
 
 // AI 工作区恢复:逐 store 逐条,同 id 保本机(先查有则跳);单条失败不拖垮其余。
@@ -408,12 +404,12 @@ export async function restoreUnifiedBackup(manifest){
 		}
 	}
 	const trash = manifest.trash && typeof manifest.trash === 'object' ? manifest.trash : {};
-	Object.keys(TRASH_KEYS).forEach((slot)=>{
+	TRASH_SLOTS.forEach((slot)=>{
 		if(trash[slot] === undefined){
 			return;
 		}
 		try{
-			const ok = mergeTrashRaw(TRASH_KEYS[slot], trash[slot]);
+			const ok = mergeTrashRaw(slot, trash[slot]);
 			results.push({ key: `trash.${slot}`, ok, detail: ok ? '已按 ID 并集合并' : '数据形状异常，已跳过' });
 		}catch(e){
 			results.push({ key: `trash.${slot}`, ok: false, detail: '合并异常' });

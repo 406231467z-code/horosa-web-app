@@ -808,3 +808,33 @@
 .astroUserbox .astroHeaderCommand :global(span:not(.anticon)) {
   display: inline-flex !important;
 }
+
+@media (max-width: 760px) {
+  .userbox.astroUserbox {
+    display: flex !important;
+    flex-wrap: nowrap;
+    align-items: center;
+    overflow-x: auto;
+    gap: 8px !important;
+    padding: 0 8px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .astroUserbox .astroBrand {
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  .astroUserbox .astroBrandText {
+    display: none !important;
+  }
+
+  .astroUserbox .astroCommandCenter {
+    flex: 0 0 auto;
+    padding-right: 0;
+  }
+
+  .astroUserbox .astroUtilityBar {
+    flex: 0 0 auto;
+  }
+}

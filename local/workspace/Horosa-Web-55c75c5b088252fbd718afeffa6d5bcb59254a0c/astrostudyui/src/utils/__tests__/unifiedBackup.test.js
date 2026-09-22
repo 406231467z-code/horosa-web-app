@@ -130,7 +130,7 @@ describe('[V4] 全量备份 v2:注册表驱动全键面 + 回收站 + AI 工作�
 
 	it('🔴 回收站随备份:导出带 trash 段;恢复=按 cid 并集,本机已有保留', async ()=>{
 		window.localStorage.setItem('horosa.localCharts.trash.v1', JSON.stringify([
-			{ cid: 'local-t-local', name: '本机垃圾', deletedAt: '2026-08-10 10:00:00' },
+			{ cid: 'local-t-local', name: '本机垃圾', deletedAt: '2026-09-15 10:00:00' },
 		]));
 		const m = buildUnifiedBackupManifest();
 		expect(m.trash.charts).toContain('local-t-local');
@@ -139,14 +139,15 @@ describe('[V4] 全量备份 v2:注册表驱动全键面 + 回收站 + AI 工作�
 			version: 2,
 			trash: {
 				charts: JSON.stringify([
-					{ cid: 'local-t-local', name: '备份版(须被本机压住)', deletedAt: '2026-08-01 10:00:00' },
-					{ cid: 'local-t-in', name: '备份来的垃圾', deletedAt: '2026-08-11 10:00:00' },
+					{ cid: 'local-t-local', name: '备份版(须被本机压住)', deletedAt: '2026-09-01 10:00:00' },
+					{ cid: 'local-t-in', name: '备份来的垃圾', deletedAt: '2026-09-16 10:00:00' },
 				]),
 			},
 		};
 		const results = await restoreUnifiedBackup(manifest);
 		expect(results.find((r)=>r.key === 'trash.charts').ok).toBe(true);
-		const trash = JSON.parse(window.localStorage.getItem('horosa.localCharts.trash.v1'));
+		const { listLocalChartsTrash } = require('../localcharts');
+		const trash = listLocalChartsTrash();
 		expect(trash.find((r)=>r.cid === 'local-t-local').name).toBe('本机垃圾');
 		expect(trash.find((r)=>r.cid === 'local-t-in').name).toBe('备份来的垃圾');
 	});
@@ -192,5 +193,163 @@ describe('[V4] 全量备份 v2:注册表驱动全键面 + 回收站 + AI 工作�
 		expect(cur1.name).toBe('本机档');
 		const cur2 = await store.getStoreRecord(store.AI_ANALYSIS_STORES.providerProfiles, 'prov-2');
 		expect(cur2.name).toBe('备份来的档');
+	});
+});
+
+describe('PHASE 2-E unified backup trash under IDB primary', ()=>{
+	const {
+		hydrateUserRecordsPrimary,
+		flushUserRecordsWrites,
+		isUserRecordsPrimaryReady,
+		listUserRecordEnvelopes,
+		USER_RECORDS_STORES,
+		USER_RECORDS_FOUR_LS_KEYS,
+		__installUserRecordsMemoryBackendForTests,
+		__resetUserRecordsForTests,
+		__startFourKeyWriteRatchetForTests,
+		__getFourKeyWriteCountsForTests,
+		__stopFourKeyWriteRatchetForTests,
+	} = require('../userRecordsStore');
+	const {
+		upsertLocalChart,
+		removeLocalChart,
+		listLocalCharts,
+		listLocalChartsTrash,
+		exportLocalChartsBackup,
+	} = require('../localcharts');
+	const {
+		upsertLocalCase,
+		removeLocalCase,
+		listLocalCases,
+		listLocalCasesTrash,
+		exportLocalCasesBackup,
+	} = require('../localcases');
+
+	beforeEach(()=>{
+		window.localStorage.clear();
+		__resetUserRecordsForTests();
+		__installUserRecordsMemoryBackendForTests();
+	});
+
+	afterEach(()=>{
+		__stopFourKeyWriteRatchetForTests();
+		__resetUserRecordsForTests();
+		window.localStorage.clear();
+	});
+
+	function chartSeed(cid, extra){
+		return {
+			cid,
+			name: cid,
+			birth: '1990-01-01 08:00:00',
+			zone: '+08:00',
+			updateTime: '2026-09-01 10:00:00',
+			preserveUpdateTime: true,
+			...(extra || {}),
+		};
+	}
+	function caseSeed(cid, extra){
+		return {
+			cid,
+			event: cid,
+			caseType: 'liuyao',
+			divTime: '2026-01-01 10:00:00',
+			zone: '+08:00',
+			updateTime: '2026-09-01 09:00:00',
+			preserveUpdateTime: true,
+			...(extra || {}),
+		};
+	}
+	function envelopeKeysOn(rec){
+		return ['createdAt', 'updatedAt', 'writeSeq', 'kind', 'slot'].filter((k)=>rec && Object.prototype.hasOwnProperty.call(rec, k));
+	}
+
+	it('TEST A: primaryReady trash export uses IDB/memory, ignores stale LS-only trash', async ()=>{
+		upsertLocalChart(chartSeed('chart-trash-1', { name: '主存废纸' }));
+		upsertLocalCase(caseSeed('case-trash-1', { event: '主存废课' }));
+		removeLocalChart('chart-trash-1');
+		removeLocalCase('case-trash-1');
+		await flushUserRecordsWrites();
+		await hydrateUserRecordsPrimary();
+		expect(isUserRecordsPrimaryReady()).toBe(true);
+		window.localStorage.setItem('horosa.localCharts.trash.v1', JSON.stringify([
+			{ cid: 'chart-trash-old', name: '陈旧 LS', deletedAt: '2026-01-01 00:00:00' },
+		]));
+		window.localStorage.setItem('horosa.localCases.trash.v1', JSON.stringify([
+			{ cid: 'case-trash-old', event: '陈旧课', deletedAt: '2026-01-01 00:00:00' },
+		]));
+		const m = buildUnifiedBackupManifest();
+		expect(m.trash.charts).toContain('chart-trash-1');
+		expect(m.trash.charts).not.toContain('chart-trash-old');
+		expect(m.trash.cases).toContain('case-trash-1');
+		expect(m.trash.cases).not.toContain('case-trash-old');
+		expect(m.charts.format).toBe('horosa-local-charts');
+		expect(m.charts.version).toBe(1);
+		expect(m.cases.format).toBe('horosa-local-cases');
+		expect(m.cases.version).toBe(1);
+	});
+
+	it('TEST B/F/G: primaryReady trash restore writes IDB only; ratchet=0; envelope clean', async ()=>{
+		upsertLocalChart(chartSeed('local-keep-live', { name: '在册' }));
+		await hydrateUserRecordsPrimary();
+		expect(isUserRecordsPrimaryReady()).toBe(true);
+		const lsCharts = window.localStorage.getItem('horosa.localCharts.v1');
+		const lsTrash = window.localStorage.getItem('horosa.localCharts.trash.v1');
+		__startFourKeyWriteRatchetForTests();
+		const manifest = {
+			format: UNIFIED_BACKUP_FORMAT,
+			version: 2,
+			trash: {
+				charts: JSON.stringify([
+					{ cid: 'chart-from-bk', name: '备份垃圾', deletedAt: '2026-09-18 10:00:00' },
+				]),
+			},
+		};
+		const results = await restoreUnifiedBackup(manifest);
+		expect(results.find((r)=>r.key === 'trash.charts').ok).toBe(true);
+		await flushUserRecordsWrites();
+		USER_RECORDS_FOUR_LS_KEYS.forEach((key)=>{
+			expect(__getFourKeyWriteCountsForTests()[key]).toBe(0);
+		});
+		expect(window.localStorage.getItem('horosa.localCharts.v1')).toBe(lsCharts);
+		expect(window.localStorage.getItem('horosa.localCharts.trash.v1')).toBe(lsTrash);
+		expect(listLocalChartsTrash().find((r)=>r.cid === 'chart-from-bk').name).toBe('备份垃圾');
+		expect(listLocalCharts().find((r)=>r.cid === 'chart-from-bk')).toBeFalsy();
+		expect(listLocalCharts().find((r)=>r.cid === 'local-keep-live')).toBeTruthy();
+		const idbTrash = await listUserRecordEnvelopes(USER_RECORDS_STORES.chartsTrash);
+		expect(idbTrash.find((e)=>e.cid === 'chart-from-bk').record.name).toBe('备份垃圾');
+		const exported = exportLocalChartsBackup();
+		expect(exported.format).toBe('horosa-local-charts');
+		expect(exported.version).toBe(1);
+		expect(envelopeKeysOn(exported.charts[0])).toEqual([]);
+		const casesEnv = exportLocalCasesBackup();
+		expect(casesEnv.format).toBe('horosa-local-cases');
+		expect(casesEnv.version).toBe(1);
+	});
+
+	it('TEST C: charts/cases trash same cid stay isolated across unified restore', async ()=>{
+		await hydrateUserRecordsPrimary();
+		__startFourKeyWriteRatchetForTests();
+		const manifest = {
+			format: UNIFIED_BACKUP_FORMAT,
+			version: 2,
+			trash: {
+				charts: JSON.stringify([{ cid: 'abc', name: '命盘废', deletedAt: '2026-09-18 10:00:00' }]),
+				cases: JSON.stringify([{ cid: 'abc', event: '事盘废', caseType: 'liuyao', deletedAt: '2026-09-18 11:00:00' }]),
+			},
+		};
+		await restoreUnifiedBackup(manifest);
+		await flushUserRecordsWrites();
+		USER_RECORDS_FOUR_LS_KEYS.forEach((key)=>{
+			expect(__getFourKeyWriteCountsForTests()[key]).toBe(0);
+		});
+		expect(listLocalChartsTrash().find((r)=>r.cid === 'abc').name).toBe('命盘废');
+		expect(listLocalCasesTrash().find((r)=>r.cid === 'abc').event).toBe('事盘废');
+		expect(listLocalCharts().find((r)=>r.cid === 'abc')).toBeFalsy();
+		expect(listLocalCases().find((r)=>r.cid === 'abc')).toBeFalsy();
+		const ct = await listUserRecordEnvelopes(USER_RECORDS_STORES.chartsTrash);
+		const xt = await listUserRecordEnvelopes(USER_RECORDS_STORES.casesTrash);
+		expect(ct.filter((e)=>e.cid === 'abc')).toHaveLength(1);
+		expect(xt.filter((e)=>e.cid === 'abc')).toHaveLength(1);
 	});
 });

@@ -184,3 +184,26 @@
 	overflow: hidden;
 	border: 1px solid var(--horosa-border);
 }
+
+@media (max-width: 760px) {
+	.atlas {
+		height: auto;
+		max-height: none;
+	}
+
+	.body {
+		flex-direction: column;
+	}
+
+	.side {
+		width: 100%;
+		flex: 1 1 auto;
+		max-height: 180px;
+	}
+
+	.map {
+		min-height: 220px;
+		width: 100%;
+		touch-action: pan-x pan-y;
+	}
+}

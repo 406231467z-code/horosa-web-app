@@ -1,5 +1,5 @@
 import React from 'react';
-import { subscribeServiceStatus, markServiceOnline, markServiceOffline } from '../../utils/serviceStatus';
+import { subscribeServiceStatus, markServiceOnline, markServiceOffline, isDesktopCalcShell, CALC_SERVICE_REQUIRED_MESSAGE } from '../../utils/serviceStatus';
 import { verifyBackendIdentity, renegotiateLocalServerRoot } from '../../utils/backendIdentity';
 import { startRecoveryPolling, buildDefaultRecoveryProbe, invokeLightServiceRestart } from '../../utils/serviceRecovery';
 import { ServerRoot } from '../../utils/constants';
@@ -81,6 +81,7 @@ export default function ServiceStatusBanner() {
   }, [online]);
 
   const hasTauri = typeof window !== 'undefined' && !!window.__TAURI__;
+  const desktopShell = isDesktopCalcShell();
 
   const handleRetry = React.useCallback(async () => {
     if (!ServerRoot || retrying) return;
@@ -209,7 +210,9 @@ export default function ServiceStatusBanner() {
         <span>
           {gaveUpMsg
             ? `⚠️ ${gaveUpMsg}`
-            : '⚠️ 本地服务暂时不可达，正在自动探测恢复，操作会自动重试。'}
+            : (desktopShell
+              ? '⚠️ 本地服务暂时不可达，正在自动探测恢复，操作会自动重试。'
+              : `⚠️ ${CALC_SERVICE_REQUIRED_MESSAGE}`)}
         </span>
         <button type="button" disabled={retrying} onClick={handleRetry} style={btnStyle}>
           {retrying ? '正在重试…' : '立即重试'}

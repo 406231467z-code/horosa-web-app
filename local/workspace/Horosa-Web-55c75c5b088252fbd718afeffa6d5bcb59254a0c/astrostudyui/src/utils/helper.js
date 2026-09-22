@@ -6,7 +6,6 @@ import { Msg } from '../msg/msg';
 import * as Constants from '../utils/constants';
 import { getErrMsg } from '../msg/errmsg';
 import {GPS} from './gps';
-import printJS from 'print-js';
 import {innerHandleError} from './request';
 import { clientToFixed } from './zoomDomain';
 
@@ -984,16 +983,4 @@ export function creatTooltip(divTooltip, titleSvg, tipobj, onTipClick, needpaddi
 		.on(leaveEvent, hideTooltip)
 		.on('mousemove', moveTooltip)
 		.on('click', clickTooltip);
-}
-
-export function printArea(id){
-	if(id === undefined || id === null){
-		return;
-	}
-	// 打印不再注入远端样式表(历史远端已下线;打印内容为内联样式的图表节点,裸打即可)。
-	printJS({
-		printable: id,
-		type: 'html',
-		maxWidth: 3000,
-	});	
 }

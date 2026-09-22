@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { Empty, Spin } from 'antd';
 import { XQSelect as Select } from '../xq-ui';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
+import { fetchZiweiBirth } from '../../utils/ziweiBirthLocal';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
 import { getLayerSihua } from '../ziwei/ZiWeiHelper';
 import { buildDaxianItems, buildLiunianItems, houseName } from '../ziwei/ZWLuckPanel';
@@ -133,7 +133,7 @@ export default class SanShiZiWeiSihua extends Component {
 		this._reqKey = key;
 		const seq = ++this._seq;
 		this.setState({ loading: true, err: '' });
-		request(`${Constants.ServerRoot}/ziwei/birth`, { body: JSON.stringify(params), silent: true })
+		fetchZiweiBirth(params, { silent: true })
 			.then((data)=>{
 				if(seq !== this._seq){ return; }
 				const result = data && data[Constants.ResultKey];

@@ -1,8 +1,7 @@
 import { Component } from 'react';
 import { Row, Col } from 'antd';
-import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import {randomNum, littleEndian,} from '../../utils/helper';
+import { lookupMeiyiGua } from '../../utils/guaTextTable';
 import { Gua8, getGua8, } from '../gua/GuaConst';
 import GuaSym from './GuaSym';
 import GuaChartDiv from './GuaChartDiv';
@@ -35,17 +34,7 @@ export default class MeiyiGuaSym extends Component{
 		let gua = this.state.gua;
 
 		if(gua){
-			let params = {
-				name: [gua],
-			};
-			
-			const descdata = await request(`${Constants.ServerRoot}/gua/meiyi`, {
-				body: JSON.stringify(params),
-			});
-	
-			const descresult = descdata && descdata[Constants.ResultKey];
-
-			desc = descresult ? descresult[gua] : null;
+			desc = lookupMeiyiGua(gua) || null;
  		}
 
 		return desc;

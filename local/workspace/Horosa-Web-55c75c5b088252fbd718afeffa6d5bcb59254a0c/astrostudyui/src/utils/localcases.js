@@ -259,3 +259,8 @@ export function purgeLocalCaseTrashItem(cid){
 export function clearLocalCasesTrash(){
 	return store.clearTrash();
 }
+
+// PHASE 2-E: 统一备份 trash 并集恢复(经内核 writeTrashRaw;primaryReady 写 IDB 不写四键 LS)。
+export function mergeLocalCasesTrashFromBackup(incomingRaw){
+	return store.mergeTrashFromBackup(incomingRaw);
+}

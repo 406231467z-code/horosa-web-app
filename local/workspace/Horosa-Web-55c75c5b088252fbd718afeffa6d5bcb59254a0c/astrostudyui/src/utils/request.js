@@ -93,7 +93,7 @@ function humanizeBackendError(text){
 	}
 	// 连接类 → 明确指向本地服务;其余技术异常 → 通用可行动提示。两者都不回显原始堆栈。
 	if(/Connect(ion)? (to|refused|timed out)|SocketTimeout|ECONNREFUSED|HttpHostConnect/i.test(raw)){
-		return '本地计算服务未响应，请稍候重试；若持续如此，请重启应用让服务重新就绪。';
+		return '需要计算服务：本地计算服务未响应。星盘等历算暂不可用，本次没有生成结果。请启动服务后重试。';
 	}
 	return '后端处理出错，请稍候重试；若持续如此，请重启应用。';
 }

@@ -3,6 +3,8 @@
 # (see Horosa_Local_Windows.bat) reads it identically with or without a BOM. Keep new
 # comments/strings ASCII, or add a UTF-8 BOM in the same change. Guarded by the release
 # selfcheck local-launchers gate (dual-engine parse + encoding invariant).
+# PHASE 4-I: opens the system browser. Does not install Horosa.exe.
+# Java :9999 and Python :8899 stay. Electron / NSIS are not the client.
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 

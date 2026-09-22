@@ -70,9 +70,25 @@ export function mirrorShadowWrite(key, text){
 
 // 启动对账:主存缺失而影子在 → 写回主存;返回 {restored:[key...], diverged:[key...]}。
 // diverged=两边都在但字节不同(主存优先,不动;仅记录供健康页)。
+// PHASE 2-E: primaryReady 后禁止 shadow→四键 LS(权威已在 IDB;陈旧影子不得回写遗留键)。
 export async function reconcileShadowOnBoot(){
-	const result = { restored: [], diverged: [], checked: false };
+	const result = { restored: [], diverged: [], checked: false, skippedPrimary: false };
 	if(!shadowEligible()){
+		lastReconcile = result;
+		return result;
+	}
+	let primaryReady = false;
+	try{
+		// 延迟 require 避免与 userRecordsStore ↔ shadowMirror 环依赖。
+		// eslint-disable-next-line global-require
+		const urs = require('./userRecordsStore');
+		primaryReady = !!(urs && typeof urs.isUserRecordsPrimaryReady === 'function' && urs.isUserRecordsPrimaryReady());
+	}catch(_e){
+		primaryReady = false;
+	}
+	if(primaryReady){
+		result.checked = true;
+		result.skippedPrimary = true;
 		lastReconcile = result;
 		return result;
 	}

@@ -1,5 +1,7 @@
 # windows-adaptations/ — Windows-only changes to the (gitignored) product source
 
+PHASE 4-I：本仓库的客户端是浏览器。`desktop_installer_bundle/`（Electron / NSIS / Horosa.exe）不在本检出，也不再是入口。Java `:9999` 与 Python `:8899` 仍由 `local/Horosa_Local_Windows.ps1` 拉起。下面的补丁记录保留，不在这一步删除后端。
+
 This Windows repo is **build-harness-only**: the product source under
 `local/workspace/Horosa-Web-*/` (astrostudyui / astropy / astrostudysrv / vendor) is **gitignored**
 and is **wholesale-replaced from the Mac repo** on every sync (`re-clone Mac → copy Mac's Horosa-Web/

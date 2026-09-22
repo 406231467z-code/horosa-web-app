@@ -94,8 +94,22 @@ let fourKeyWriteCounts = {
 	'horosa.localCases.v1': 0,
 	'horosa.localCases.trash.v1': 0,
 };
+let fourKeyReadCounts = {
+	'horosa.localCharts.v1': 0,
+	'horosa.localCharts.trash.v1': 0,
+	'horosa.localCases.v1': 0,
+	'horosa.localCases.trash.v1': 0,
+};
+let fourKeyRemoveCounts = {
+	'horosa.localCharts.v1': 0,
+	'horosa.localCharts.trash.v1': 0,
+	'horosa.localCases.v1': 0,
+	'horosa.localCases.trash.v1': 0,
+};
 let fourKeyRatchetOn = false;
 let originalLocalStorageSetItem = null;
+let originalLocalStorageGetItem = null;
+let originalLocalStorageRemoveItem = null;
 const primaryListeners = [];
 let snapshots = {
 	chart: { live: null, trash: null },
@@ -1104,22 +1118,46 @@ function ensureFourKeyRatchetPatched(){
 		return;
 	}
 	originalLocalStorageSetItem = window.localStorage.setItem.bind(window.localStorage);
+	originalLocalStorageGetItem = window.localStorage.getItem.bind(window.localStorage);
+	originalLocalStorageRemoveItem = window.localStorage.removeItem.bind(window.localStorage);
 	window.localStorage.setItem = function(key, value){
 		if(fourKeyRatchetOn && Object.prototype.hasOwnProperty.call(fourKeyWriteCounts, key)){
 			fourKeyWriteCounts[key] += 1;
 		}
 		return originalLocalStorageSetItem(key, value);
 	};
+	window.localStorage.getItem = function(key){
+		if(fourKeyRatchetOn && Object.prototype.hasOwnProperty.call(fourKeyReadCounts, key)){
+			fourKeyReadCounts[key] += 1;
+		}
+		return originalLocalStorageGetItem(key);
+	};
+	window.localStorage.removeItem = function(key){
+		if(fourKeyRatchetOn && Object.prototype.hasOwnProperty.call(fourKeyRemoveCounts, key)){
+			fourKeyRemoveCounts[key] += 1;
+		}
+		return originalLocalStorageRemoveItem(key);
+	};
 }
 
 export function __startFourKeyWriteRatchetForTests(){
 	ensureFourKeyRatchetPatched();
 	fourKeyWriteCounts = emptyFourKeyCounts();
+	fourKeyReadCounts = emptyFourKeyCounts();
+	fourKeyRemoveCounts = emptyFourKeyCounts();
 	fourKeyRatchetOn = true;
 }
 
 export function __getFourKeyWriteCountsForTests(){
 	return { ...fourKeyWriteCounts };
+}
+
+export function __getFourKeyReadCountsForTests(){
+	return { ...fourKeyReadCounts };
+}
+
+export function __getFourKeyRemoveCountsForTests(){
+	return { ...fourKeyRemoveCounts };
 }
 
 export function __stopFourKeyWriteRatchetForTests(){
@@ -1141,6 +1179,8 @@ function resetRuntimeState(){
 	snapshots = emptySnapshots();
 	setReadiness(USER_RECORDS_STATUS.uninitialized);
 	fourKeyWriteCounts = emptyFourKeyCounts();
+	fourKeyReadCounts = emptyFourKeyCounts();
+	fourKeyRemoveCounts = emptyFourKeyCounts();
 	fourKeyRatchetOn = false;
 }
 

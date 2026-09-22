@@ -2,9 +2,8 @@ import { Component } from 'react';
 import { Row, Col, } from 'antd';
 import MeiyiGuaSym from './MeiyiGuaSym';
 import GuaChartDiv from './GuaChartDiv';
-import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import { XQSelect as Select } from '../xq-ui';
+import { lookupGuaDescMap, lookupMeiyiDescMap } from '../../utils/guaTextTable';
 
 const { Option } = Select;
 
@@ -106,12 +105,8 @@ export default class DoubleMeiyiGuaSym extends Component{
             ],
         };
         
-        const descdata = await request(`${Constants.ServerRoot}/gua/desc`, {
-            body: JSON.stringify(params),
-        });
-
-        const descresult = descdata && descdata[Constants.ResultKey];
-        if(!descresult){ return; } // request 软失败返 undefined → 不 setState 半成品,避免 Unhandled Rejection
+        const descresult = lookupGuaDescMap(params.name);
+        if(!descresult || !Object.keys(descresult).length){ return; }
 
         let st = {
             gua64: descresult[orgyao.join('')],
@@ -135,11 +130,8 @@ export default class DoubleMeiyiGuaSym extends Component{
         let meiyiparam = {
             name: [huUpYao.join(''), huDownYao.join('')],
         }
-        const meiyidata = await request(`${Constants.ServerRoot}/gua/meiyi`, {
-            body: JSON.stringify(meiyiparam),
-        });
-        const meiyires = meiyidata && meiyidata[Constants.ResultKey];
-        if(!meiyires){ return; } // 同上:互卦取象软失败时不渲染半盘
+        const meiyires = lookupMeiyiDescMap(meiyiparam.name);
+        if(!meiyires || !Object.keys(meiyires).length){ return; }
 
         st.huGuaUp = meiyires[huUpYao.join('')];
         st.huGuaDown = meiyires[huDownYao.join('')];

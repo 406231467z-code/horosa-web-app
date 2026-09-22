@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# PHASE 4-I: 客户端是浏览器。本脚本拉起 Java / Python 与静态页，不启动 Horosa.exe。
 set -euo pipefail
 
 # [U-I G1] locale 兜底:GUI(LaunchServices)拉起的进程通常无 LANG——非 ASCII(中文

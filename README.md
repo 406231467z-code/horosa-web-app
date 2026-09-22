@@ -6,18 +6,18 @@
 
 # 星阙 Horosa
 
-**把所有玄学放进一个原生 Windows 软件里**<br />
-*Every kind of metaphysics, in one native Windows app*
+**浏览器里的玄学工作站**<br />
+*The client is a browser. Local Java and Python stay as calculation services.*
 
 命 · 卜 · 工具 三区 —— **26 门主技法 · 60+ 子技法流派**（完整清单见[全功能清单](#三全功能清单)）
 
 [![Version](https://img.shields.io/badge/version-3.10.0-2ea043?style=flat-square)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/tag/v3.10.0)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-dc2626?style=flat-square)](LICENSE)
 [![Windows](https://img.shields.io/badge/Windows%2010%2F11-x64-111111?style=flat-square&logo=windows&logoColor=white)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/tag/v3.10.0)
-[![Installer](https://img.shields.io/badge/NSIS-bundled%20runtime-1f6feb?style=flat-square)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/tag/v3.10.0)
+[![Client](https://img.shields.io/badge/client-browser-1f6feb?style=flat-square)](docs/PHASE4I_INSTALLER_EXIT.md)
 [![Stars](https://img.shields.io/github/stars/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows?style=flat-square)](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/stargazers)
 
-[下载安装包](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases/download/v3.10.0/Horosa-Setup-3.10.0.exe) ·
+[打开浏览器客户端](#四网页版一键启动从源码) ·
 [中文详版](README_ZH.md) ·
 [English Guide](README_EN.md) ·
 [所有版本](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases)
@@ -40,17 +40,13 @@
 
 ## 一、星阙是什么
 
-星阙 Horosa 是一套桌面端玄学工作站，把几乎所有玄学术数放进同一个原生 Windows 应用里。从西方占星（本命、推运链、合盘）到中国术数（八字、紫微、奇门、六壬、太乙、六爻、风水、七政四余），再到印度吠陀、希腊化、汉堡量化、塔罗、地占等，外加内置多 LLM AI 分析。
+星阙 Horosa 的客户端是浏览器。西方占星、八字、紫微、奇门、六壬、太乙、六爻以及其它 KEEP 技法都在这个页面里。不需要安装 `Horosa.exe` 或 NSIS 安装包。
 
-目标是：**不再在十几个单一用途的网页排盘器之间来回切换，也不用手工拼装底层的 Python / Java / 星历运行时**。下载一个离线的安装包，打开就是成品。
+本机 Java（`:9999`）和 Python（`:8899`）仍然是计算服务：西洋星历、部分 kentang、部分尚未迁进浏览器的接口走这两处。它们不是安装器，删掉它们不会让客户端变成纯静态页。
 
-本仓承担 Windows 这一侧的交付：应用源码、共享运行时、Windows 适配层，以及面向最终用户的 NSIS 离线安装包（`Horosa-Setup-3.10.0.exe`）发布。
-
-- **当前版本**：3.10.0（运行时 `3.10.0-runtime1`）
-- **平台**：Windows 10 / 11（`x64`）
+- **客户端**：系统浏览器，或 `npm run build:file` 之后的静态页
+- **启动**：`START_HERE.bat`（转去 `local\Horosa_Local_Windows.bat`），拉起上述服务后打开浏览器
 - **许可**：AGPL-3.0-only
-
-> 安装包当前未做 Authenticode 签名，首次运行 SmartScreen 可能提示「更多信息 → 仍要运行」；请从官方 Releases 下载并可比对 `SHA256SUMS.txt` 校验。
 
 ### 截图
 
@@ -92,7 +88,7 @@
 
 | 层 | 技术 | 说明 |
 | --- | --- | --- |
-| 桌面壳 | **Electron** | 原生外壳：生命周期 / 窗口 / 运行时引导 / 应用内更新（增量下载 + Ed25519 验签）/ 缩放持久化；离线运行时随包交付 |
+| 客户端 | **浏览器** | 不安装 Horosa.exe。Electron / NSIS 不在本检出，也不再是入口 |
 | 前端 | **React 17 + UMI 3 + TypeScript / JS**，Ant Design | D3 绘盘、Babylon.js / Three.js 三维、Plotly 星体地图、Monaco 编辑 AI 导出模板 |
 | 后端（业务） | **Java 17 / Spring Boot 2.7**（多模块 Maven） | 承载占星与中国术数核心服务；监听 `:9999`（前端请求体 RSA 加密），重计算转发 Python |
 | 后端（计算） | **Python 3.11** | 封装 Swiss Ephemeris（`pyswisseph`）+ flatlib（改写版）+ vendored 传统术数计算引擎；CherryPy REST `:8899` |
@@ -273,7 +269,8 @@
 
 ## 七、文档与入口
 
-- 从源码本地部署：完整产品源码随仓库发布于 [`local/workspace/Horosa-Web-…/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/)（前端 `astrostudyui` · Java 后端 `astrostudysrv` · Python 排盘 `astropy` · 术数引擎 `vendor` · 星历 `flatlib-ctrad2`）；运行时准备脚本见 [`prepareruntime/`](prepareruntime/)，Windows 适配层见 [`windows-adaptations/`](windows-adaptations/)。工具链 Java 17 / Maven / Node 18+ / Python 3.11；用 Maven 构建 `astrostudysrv/` 产出后端 jar，然后 `bash start_horosa_local.sh`（Git Bash / WSL）。桌面打包工程（Electron + NSIS）私有维护、不在本仓库。
+- 浏览器入口：双击 [`START_HERE.bat`](START_HERE.bat)。它调用 [`local/Horosa_Local_Windows.bat`](local/Horosa_Local_Windows.bat)，启动 Java `:9999`、Python `:8899` 和静态页，然后打开系统浏览器。设 `HOROSA_NO_BROWSER=1` 则只起服务。开发时在 `astrostudyui` 里 `npm start`；交付静态页用 `npm run build:file`（产物 `dist-file`）。
+- 源码位置：[`local/workspace/Horosa-Web-…/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/)（前端 `astrostudyui` · Java `astrostudysrv` · Python `astropy` · `vendor` · `flatlib-ctrad2`）。Electron、NSIS、`Horosa.exe` 不在本检出。Java 与 Python 保留。
 - 社区文档：[CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [SUPPORT.md](SUPPORT.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - 法律与隐私：[docs/legal](docs/legal/)（服务条款 · 隐私政策 · 安全 · 网络 · 开源声明）
 - 语言详版：[README_ZH.md](README_ZH.md) · [README_EN.md](README_EN.md)

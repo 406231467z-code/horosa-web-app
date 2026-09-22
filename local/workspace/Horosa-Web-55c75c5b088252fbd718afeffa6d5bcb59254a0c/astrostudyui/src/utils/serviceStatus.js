@@ -54,6 +54,17 @@ export function markServiceOffline() {
   }
 }
 
+// PHASE 4-A: 桌面壳会自己拉起 Java/Python；纯浏览器没有这两座桥时，计算服务缺失不得挡住整个 UI。
+export function isDesktopCalcShell() {
+  try {
+    return typeof window !== 'undefined' && (!!window.__TAURI__ || !!window.horosaDesktop);
+  } catch (_e) {
+    return false;
+  }
+}
+
+export const CALC_SERVICE_REQUIRED_MESSAGE = '需要计算服务：本机 Java（:9999）与 Python（:8899）未响应。星盘等历算暂不可用，本次没有生成结果。本地命盘仍可使用。服务启动后点「立即重试」。';
+
 // 严格的「后端不可达」判定(见文件头注释)。
 export function isBackendUnreachableError(err) {
   if (!err) {

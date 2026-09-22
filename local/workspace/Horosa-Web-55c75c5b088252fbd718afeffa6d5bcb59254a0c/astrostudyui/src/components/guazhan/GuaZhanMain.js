@@ -4,8 +4,7 @@ import { createSignatureMemo } from '../../utils/memoBySignature';
 import { Checkbox, message, Modal } from 'antd';
 import { XQButton as Button, XQInputNumber as InputNumber, XQSelect as Select, XQTabs as Tabs, XQSideSection, XQModal  } from '../xq-ui';
 import QuickDockBar from '../common/QuickDockBar';
-import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
+import { lookupGuaDescMap } from '../../utils/guaTextTable';
 import * as AstroConst from '../../constants/AstroConst';
 import {randomStr, randomNum, littleEndian,} from '../../utils/helper';
 import GuaZhanInput from './GuaZhanInput';
@@ -15,7 +14,6 @@ import { getGua64, Gua64, Gua8, randYao, ZiList, HourZi, SixGods, getXunEmpty, L
 import { yarrowYao } from '../gua/LiuYaoConst';
 import { analyzeLiuyao } from '../gua/liuyaoFacade';
 import { normalizeLiuyaoSettings, applyPreset, setOption, LIUYAO_SCHOOL_OPTIONS, LIUYAO_PRESETS, loadPersistedLiuyaoSettings, persistLiuyaoSettings } from '../gua/liuyaoSchools';
-import { safeLocalStorageGet, safeLocalStorageSet } from '../../utils/safeStorage';
 import { SHENSHA_EX, yueLingNames } from '../gua/liuyaoShenShaEx';
 import LiuYaoDuanJueView from './LiuYaoDuanJueView';
 import LiuYaoZhanLeiView from './LiuYaoZhanLeiView';
@@ -701,31 +699,15 @@ class GuaZhanMain extends Component{
 		let desc = null;
 		let guaids = this.getGuasId();
 		if(guaids){
-			let params = {
-				name: [guaids.guaOrg, guaids.guaRes, guaids.guaMiddle],
-			};
-			
-			const descdata = await request(`${Constants.ServerRoot}/gua/desc`, {
-				body: JSON.stringify(params),
-			});
-	
-			// [六爻补齐 E] 卦辞离线兜底:成功即缓存;网络层失败读同 key 缓存(离线/后端未起仍有卦辞)。
-			const _descCacheKey = 'horosa.guadesc.cache.' + params.name.join('|');
-			if(!descdata){
-				try{
-					const cached = safeLocalStorageGet(_descCacheKey);
-					if(cached){ return JSON.parse(cached); }
-				}catch(e){ /* 缓存不可用即维持旧行为 */ }
-				return;   // 空载荷守卫:request() 吞错 resolve undefined(网络层失败),此次不更新、重试即恢复
-			}
-			const descresult = descdata[Constants.ResultKey];
-	
+			const descresult = lookupGuaDescMap([guaids.guaOrg, guaids.guaRes, guaids.guaMiddle]);
 			desc = {
 				guaOrg: descresult[guaids.guaOrg],
 				guaRes: descresult[guaids.guaRes],
 				guaMiddle: descresult[guaids.guaMiddle],
 			};
-			safeLocalStorageSet(_descCacheKey, JSON.stringify(desc)); // 配额满由 safeStorage 自愈
+			if(!desc.guaOrg && !desc.guaRes && !desc.guaMiddle){
+				return;
+			}
 		}
 
 		return desc;

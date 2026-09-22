@@ -4,6 +4,7 @@ import { sideSectionIcon } from '../../constants/sideSectionIcons'; // [观象P1
 import { message, Modal } from 'antd';
 import * as Constants from '../../utils/constants';
 import request from '../../utils/request';
+import { fetchLiurengGods } from '../../utils/liurengGodsLocal';
 import * as LRConst from '../liureng/LRConst';
 import { ZSList, ZhangSheng, } from '../liureng/LRZhangSheng';
 import LiuRengInput from '../lrzhan/LiuRengInput';
@@ -1066,7 +1067,7 @@ class JinKouMain extends Component{
 			};
 			const params = this.genGodsParams(flds2);
 			if(!params){ return; }
-			request(`${Constants.ServerRoot}/liureng/gods`, {
+			fetchLiurengGods(params, {
 				body: JSON.stringify(params),
 				silent: true,
 			}).then((data)=>{
@@ -1399,7 +1400,7 @@ class JinKouMain extends Component{
 			lateZiHourUseNextDay: flds.lateZiHourUseNextDay && flds.lateZiHourUseNextDay.value !== undefined ? flds.lateZiHourUseNextDay.value : defaultLateZiHourUseNextDay(),
 		};
 		try{
-			const data = await request(`${Constants.ServerRoot}/liureng/gods`, {
+			const data = await fetchLiurengGods(params, {
 				body: JSON.stringify(params),
 				silent: true,
 			});
@@ -1512,7 +1513,7 @@ class JinKouMain extends Component{
 		}else if(godsKey && this.godsInflight.has(godsKey)){
 			result = clonePlain(await this.godsInflight.get(godsKey));
 		}else{
-			const req = request(`${Constants.ServerRoot}/liureng/gods`, {
+			const req = fetchLiurengGods(params, {
 				body: JSON.stringify(params),
 				silent: true,
 			}).then((data)=>{
