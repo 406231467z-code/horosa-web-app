@@ -1,0 +1,596 @@
+{
+  "verdict": "BLOCKED",
+  "reasons": [
+    "BACKEND GOLDEN CAPTURE BLOCKED",
+    "ports 9999 and 8899 were down",
+    "python 3.14 has no swisseph, flatlib, or jsonpickle",
+    "astrostudyboot.jar is not built",
+    "only one HISTORICAL GOLDEN exists, so the fixture matrix has no production numbers",
+    "historical angular fields met 1 arcsecond on the single stored chart",
+    "aspects, lots, and house placement are MISSING from the WASM candidate"
+  ],
+  "golden": {
+    "kind": "HISTORICAL GOLDEN",
+    "file": "astrostudyui/src/divination/engine/__tests__/fixtures/realChartResult.json",
+    "sha256": "cc02ffa7ae573879b5a404d459786588ca261c6fa0ae6db245443d32d7aca814",
+    "birth": "1990-06-15 10:30:00",
+    "zone": "+08:00",
+    "hsys": "Regiomontanus",
+    "zodiacal": "Tropical",
+    "jd": 2448057.6041666665,
+    "lat": 31.233333333333334,
+    "lon": 121.46666666666667,
+    "topLevelKeys": [
+      "params",
+      "chart",
+      "receptions",
+      "mutuals",
+      "declParallel",
+      "aspects",
+      "lots",
+      "surround",
+      "guoStarSect"
+    ]
+  },
+  "fixtureCount": 21,
+  "fixturesWithGolden": [
+    "astro-moon"
+  ],
+  "fixturesWithoutGolden": [
+    "modern-1900",
+    "modern-1950",
+    "modern-1976",
+    "modern-2000",
+    "modern-2026",
+    "bound-0001",
+    "bound-0100",
+    "bound-1582",
+    "bound-9999",
+    "cal-leap",
+    "cal-month-begin",
+    "cal-month-end",
+    "cal-midnight",
+    "cal-noon",
+    "cal-offset-std",
+    "cal-offset-dst",
+    "astro-high-lat",
+    "astro-north",
+    "astro-south",
+    "astro-sidereal-intent"
+  ],
+  "toleranceArcsec": 1,
+  "toleranceWidened": false,
+  "angular": {
+    "n": 30,
+    "maxDeg": 0.0000016799815182044764,
+    "maxArcsec": 0.006047933465536115,
+    "medianArcsec": 4.092726157978177e-10,
+    "p95Arcsec": 0.0007448863925674232,
+    "worstField": "Jupiter.lat",
+    "worstFixture": "astro-moon / realChartResult.json"
+  },
+  "fieldFailCount": 0,
+  "fieldPassCount": 62,
+  "missing": [
+    "Sun.house",
+    "Moon.house",
+    "Mercury.house",
+    "Venus.house",
+    "Mars.house",
+    "Jupiter.house",
+    "Saturn.house",
+    "North Node.house"
+  ],
+  "derived": {
+    "aspects": "MISSING",
+    "lots": "MISSING",
+    "sidereal": "NOT PRESENT IN THIS GOLDEN",
+    "returns": "NOT PRESENT IN THIS GOLDEN",
+    "nongli": "NOT PRESENT IN THIS GOLDEN",
+    "housePlacement": "MISSING"
+  },
+  "fields": [
+    {
+      "field": "Sun.lon",
+      "production": 83.75148635610559,
+      "wasm": 83.751486350667,
+      "deltaDeg": 5.438593575490813e-9,
+      "deltaArcsec": 0.000019578936871766928,
+      "status": "PASS"
+    },
+    {
+      "field": "Sun.lat",
+      "production": 0.00010779948809563099,
+      "wasm": 0.00010774442533114215,
+      "deltaDeg": 5.506276448883599e-8,
+      "deltaArcsec": 0.00019822595215980955,
+      "status": "PASS"
+    },
+    {
+      "field": "Sun.lonspeed",
+      "production": 0.9551426912952471,
+      "wasm": 0.9551426920696479,
+      "deltaDegPerDay": 7.744007657350949e-10,
+      "deltaArcsecPerDay": 0.0000027878427566463415,
+      "status": "PASS"
+    },
+    {
+      "field": "Sun.sign",
+      "production": "Gemini",
+      "wasm": "Gemini",
+      "status": "PASS"
+    },
+    {
+      "field": "Sun.signlon",
+      "production": 23.751486356105588,
+      "wasm": 23.751486350666994,
+      "deltaDeg": 5.438593575490813e-9,
+      "status": "PASS"
+    },
+    {
+      "field": "Sun.retrograde",
+      "production": false,
+      "wasm": false,
+      "status": "PASS"
+    },
+    {
+      "field": "Sun.house",
+      "production": "House10",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "Moon.lon",
+      "production": 340.0965357544576,
+      "wasm": 340.0965355475447,
+      "deltaDeg": 2.0691288682428421e-7,
+      "deltaArcsec": 0.0007448863925674232,
+      "status": "PASS"
+    },
+    {
+      "field": "Moon.lat",
+      "production": 2.7399114136532323,
+      "wasm": 2.739911440516042,
+      "deltaDeg": 2.6862809754391037e-8,
+      "deltaArcsec": 0.00009670611511580773,
+      "status": "PASS"
+    },
+    {
+      "field": "Moon.lonspeed",
+      "production": 13.223769326337802,
+      "wasm": 13.223769324729618,
+      "deltaDegPerDay": 1.6081838083437106e-9,
+      "deltaArcsecPerDay": 0.000005789461710037358,
+      "status": "PASS"
+    },
+    {
+      "field": "Moon.sign",
+      "production": "Pisces",
+      "wasm": "Pisces",
+      "status": "PASS"
+    },
+    {
+      "field": "Moon.signlon",
+      "production": 10.09653575445759,
+      "wasm": 10.096535547544704,
+      "deltaDeg": 2.0691288682428421e-7,
+      "status": "PASS"
+    },
+    {
+      "field": "Moon.retrograde",
+      "production": false,
+      "wasm": false,
+      "status": "PASS"
+    },
+    {
+      "field": "Moon.house",
+      "production": "House7",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "Mercury.lon",
+      "production": 65.01506936771867,
+      "wasm": 65.01506935034979,
+      "deltaDeg": 1.7368876115142484e-8,
+      "deltaArcsec": 0.00006252795401451294,
+      "status": "PASS"
+    },
+    {
+      "field": "Mercury.lat",
+      "production": -1.7335509280636858,
+      "wasm": -1.7335509239476528,
+      "deltaDeg": 4.116033069934133e-9,
+      "deltaArcsec": 0.000014817719051762879,
+      "status": "PASS"
+    },
+    {
+      "field": "Mercury.lonspeed",
+      "production": 1.6977681983120456,
+      "wasm": 1.697768205185461,
+      "deltaDegPerDay": 6.873415392405491e-9,
+      "deltaArcsecPerDay": 0.000024744295412659767,
+      "status": "PASS"
+    },
+    {
+      "field": "Mercury.sign",
+      "production": "Gemini",
+      "wasm": "Gemini",
+      "status": "PASS"
+    },
+    {
+      "field": "Mercury.signlon",
+      "production": 5.015069367718667,
+      "wasm": 5.0150693503497905,
+      "deltaDeg": 1.7368876115142484e-8,
+      "status": "PASS"
+    },
+    {
+      "field": "Mercury.retrograde",
+      "production": false,
+      "wasm": false,
+      "status": "PASS"
+    },
+    {
+      "field": "Mercury.house",
+      "production": "House10",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "Venus.lon",
+      "production": 48.3121754768774,
+      "wasm": 48.31217545611053,
+      "deltaDeg": 2.0766869113231223e-8,
+      "deltaArcsec": 0.0000747607288076324,
+      "status": "PASS"
+    },
+    {
+      "field": "Venus.lat",
+      "production": -1.9530334964948766,
+      "wasm": -1.953033512308558,
+      "deltaDeg": 1.5813681475407293e-8,
+      "deltaArcsec": 0.000056929253311466255,
+      "status": "PASS"
+    },
+    {
+      "field": "Venus.lonspeed",
+      "production": 1.175623336464801,
+      "wasm": 1.1756233394938,
+      "deltaDegPerDay": 3.028999051579717e-9,
+      "deltaArcsecPerDay": 0.000010904396585686982,
+      "status": "PASS"
+    },
+    {
+      "field": "Venus.sign",
+      "production": "Taurus",
+      "wasm": "Taurus",
+      "status": "PASS"
+    },
+    {
+      "field": "Venus.signlon",
+      "production": 18.3121754768774,
+      "wasm": 18.312175456110538,
+      "deltaDeg": 2.0766862007803866e-8,
+      "status": "PASS"
+    },
+    {
+      "field": "Venus.retrograde",
+      "production": false,
+      "wasm": false,
+      "status": "PASS"
+    },
+    {
+      "field": "Venus.house",
+      "production": "House9",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "Mars.lon",
+      "production": 10.75663934176239,
+      "wasm": 10.756639386323547,
+      "deltaDeg": 4.45611565424997e-8,
+      "deltaArcsec": 0.00016042016355299893,
+      "status": "PASS"
+    },
+    {
+      "field": "Mars.lat",
+      "production": -1.983010246423067,
+      "wasm": -1.9830103640155805,
+      "deltaDeg": 1.1759251350440536e-7,
+      "deltaArcsec": 0.0004233330486158593,
+      "status": "PASS"
+    },
+    {
+      "field": "Mars.lonspeed",
+      "production": 0.7193894722647898,
+      "wasm": 0.7193894743917146,
+      "deltaDegPerDay": 2.1269248584587785e-9,
+      "deltaArcsecPerDay": 0.000007656929490451603,
+      "status": "PASS"
+    },
+    {
+      "field": "Mars.sign",
+      "production": "Aries",
+      "wasm": "Aries",
+      "status": "PASS"
+    },
+    {
+      "field": "Mars.signlon",
+      "production": 10.75663934176239,
+      "wasm": 10.75663938632357,
+      "deltaDeg": 4.4561179635138615e-8,
+      "status": "PASS"
+    },
+    {
+      "field": "Mars.retrograde",
+      "production": false,
+      "wasm": false,
+      "status": "PASS"
+    },
+    {
+      "field": "Mars.house",
+      "production": "House8",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "Jupiter.lon",
+      "production": 105.80377670040171,
+      "wasm": 105.8037768290354,
+      "deltaDeg": 1.2863368681337306e-7,
+      "deltaArcsec": 0.000463081272528143,
+      "status": "PASS"
+    },
+    {
+      "field": "Jupiter.lat",
+      "production": 0.18507647000784136,
+      "wasm": 0.18507479002632315,
+      "deltaDeg": 0.0000016799815182044764,
+      "deltaArcsec": 0.006047933465536115,
+      "status": "PASS"
+    },
+    {
+      "field": "Jupiter.lonspeed",
+      "production": 0.21641881191717038,
+      "wasm": 0.21641881615660508,
+      "deltaDegPerDay": 4.2394346921881265e-9,
+      "deltaArcsecPerDay": 0.000015261964891877255,
+      "status": "PASS"
+    },
+    {
+      "field": "Jupiter.sign",
+      "production": "Cancer",
+      "wasm": "Cancer",
+      "status": "PASS"
+    },
+    {
+      "field": "Jupiter.signlon",
+      "production": 15.803776700401713,
+      "wasm": 15.803776829035428,
+      "deltaDeg": 1.286337152350825e-7,
+      "status": "PASS"
+    },
+    {
+      "field": "Jupiter.retrograde",
+      "production": false,
+      "wasm": false,
+      "status": "PASS"
+    },
+    {
+      "field": "Jupiter.house",
+      "production": "House11",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "Saturn.lon",
+      "production": 294.05506521373667,
+      "wasm": 294.05506525895305,
+      "deltaDeg": 4.521638174992404e-8,
+      "deltaArcsec": 0.00016277897429972654,
+      "status": "PASS"
+    },
+    {
+      "field": "Saturn.lat",
+      "production": 0.11711332253393968,
+      "wasm": 0.11711335119967335,
+      "deltaDeg": 2.8665733675659055e-8,
+      "deltaArcsec": 0.0001031966412323726,
+      "status": "PASS"
+    },
+    {
+      "field": "Saturn.lonspeed",
+      "production": -0.05823102834207577,
+      "wasm": -0.058231023197764666,
+      "deltaDegPerDay": 5.144311102101007e-9,
+      "deltaArcsecPerDay": 0.000018519519967563625,
+      "status": "PASS"
+    },
+    {
+      "field": "Saturn.sign",
+      "production": "Capricorn",
+      "wasm": "Capricorn",
+      "status": "PASS"
+    },
+    {
+      "field": "Saturn.signlon",
+      "production": 24.05506521373667,
+      "wasm": 24.05506525895305,
+      "deltaDeg": 4.521638174992404e-8,
+      "status": "PASS"
+    },
+    {
+      "field": "Saturn.retrograde",
+      "production": true,
+      "wasm": true,
+      "status": "PASS"
+    },
+    {
+      "field": "Saturn.house",
+      "production": "House5",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "North Node.lon",
+      "production": 309.71885064672216,
+      "wasm": 309.7188506467304,
+      "deltaDeg": 8.242295734817162e-12,
+      "deltaArcsec": 2.9672264645341784e-8,
+      "status": "PASS"
+    },
+    {
+      "field": "North Node.lat",
+      "production": 0,
+      "wasm": 0,
+      "deltaDeg": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "North Node.lonspeed",
+      "production": -0.052967253313373396,
+      "wasm": -0.05296722846354694,
+      "deltaDegPerDay": 2.4849826453510193e-8,
+      "deltaArcsecPerDay": 0.0000894593752326367,
+      "status": "PASS"
+    },
+    {
+      "field": "North Node.sign",
+      "production": "Aquarius",
+      "wasm": "Aquarius",
+      "status": "PASS"
+    },
+    {
+      "field": "North Node.signlon",
+      "production": 9.71885064672216,
+      "wasm": 9.718850646730402,
+      "deltaDeg": 8.242295734817162e-12,
+      "status": "PASS"
+    },
+    {
+      "field": "North Node.retrograde",
+      "production": true,
+      "wasm": true,
+      "status": "PASS"
+    },
+    {
+      "field": "North Node.house",
+      "production": "House6",
+      "wasm": null,
+      "status": "MISSING"
+    },
+    {
+      "field": "Asc.lon",
+      "production": 156.011674406942,
+      "wasm": 156.01167440694198,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "MC.lon",
+      "production": 64.07947909689123,
+      "wasm": 64.07947909689118,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House1.lon",
+      "production": 156.011674406942,
+      "wasm": 156.01167440694198,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House2.lon",
+      "production": 181.8537070240794,
+      "wasm": 181.85370702407934,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House3.lon",
+      "production": 210.60894209907622,
+      "wasm": 210.60894209907616,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House4.lon",
+      "production": 244.07947909689125,
+      "wasm": 244.0794790968912,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House5.lon",
+      "production": 278.7633461755206,
+      "wasm": 278.7633461755205,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House6.lon",
+      "production": 309.4151965868448,
+      "wasm": 309.4151965868447,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House7.lon",
+      "production": 336.011674406942,
+      "wasm": 336.011674406942,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "House8.lon",
+      "production": 1.8537070240794264,
+      "wasm": 1.8537070240793128,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House9.lon",
+      "production": 30.608942099076216,
+      "wasm": 30.60894209907616,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House10.lon",
+      "production": 64.07947909689123,
+      "wasm": 64.07947909689118,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House11.lon",
+      "production": 98.76334617552058,
+      "wasm": 98.76334617552051,
+      "deltaArcsec": 2.5579538487363607e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House12.lon",
+      "production": 129.41519658684476,
+      "wasm": 129.4151965868447,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    }
+  ],
+  "performance": {
+    "label": "NODE EXPERIMENT",
+    "notBrowser": true,
+    "initMs": 36.54,
+    "singleChartMs": 5.14,
+    "tenChartsMs": 1.13,
+    "hundredChartsMs": 6.1,
+    "backendRequestMs": null,
+    "backendNote": "BACKEND GOLDEN CAPTURE BLOCKED"
+  },
+  "productionDependency": false,
+  "productionChartChanged": false
+}

@@ -1,0 +1,9 @@
+{
+  "name": "phase5a-sweph-parity",
+  "private": true,
+  "type": "module",
+  "description": "Isolated Swiss Ephemeris WASM vs PerChart parity. Not a production dependency.",
+  "scripts": {
+    "check": "node compare.mjs & node derived.mjs"
+  }
+}

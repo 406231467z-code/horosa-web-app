@@ -1,0 +1,36 @@
+{
+  "tolerance": {
+    "policy": "Declared before the run. Not widened after seeing deltas.",
+    "longitudeDeg": 0.0002777777777777778,
+    "longitudeLabel": "1 arcsecond",
+    "latitudeDeg": 0.0002777777777777778,
+    "latitudeLabel": "1 arcsecond",
+    "speedDegPerDay": 0.0002777777777777778,
+    "speedLabel": "1 arcsecond per day",
+    "cuspDeg": 0.0002777777777777778,
+    "angleDeg": 0.0002777777777777778
+  },
+  "rows": [
+    {"production": "chart.objects[id=Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn].lon", "wasm": "calc_ut()[0]", "unit": "degree", "transform": "shortest arc", "tolerance": "1 arcsecond"},
+    {"production": "same .lat", "wasm": "calc_ut()[1]", "unit": "degree", "transform": "absolute difference", "tolerance": "1 arcsecond"},
+    {"production": "same .lonspeed", "wasm": "calc_ut()[3] with SEFLG_SPEED", "unit": "degree/day", "transform": "absolute difference", "tolerance": "1 arcsecond/day"},
+    {"production": "chart.objects[id=North Node].lon/lat/lonspeed", "wasm": "SE_MEAN_NODE (body 10), tropical default", "unit": "degree", "transform": "same as planets", "tolerance": "1 arcsecond"},
+    {"production": "chart.objects[id=Asc].lon", "wasm": "houses().ascmc[0]", "unit": "degree", "transform": "shortest arc", "tolerance": "1 arcsecond"},
+    {"production": "chart.objects[id=MC].lon", "wasm": "houses().ascmc[1]", "unit": "degree", "transform": "shortest arc", "tolerance": "1 arcsecond"},
+    {"production": "chart.houses[id=House1..House12].lon", "wasm": "houses().cusps[1..12]", "unit": "degree", "transform": "match by house id, not array order", "tolerance": "1 arcsecond"},
+    {"production": "object.sign / signlon", "wasm": "derived from longitude", "unit": "sign index and degree in sign", "transform": "sign = floor(lon/30), signlon = lon mod 30", "tolerance": "sign must match; signlon uses the longitude tolerance"},
+    {"production": "object.lonspeed < 0 as retrograde", "wasm": "sign of speed", "unit": "boolean", "transform": "same sign of speed", "tolerance": "exact, after speed tolerance"},
+    {"production": "object.house", "wasm": "not computed", "unit": "", "transform": "", "tolerance": "MISSING"},
+    {"production": "aspects.normalAsp / immediateAsp / signAsp", "wasm": "not computed", "unit": "", "transform": "", "tolerance": "MISSING"},
+    {"production": "lots (Arabic parts)", "wasm": "not computed", "unit": "", "transform": "", "tolerance": "MISSING"},
+    {"production": "nakshatras / siderealAyanamsa when zodiacal is Sidereal", "wasm": "SEFLG_SIDEREAL not applied to the stored chart", "unit": "", "transform": "", "tolerance": "NOT PRESENT IN THIS GOLDEN"},
+    {"production": "return charts (/predict solar/lunar return)", "wasm": "not in /chart body", "unit": "", "transform": "", "tolerance": "NOT PRESENT IN THIS GOLDEN"},
+    {"production": "chart.nongli (Java)", "wasm": "not Swiss", "unit": "", "transform": "", "tolerance": "NOT PRESENT IN THIS GOLDEN"}
+  ],
+  "flags": {
+    "productionDefault": "FLG_SWIEPH | FLG_SPEED, tropical unless zodiacal is Sidereal",
+    "wasm": "SEFLG_SWIEPH | SEFLG_SPEED",
+    "houseLetter": {"Regiomontanus": "R", "Placidus": "P"},
+    "node": "body 10 mean node unless westNodeType is true"
+  }
+}

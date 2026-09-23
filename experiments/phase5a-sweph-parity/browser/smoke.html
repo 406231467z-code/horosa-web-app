@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>PHASE 5-A WASM browser smoke</title>
+</head>
+<body>
+	<p id="out">loading</p>
+	<script type="module">
+		const out = document.getElementById('out');
+		try {
+			const { default: SwissEph } = await import('../../phase4d-sweph-wasm/node_modules/swisseph-wasm/src/swisseph.js');
+			const swe = new SwissEph();
+			const t0 = performance.now();
+			await swe.initSwissEph();
+			const initMs = performance.now() - t0;
+			const jd = 2448057.6041666665;
+			const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
+			const sun = swe.calc_ut(jd, swe.SE_SUN, flags);
+			const houses = swe.houses(jd, 31.233333333333334, 121.46666666666667, 'R');
+			swe.close();
+			const payload = {
+				ok: true,
+				runtime: 'browser',
+				initMs: Number(initMs.toFixed(2)),
+				sunLon: sun[0],
+				asc: houses.ascmc[0],
+				mc: houses.ascmc[1],
+			};
+			out.textContent = JSON.stringify(payload);
+			document.title = 'PHASE5A_SMOKE_OK';
+		} catch (err) {
+			out.textContent = String(err && err.stack ? err.stack : err);
+			document.title = 'PHASE5A_SMOKE_FAIL';
+		}
+	</script>
+</body>
+</html>

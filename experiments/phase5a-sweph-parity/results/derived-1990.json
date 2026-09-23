@@ -1,0 +1,1511 @@
+{
+  "golden": "HISTORICAL GOLDEN",
+  "backendCapture": "BACKEND GOLDEN CAPTURE BLOCKED",
+  "sidereal": "NOT PRESENT IN THIS GOLDEN",
+  "houseOffsetDeg": -5,
+  "diurnal": true,
+  "tally": {
+    "PASS": 110,
+    "FAIL": 0,
+    "MISSING": 2,
+    "NOT PRESENT": 0
+  },
+  "selfHouseFailSample": [],
+  "groups": {
+    "houseSelfCheckFail": 0,
+    "house": [
+      {
+        "field": "Sun.house",
+        "backend": "House10",
+        "wasm": "House10",
+        "status": "PASS"
+      },
+      {
+        "field": "Moon.house",
+        "backend": "House7",
+        "wasm": "House7",
+        "status": "PASS"
+      },
+      {
+        "field": "Mercury.house",
+        "backend": "House10",
+        "wasm": "House10",
+        "status": "PASS"
+      },
+      {
+        "field": "Venus.house",
+        "backend": "House9",
+        "wasm": "House9",
+        "status": "PASS"
+      },
+      {
+        "field": "Mars.house",
+        "backend": "House8",
+        "wasm": "House8",
+        "status": "PASS"
+      },
+      {
+        "field": "Jupiter.house",
+        "backend": "House11",
+        "wasm": "House11",
+        "status": "PASS"
+      },
+      {
+        "field": "Saturn.house",
+        "backend": "House5",
+        "wasm": "House5",
+        "status": "PASS"
+      },
+      {
+        "field": "Uranus.house",
+        "backend": "House5",
+        "wasm": "House5",
+        "status": "PASS"
+      },
+      {
+        "field": "Neptune.house",
+        "backend": "House5",
+        "wasm": "House5",
+        "status": "PASS"
+      },
+      {
+        "field": "Pluto.house",
+        "backend": "House3",
+        "wasm": "House3",
+        "status": "PASS"
+      },
+      {
+        "field": "North Node.house",
+        "backend": "House6",
+        "wasm": "House6",
+        "status": "PASS"
+      },
+      {
+        "field": "Asc.house",
+        "backend": "House1",
+        "wasm": "House1",
+        "status": "PASS"
+      },
+      {
+        "field": "MC.house",
+        "backend": "House10",
+        "wasm": "House10",
+        "status": "PASS"
+      }
+    ],
+    "lots": [
+      {
+        "field": "Pars Fortuna",
+        "backend": 52.356723805293996,
+        "wasm": 52.35672360381972,
+        "deltaArcsec": 0.0007253074045365793,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Spirit",
+        "backend": 259.66662500859,
+        "wasm": 259.66662521006424,
+        "deltaArcsec": 0.0007253071999002714,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Faith",
+        "backend": 240.93020802020308,
+        "wasm": 240.93020820974706,
+        "deltaArcsec": 0.0006823583362347563,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Substance",
+        "backend": 289.553205954144,
+        "wasm": 289.5532059749107,
+        "deltaArcsec": 0.00007476019163732417,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Wedding [Male]",
+        "backend": 270.2687846700827,
+        "wasm": 270.26878460409944,
+        "deltaArcsec": 0.0002375397798459744,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Wedding [Female]",
+        "backend": 41.7545641438013,
+        "wasm": 41.75456420978452,
+        "deltaArcsec": 0.0002375395752096665,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Sons",
+        "backend": 344.26296292027695,
+        "wasm": 344.26296283685963,
+        "deltaArcsec": 0.00030030234938749345,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Father",
+        "backend": 6.315253264573073,
+        "wasm": 6.3152533152280625,
+        "deltaArcsec": 0.00018235796233057044,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Mother",
+        "backend": 87.79603468452217,
+        "wasm": 87.79603449837617,
+        "deltaArcsec": 0.0006701255870211753,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Brothers",
+        "backend": 327.76038589360707,
+        "wasm": 327.7603859770243,
+        "deltaArcsec": 0.00030030214475118555,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Diseases",
+        "backend": 232.71324853496773,
+        "wasm": 232.71324853431247,
+        "deltaArcsec": 0.000002358945039304672,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Death",
+        "backend": 315.8122364833585,
+        "wasm": 315.81223673548766,
+        "deltaArcsec": 0.0009076649575945339,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Travel",
+        "backend": 138.30844102914082,
+        "wasm": 138.30844104990763,
+        "deltaArcsec": 0.00007476049859178602,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Friends",
+        "backend": 240.93020802020308,
+        "wasm": 240.93020820974706,
+        "deltaArcsec": 0.0006823583362347563,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Enemies",
+        "backend": 201.6753846376812,
+        "wasm": 201.67538464311974,
+        "deltaArcsec": 0.000019578783394536003,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Saturn",
+        "backend": 274.31333299849933,
+        "wasm": 274.3133327518086,
+        "deltaArcsec": 0.0008880865834726137,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Jupiter",
+        "backend": 2.148826098753716,
+        "wasm": 2.148826025913081,
+        "deltaArcsec": 0.0002622262854856672,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Mars",
+        "backend": 197.61175887047364,
+        "wasm": 197.61175862443815,
+        "deltaArcsec": 0.000885727740751463,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Venus",
+        "backend": 304.6572248752294,
+        "wasm": 304.65722465298825,
+        "deltaArcsec": 0.0008000682100828271,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Mercury",
+        "backend": 143.35332884451736,
+        "wasm": 143.35332866041188,
+        "deltaArcsec": 0.0006627797574765282,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Horsemanship",
+        "backend": 202.05314494766293,
+        "wasm": 202.05314469553366,
+        "deltaArcsec": 0.0009076653668671497,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Life",
+        "status": "MISSING",
+        "reason": "formula input not computed by WASM"
+      },
+      {
+        "field": "Pars Radix",
+        "status": "MISSING",
+        "reason": "formula input not computed by WASM"
+      },
+      {
+        "field": "Pars Eros",
+        "backend": 7.366123938654624,
+        "wasm": 7.366124160895708,
+        "deltaArcsec": 0.0008000679031283653,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Necessity",
+        "backend": 143.35332884451736,
+        "wasm": 143.35332866041188,
+        "deltaArcsec": 0.0006627797574765282,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Courage",
+        "backend": 197.61175887047364,
+        "wasm": 197.61175862443815,
+        "deltaArcsec": 0.000885727740751463,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Victory",
+        "backend": 309.8745227151303,
+        "wasm": 309.8745227879708,
+        "deltaArcsec": 0.0002622258762130514,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Nemesis",
+        "backend": 274.31333299849933,
+        "wasm": 274.3133327518086,
+        "deltaArcsec": 0.0008880865834726137,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Basis",
+        "backend": 308.701773203646,
+        "wasm": 308.7017728006974,
+        "deltaArcsec": 0.0014506148090731585,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Exaltation",
+        "backend": 91.26018805083642,
+        "wasm": 91.26018805627496,
+        "deltaArcsec": 0.00001957873223545903,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Sons Valens",
+        "backend": 115.22296707425896,
+        "wasm": 115.22296692825637,
+        "deltaArcsec": 0.0005256093288608099,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Daughters",
+        "backend": 98.5200731834177,
+        "wasm": 98.52007303401712,
+        "deltaArcsec": 0.0005378420780743909,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Praxis",
+        "backend": 101.75324438098573,
+        "wasm": 101.75324444291573,
+        "deltaArcsec": 0.0002229479832749348,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "Pars Wedding Dorothean",
+        "backend": 120.57236352771382,
+        "wasm": 120.57236351238555,
+        "deltaArcsec": 0.00005518176635632699,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      }
+    ],
+    "aspects": [
+      {
+        "field": "normalAsp.Sun.Applicative.Uranus|180",
+        "backend": 14.42911415515806,
+        "wasm": 14.429115221887514,
+        "deltaArcsec": 0.003840226031570637,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Sun.Separative.Mars|60",
+        "backend": 12.99484701434318,
+        "wasm": 12.994846964343424,
+        "deltaArcsec": 0.00017999911960941972,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Sun.None.Moon|90",
+        "backend": 13.654950601648011,
+        "wasm": 13.65495080312229,
+        "deltaArcsec": 0.0007253074045365793,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Moon.Applicative.Venus|60",
+        "backend": 8.215639722419837,
+        "wasm": 8.215639908565834,
+        "deltaArcsec": 0.0006701255870211753,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Moon.Applicative.Jupiter|120",
+        "backend": 5.707240945944136,
+        "wasm": 5.707241281490695,
+        "deltaArcsec": 0.0012079676139364892,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Moon.Applicative.Neptune|60",
+        "backend": 3.630431382156644,
+        "wasm": 3.630431436541926,
+        "deltaArcsec": 0.00019578701540012844,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Moon.Applicative.Pluto|120",
+        "backend": 5.312987166573123,
+        "wasm": 5.312983530291177,
+        "deltaArcsec": 0.013090615004784922,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Moon.Separative.Mercury|90",
+        "backend": 5.081466386738953,
+        "wasm": 5.0814661971949135,
+        "deltaArcsec": 0.0006823585408710642,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Moon.Separative.Saturn|45",
+        "backend": 1.0414705407209226,
+        "wasm": 1.041470288591654,
+        "deltaArcsec": 0.0009076653668671497,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Moon.Separative.Uranus|60",
+        "backend": 1.9159352431939283,
+        "wasm": 1.915933974990196,
+        "deltaArcsec": 0.004565533436107216,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Mercury.Applicative.Mars|60",
+        "backend": 5.741569974043728,
+        "wasm": 5.74157003597378,
+        "deltaArcsec": 0.0002229481879112427,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Mercury.None.Moon|90",
+        "backend": 5.081466386738953,
+        "wasm": 5.0814661971949135,
+        "deltaArcsec": 0.0006823585408710642,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Venus.Applicative.Saturn|120",
+        "backend": 5.742889736859269,
+        "wasm": 5.7428898028424555,
+        "deltaArcsec": 0.00023753947289151256,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Venus.Separative.Jupiter|60",
+        "backend": 2.508398776475687,
+        "wasm": 2.5083986270751097,
+        "deltaArcsec": 0.0005378420780743909,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Venus.Separative.Neptune|120",
+        "backend": 4.585208340263165,
+        "wasm": 4.585208472023851,
+        "deltaArcsec": 0.0004743384693028929,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Venus.Separative.Pluto|180",
+        "backend": 2.902652555846686,
+        "wasm": 2.902656378274628,
+        "deltaArcsec": 0.013760740591806098,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Mars.Applicative.Jupiter|90",
+        "backend": 5.0471373586393184,
+        "wasm": 5.047137442711858,
+        "deltaArcsec": 0.0003026611409495672,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Mars.Applicative.Neptune|90",
+        "backend": 2.970327794851869,
+        "wasm": 2.9703275977631165,
+        "deltaArcsec": 0.0007095195087458706,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Mars.Separative.Uranus|90",
+        "backend": 2.576038830498703,
+        "wasm": 2.5760378137690623,
+        "deltaArcsec": 0.0036602267073249095,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Mars.None.Mercury|60",
+        "backend": 5.741569974043728,
+        "wasm": 5.74157003597378,
+        "deltaArcsec": 0.0002229481879112427,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Jupiter.Applicative.Saturn|180",
+        "backend": 8.251288513334941,
+        "wasm": 8.251288429917622,
+        "deltaArcsec": 0.00030030234938749345,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Jupiter.Separative.Uranus|180",
+        "backend": 7.623176189138064,
+        "wasm": 7.623175256480863,
+        "deltaArcsec": 0.003357565924488881,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Jupiter.Separative.Neptune|180",
+        "backend": 2.076809563787492,
+        "wasm": 2.076809844948798,
+        "deltaArcsec": 0.0010121807008545147,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Jupiter.Separative.Pluto|120",
+        "backend": 0.3942537793709988,
+        "wasm": 0.3942577511995182,
+        "deltaArcsec": 0.014298582669880489,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Jupiter.None.Moon|120",
+        "backend": 5.707240945944136,
+        "wasm": 5.707241281490695,
+        "deltaArcsec": 0.0012079676139364892,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Jupiter.None.Venus|60",
+        "backend": 2.508398776475687,
+        "wasm": 2.5083986270751097,
+        "deltaArcsec": 0.0005378420780743909,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Jupiter.None.Mars|90",
+        "backend": 5.0471373586393184,
+        "wasm": 5.047137442711858,
+        "deltaArcsec": 0.0003026611409495672,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Saturn.Applicative.Venus|120",
+        "backend": 5.742889736859269,
+        "wasm": 5.7428898028424555,
+        "deltaArcsec": 0.00023753947289151256,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Saturn.Applicative.Jupiter|180",
+        "backend": 8.251288513334941,
+        "wasm": 8.251288429917622,
+        "deltaArcsec": 0.00030030234938749345,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Saturn.Applicative.Pluto|60",
+        "backend": 8.645542292705954,
+        "wasm": 8.645546181117197,
+        "deltaArcsec": 0.013998280473970226,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Saturn.Separative.Moon|45",
+        "backend": 1.0414705407209226,
+        "wasm": 1.041470288591654,
+        "deltaArcsec": 0.0009076653668671497,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Uranus.Separative.Moon|60",
+        "backend": 1.9159352431939283,
+        "wasm": 1.915933974990196,
+        "deltaArcsec": 0.004565533436107216,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Uranus.Separative.Mars|90",
+        "backend": 2.576038830498703,
+        "wasm": 2.5760378137690623,
+        "deltaArcsec": 0.0036602267073249095,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Neptune.Applicative.Moon|60",
+        "backend": 3.630431382156644,
+        "wasm": 3.630431436541926,
+        "deltaArcsec": 0.00019578701540012844,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Neptune.Applicative.Mars|90",
+        "backend": 2.970327794851869,
+        "wasm": 2.9703275977631165,
+        "deltaArcsec": 0.0007095195087458706,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Neptune.Separative.Venus|120",
+        "backend": 4.585208340263165,
+        "wasm": 4.585208472023851,
+        "deltaArcsec": 0.0004743384693028929,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Neptune.Separative.Jupiter|180",
+        "backend": 2.076809563787492,
+        "wasm": 2.076809844948798,
+        "deltaArcsec": 0.0010121807008545147,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Neptune.Separative.Pluto|60",
+        "backend": 1.6825557844164791,
+        "wasm": 1.6825520937492229,
+        "deltaArcsec": 0.013286402122503205,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Pluto.Separative.Venus|180",
+        "backend": 2.902652555846686,
+        "wasm": 2.902656378274628,
+        "deltaArcsec": 0.013760740591806098,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Pluto.Separative.Jupiter|120",
+        "backend": 0.3942537793709988,
+        "wasm": 0.3942577511995182,
+        "deltaArcsec": 0.014298582669880489,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Pluto.None.Neptune|60",
+        "backend": 1.6825557844164791,
+        "wasm": 1.6825520937492229,
+        "deltaArcsec": 0.013286402122503205,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Chiron.Exact.Jupiter|0",
+        "backend": 0.21669873285479468,
+        "wasm": 0.21671866997758116,
+        "deltaArcsec": 0.0717736420313031,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Chiron.Separative.Neptune|180",
+        "backend": 2.2935082966422726,
+        "wasm": 2.2935285149262654,
+        "deltaArcsec": 0.07278582237404407,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Chiron.Separative.Pluto|120",
+        "backend": 0.6109525122257935,
+        "wasm": 0.6109764211770425,
+        "deltaArcsec": 0.08607222449654728,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Chiron.None.Venus|60",
+        "backend": 2.2917000436208923,
+        "wasm": 2.2916799570975854,
+        "deltaArcsec": 0.07231148390474118,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Pholus.None.Venus|45",
+        "backend": 0.3084630997885256,
+        "wasm": 0.30847854269518393,
+        "deltaArcsec": 0.05559446397001011,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Juno.Exact.Moon|120",
+        "backend": 0.2707764791165346,
+        "wasm": 0.27071806701297874,
+        "deltaArcsec": 0.21028357280101773,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      },
+      {
+        "field": "normalAsp.Juno.Applicative.Uranus|60",
+        "backend": 2.186711722310463,
+        "wasm": 2.1866520420031748,
+        "deltaArcsec": 0.21484910623712494,
+        "tolerance": "1 arcsecond",
+        "status": "PASS"
+      }
+    ],
+    "signAsp": [
+      {
+        "field": "signAsp.Sun",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 0,
+            "id": "Mercury"
+          },
+          {
+            "asp": 60,
+            "id": "Mars"
+          },
+          {
+            "asp": 90,
+            "id": "Moon"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 0,
+            "id": "Mercury"
+          },
+          {
+            "asp": 60,
+            "id": "Mars"
+          },
+          {
+            "asp": 90,
+            "id": "Moon"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Moon",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 60,
+            "id": "Venus"
+          },
+          {
+            "asp": 60,
+            "id": "Saturn"
+          },
+          {
+            "asp": 60,
+            "id": "Uranus"
+          },
+          {
+            "asp": 60,
+            "id": "Neptune"
+          },
+          {
+            "asp": 90,
+            "id": "Sun"
+          },
+          {
+            "asp": 90,
+            "id": "Mercury"
+          },
+          {
+            "asp": 120,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 120,
+            "id": "Pluto"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 60,
+            "id": "Venus"
+          },
+          {
+            "asp": 60,
+            "id": "Saturn"
+          },
+          {
+            "asp": 60,
+            "id": "Uranus"
+          },
+          {
+            "asp": 60,
+            "id": "Neptune"
+          },
+          {
+            "asp": 90,
+            "id": "Sun"
+          },
+          {
+            "asp": 90,
+            "id": "Mercury"
+          },
+          {
+            "asp": 120,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 120,
+            "id": "Pluto"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Mercury",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 0,
+            "id": "Sun"
+          },
+          {
+            "asp": 60,
+            "id": "Mars"
+          },
+          {
+            "asp": 90,
+            "id": "Moon"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 0,
+            "id": "Sun"
+          },
+          {
+            "asp": 60,
+            "id": "Mars"
+          },
+          {
+            "asp": 90,
+            "id": "Moon"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Venus",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 120,
+            "id": "Saturn"
+          },
+          {
+            "asp": 120,
+            "id": "Uranus"
+          },
+          {
+            "asp": 120,
+            "id": "Neptune"
+          },
+          {
+            "asp": 180,
+            "id": "Pluto"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 120,
+            "id": "Saturn"
+          },
+          {
+            "asp": 120,
+            "id": "Uranus"
+          },
+          {
+            "asp": 120,
+            "id": "Neptune"
+          },
+          {
+            "asp": 180,
+            "id": "Pluto"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Mars",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 60,
+            "id": "Sun"
+          },
+          {
+            "asp": 60,
+            "id": "Mercury"
+          },
+          {
+            "asp": 90,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 90,
+            "id": "Saturn"
+          },
+          {
+            "asp": 90,
+            "id": "Uranus"
+          },
+          {
+            "asp": 90,
+            "id": "Neptune"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 60,
+            "id": "Sun"
+          },
+          {
+            "asp": 60,
+            "id": "Mercury"
+          },
+          {
+            "asp": 90,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 90,
+            "id": "Saturn"
+          },
+          {
+            "asp": 90,
+            "id": "Uranus"
+          },
+          {
+            "asp": 90,
+            "id": "Neptune"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Jupiter",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 60,
+            "id": "Venus"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Moon"
+          },
+          {
+            "asp": 120,
+            "id": "Pluto"
+          },
+          {
+            "asp": 180,
+            "id": "Saturn"
+          },
+          {
+            "asp": 180,
+            "id": "Uranus"
+          },
+          {
+            "asp": 180,
+            "id": "Neptune"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 60,
+            "id": "Venus"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Moon"
+          },
+          {
+            "asp": 120,
+            "id": "Pluto"
+          },
+          {
+            "asp": 180,
+            "id": "Saturn"
+          },
+          {
+            "asp": 180,
+            "id": "Uranus"
+          },
+          {
+            "asp": 180,
+            "id": "Neptune"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Saturn",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 0,
+            "id": "Uranus"
+          },
+          {
+            "asp": 0,
+            "id": "Neptune"
+          },
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Pluto"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Venus"
+          },
+          {
+            "asp": 180,
+            "id": "Jupiter"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 0,
+            "id": "Uranus"
+          },
+          {
+            "asp": 0,
+            "id": "Neptune"
+          },
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Pluto"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Venus"
+          },
+          {
+            "asp": 180,
+            "id": "Jupiter"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Uranus",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 0,
+            "id": "Saturn"
+          },
+          {
+            "asp": 0,
+            "id": "Neptune"
+          },
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Pluto"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Venus"
+          },
+          {
+            "asp": 180,
+            "id": "Jupiter"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 0,
+            "id": "Saturn"
+          },
+          {
+            "asp": 0,
+            "id": "Neptune"
+          },
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Pluto"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Venus"
+          },
+          {
+            "asp": 180,
+            "id": "Jupiter"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Neptune",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 0,
+            "id": "Saturn"
+          },
+          {
+            "asp": 0,
+            "id": "Uranus"
+          },
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Pluto"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Venus"
+          },
+          {
+            "asp": 180,
+            "id": "Jupiter"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 0,
+            "id": "Saturn"
+          },
+          {
+            "asp": 0,
+            "id": "Uranus"
+          },
+          {
+            "asp": 60,
+            "id": "Moon"
+          },
+          {
+            "asp": 60,
+            "id": "Pluto"
+          },
+          {
+            "asp": 90,
+            "id": "Mars"
+          },
+          {
+            "asp": 120,
+            "id": "Venus"
+          },
+          {
+            "asp": 180,
+            "id": "Jupiter"
+          }
+        ]
+      },
+      {
+        "field": "signAsp.Pluto",
+        "status": "PASS",
+        "backend": [
+          {
+            "asp": 60,
+            "id": "Saturn"
+          },
+          {
+            "asp": 60,
+            "id": "Uranus"
+          },
+          {
+            "asp": 60,
+            "id": "Neptune"
+          },
+          {
+            "asp": 120,
+            "id": "Moon"
+          },
+          {
+            "asp": 120,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 180,
+            "id": "Venus"
+          }
+        ],
+        "wasm": [
+          {
+            "asp": 60,
+            "id": "Saturn"
+          },
+          {
+            "asp": 60,
+            "id": "Uranus"
+          },
+          {
+            "asp": 60,
+            "id": "Neptune"
+          },
+          {
+            "asp": 120,
+            "id": "Moon"
+          },
+          {
+            "asp": 120,
+            "id": "Jupiter"
+          },
+          {
+            "asp": 180,
+            "id": "Venus"
+          }
+        ]
+      }
+    ],
+    "immediateAsp": [
+      {
+        "field": "immediateAsp.Sun",
+        "backend": [
+          {
+            "id": "Mars",
+            "asp": 60,
+            "orb": 12.99484701434318
+          },
+          {
+            "id": "Uranus",
+            "asp": 180,
+            "orb": 14.42911415515806
+          }
+        ],
+        "wasm": [
+          {
+            "id": "Mars",
+            "asp": 60,
+            "orb": 12.994846964343424
+          },
+          {
+            "id": "Uranus",
+            "asp": 180,
+            "orb": 14.429115221887514
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "field": "immediateAsp.Moon",
+        "backend": [
+          {
+            "id": "Uranus",
+            "asp": 60,
+            "orb": 1.9159352431939283
+          },
+          {
+            "id": "Neptune",
+            "asp": 60,
+            "orb": 3.630431382156644
+          }
+        ],
+        "wasm": [
+          {
+            "id": "Uranus",
+            "asp": 60,
+            "orb": 1.915933974990196
+          },
+          {
+            "id": "Neptune",
+            "asp": 60,
+            "orb": 3.630431436541926
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "field": "immediateAsp.Venus",
+        "backend": [
+          {
+            "id": "Jupiter",
+            "asp": 60,
+            "orb": 2.508398776475687
+          },
+          {
+            "id": "Saturn",
+            "asp": 120,
+            "orb": 5.742889736859269
+          }
+        ],
+        "wasm": [
+          {
+            "id": "Jupiter",
+            "asp": 60,
+            "orb": 2.5083986270751097
+          },
+          {
+            "id": "Saturn",
+            "asp": 120,
+            "orb": 5.7428898028424555
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "field": "immediateAsp.Mars",
+        "backend": [
+          {
+            "id": "Uranus",
+            "asp": 90,
+            "orb": 2.576038830498703
+          },
+          {
+            "id": "Neptune",
+            "asp": 90,
+            "orb": 2.970327794851869
+          }
+        ],
+        "wasm": [
+          {
+            "id": "Uranus",
+            "asp": 90,
+            "orb": 2.5760378137690623
+          },
+          {
+            "id": "Neptune",
+            "asp": 90,
+            "orb": 2.9703275977631165
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "field": "immediateAsp.Jupiter",
+        "backend": [
+          {
+            "id": "Pluto",
+            "asp": 120,
+            "orb": 0.3942537793709988
+          },
+          {
+            "id": "Saturn",
+            "asp": 180,
+            "orb": 8.251288513334941
+          }
+        ],
+        "wasm": [
+          {
+            "id": "Pluto",
+            "asp": 120,
+            "orb": 0.3942577511995182
+          },
+          {
+            "id": "Saturn",
+            "asp": 180,
+            "orb": 8.251288429917622
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "field": "immediateAsp.Neptune",
+        "backend": [
+          {
+            "id": "Pluto",
+            "asp": 60,
+            "orb": 1.6825557844164791
+          },
+          {
+            "id": "Mars",
+            "asp": 90,
+            "orb": 2.970327794851869
+          }
+        ],
+        "wasm": [
+          {
+            "id": "Pluto",
+            "asp": 60,
+            "orb": 1.6825520937492229
+          },
+          {
+            "id": "Mars",
+            "asp": 90,
+            "orb": 2.9703275977631165
+          }
+        ],
+        "status": "PASS"
+      },
+      {
+        "field": "immediateAsp.Chiron",
+        "backend": [
+          {
+            "id": "Pluto",
+            "asp": 120,
+            "orb": 0.6109525122257935
+          },
+          {
+            "id": "Jupiter",
+            "asp": 0,
+            "orb": 0.21669873285479468
+          }
+        ],
+        "wasm": [
+          {
+            "id": "Pluto",
+            "asp": 120,
+            "orb": 0.6109764211770425
+          },
+          {
+            "id": "Jupiter",
+            "asp": 0,
+            "orb": 0.21671866997758116
+          }
+        ],
+        "status": "PASS"
+      }
+    ]
+  }
+}
