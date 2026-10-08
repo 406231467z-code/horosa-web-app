@@ -100,23 +100,3 @@ describe('kentang service root isolation', ()=>{
 		expect(serviceRoot.buildKentangEndpoint('shenyishu', 'pan')).toBe('http://127.0.0.1:8899/shenyishu/pan');
 	});
 });
-
-describe('phase 4-E vendor snapshots stay on disk', ()=>{
-	const vendor = path.resolve(__dirname, '../../../../../vendor');
-	const mit = ['kintaiyi', 'kinjinkou', 'kinqimen', 'kinwangji', 'kinwuzhao', 'kinastro'];
-	const noGrant = ['taixuanshifa', 'jingjue', 'shenyishu'];
-
-	test('MIT engines keep their license files', ()=>{
-		mit.forEach((name)=>{
-			const text = fs.readFileSync(path.join(vendor, name, 'LICENSE'), 'utf8');
-			expect(text.startsWith('MIT License')).toBe(true);
-		});
-	});
-
-	test('engines without a grant stay in vendor and have no LICENSE file', ()=>{
-		noGrant.forEach((name)=>{
-			expect(fs.existsSync(path.join(vendor, name))).toBe(true);
-			expect(fs.existsSync(path.join(vendor, name, 'LICENSE'))).toBe(false);
-		});
-	});
-});

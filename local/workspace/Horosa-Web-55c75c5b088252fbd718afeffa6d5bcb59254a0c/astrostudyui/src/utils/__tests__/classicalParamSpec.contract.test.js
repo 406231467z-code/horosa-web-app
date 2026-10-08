@@ -142,19 +142,6 @@ describe('③ spec ≡ ASTRO_CHART_FIELDS 挂载齿轮', () => {
 	});
 });
 
-describe('④ spec ⊆ Java 白名单(两 Controller fs grep)', () => {
-	const read = (p) => fs.readFileSync(path.join(__dirname, p), 'utf8');
-	it('send=nonDefault 的键(backendKey 映射后)在 ChartController 与 PredictiveController 都被透传', () => {
-		const chartCtrl = read('../../../../astrostudysrv/astrostudycn/src/main/java/spacex/astrostudycn/controller/ChartController.java');
-		const predCtrl = read('../../../../astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/controller/PredictiveController.java');
-		CLASSICAL_PARAM_SPEC.filter((s) => s.send === 'nonDefault').forEach((s) => {
-			const backendName = s.backendKey || s.key;
-			expect(chartCtrl.includes(`"${backendName}"`)).toBe(true);
-			expect(predCtrl.includes(`"${backendName}"`)).toBe(true);
-		});
-	});
-});
-
 describe('⑤ spec(send=nonDefault)全覆盖快照口径自陈', () => {
 	it('逐键拨非默认 → buildClassicalCalibreLine 产非空自陈行;全默认 → 空串零增行', () => {
 		expect(buildClassicalCalibreLine({})).toBe('');
@@ -201,62 +188,22 @@ describe('横向复制点全等(第三闸/回显白名单/PD 收缩/卜卦构参
 	// 哈希后缀(Horosa-Web-<sha>)且挂在 local/workspace/ 下 ⇒ 六个后端扫描测全 ENOENT
 	// (#99 课一「机械扫源码契约门咬 Windows 面」同族)。改为「本测试文件 → 工作区根」相对
 	// 定位 + 剥离 Horosa-Web/ 前缀:布局无关,macOS 上解析到完全相同的文件(行为等价)。
-	const WSROOT = path.join(__dirname, '../../../..');
-	const read = (rel) => fs.readFileSync(
-		path.join(WSROOT, String(rel).replace(/^Horosa-Web[\\/]/, '')), 'utf8');
-	const NON_DEFAULT_KEYS = CLASSICAL_PARAM_SPEC.filter((s) => s.send === 'nonDefault').map((s) => s.backendKey || s.key);
-	const NEVER_KEYS = CLASSICAL_PARAM_SPEC.filter((s) => s.send === 'never').map((s) => s.key);
-
-	it('第三 Java 闸(合盘 ModernChartController):send 键全在、never 键全不在', () => {
-		const src = read('Horosa-Web/astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/controller/ModernChartController.java');
-		NON_DEFAULT_KEYS.forEach((k) => {
-			expect(`ModernChartController:${k}:${src.includes(`"${k}"`)}`).toBe(`ModernChartController:${k}:true`);
-		});
-		NEVER_KEYS.forEach((k) => {
-			expect(`ModernChartController:never:${k}:${src.includes(`"${k}"`)}`).toBe(`ModernChartController:never:${k}:false`);
-		});
-	});
-
-	it('never 键负锁:两主 Controller 也不得混入纯前端键', () => {
-		const chart = read('Horosa-Web/astrostudysrv/astrostudycn/src/main/java/spacex/astrostudycn/controller/ChartController.java');
-		const pred = read('Horosa-Web/astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/controller/PredictiveController.java');
-		NEVER_KEYS.forEach((k) => {
-			expect(`chart:never:${k}:${chart.includes(`"${k}"`)}`).toBe(`chart:never:${k}:false`);
-			expect(`pred:never:${k}:${pred.includes(`"${k}"`)}`).toBe(`pred:never:${k}:false`);
-		});
-	});
-
-	it('回显白名单(webchartsrv 常量+helper):send 键全在——缺谁谁在派生链静默回默认', () => {
-		const web = read('Horosa-Web/astropy/websrv/webchartsrv.py');
-		const helper = read('Horosa-Web/astropy/astrostudy/helper.py');
-		// eclipseTimeMode 走 astroextra 独立端点非 /chart 回显;其余 send 键必须双双在场。
-		NON_DEFAULT_KEYS.filter((k) => k !== 'eclipseTimeMode').forEach((k) => {
-			expect(`web-echo:${k}:${web.includes(`'${k}'`)}`).toBe(`web-echo:${k}:true`);
-			expect(`helper-echo:${k}:${helper.includes(`'${k}'`)}`).toBe(`helper-echo:${k}:true`);
-		});
-	});
+	const readUi = (rel) => fs.readFileSync(path.join(UI, rel), 'utf8');
 
 	it('PD 链零收缩:termsVariant 不得再现 (1|2) 收缩形态(3/4 被吞=各 PD 表面口径分裂)', () => {
-		['Horosa-Web/astrostudyui/src/utils/primaryDirectionSync.js',
-			'Horosa-Web/astrostudyui/src/components/astro/AstroPrimaryDirection.js',
-			'Horosa-Web/astrostudyui/src/components/astro/AstroPrimaryDirectionChart.js',
-			'Horosa-Web/astrostudyui/src/components/direction/AstroDirectMain.js'].forEach((rel) => {
-			const src = read(rel);
+		['utils/primaryDirectionSync.js',
+			'components/astro/AstroPrimaryDirection.js',
+			'components/astro/AstroPrimaryDirectionChart.js',
+			'components/direction/AstroDirectMain.js'].forEach((rel) => {
+			const src = readUi(rel);
 			const shrunk = /===\s*1\s*\|\|[^)]{0,40}===\s*2\s*\)\s*\?[^:]{0,40}:\s*0/.test(src);
 			expect(`${rel}:shrunk:${shrunk}`).toBe(`${rel}:shrunk:false`);
 		});
 	});
 
-	it('卜卦构参:user 档附历元两参(缺参后端静默回落 Lahiri)', () => {
-		const src = read('Horosa-Web/astrostudyui/src/divination/engine/chartRequest.js');
+	it('卜卦构参:user 档附历元两参', () => {
+		const src = readUi('divination/engine/chartRequest.js');
 		expect(src.includes('userAyanParamsFrom')).toBe(true);
-	});
-
-	it('合盘 Python 层:webmodernsrv 走复合临界区(散 push 禁复活)', () => {
-		const src = read('Horosa-Web/astropy/websrv/webmodernsrv.py');
-		expect(src.includes('push_classical_request(data)')).toBe(true);
-		expect(src.includes('pop_classical_request(')).toBe(true);
-		expect(src.includes('push_request_exalt_variants(')).toBe(false);
 	});
 });
 

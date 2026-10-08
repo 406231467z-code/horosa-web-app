@@ -6,7 +6,8 @@
 
 # 星阙 Horosa
 
-**浏览器里的玄学工作站。本机 Java 与 Python 仍是计算服务**
+**浏览器里的玄学工作站**<br />
+*Browser Web Production 无需本机 Java 或 Python。*
 
 命 · 卜 · 工具 三区 —— **26 门主技法 · 60+ 子技法流派**（完整清单见[功能总览](#功能总览)）
 
@@ -29,11 +30,11 @@
 
 星阙 Horosa 的客户端是浏览器。西方占星、八字、紫微、奇门、六壬、太乙都在这个页面里。不安装 `Horosa.exe`，也不使用 NSIS 安装包。
 
-本机 Java（`:9999`）和 Python（`:8899`）仍然负责西洋星历、部分 kentang 和尚未迁进浏览器的接口。它们是计算服务，不是桌面壳。
+**Browser Web Production** 不依赖本机 Java / Python / `Horosa.exe` / Electron。KEEP 技法在浏览器内计算；静态托管见 [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)。（PHASE 0–4 曾使用 Java `:9999` 与 Python `:8899`；PHASE 5 Legacy Purge 自工作区移除后端树。）
 
 ## 打开
 
-双击仓库根目录的 `START_HERE.bat`。它会拉起上述服务，然后用系统浏览器打开页面。
+在 `astrostudyui` 目录执行 `npm start`（开发），或 `npm run build` / `npm run build:file` 后用静态服务器打开产物（见 [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)）。
 
 - 法律与隐私：服务条款 / 隐私政策 / 安全说明 / 网络说明 / 开源声明，见 [docs/legal](docs/legal/)（中英双语）
 
@@ -114,35 +115,29 @@
 ## 技术构成
 
 - **前端** —— React 17 + Umi 3 + TypeScript，Ant Design；D3 绘盘，Babylon.js / Three.js 三维，Plotly 星体地图，Monaco 编辑 AI 导出模板
-- **后端** —— Java 17 / Spring Boot 承载占星与中国术数核心服务；Python 3.11 服务层封装 Swiss Ephemeris（`pyswisseph`）与 vendored 的 kentang 传统术数引擎
-- **客户端** —— 系统浏览器。Electron / NSIS / `Horosa.exe` 不在本检出，也不再是入口
-- **本机服务** —— 启动脚本拉起 Java `:9999` 与 Python `:8899`。西洋星历和部分 kentang 仍走这里
+- **计算** —— KEEP 技法在浏览器内本地计算；Swiss WASM / astronomy-engine 实验资产见 `experiments/phase5a-sweph-parity`
+- **客户端** —— 系统浏览器；Electron / NSIS / `Horosa.exe` 已自生产树移除
+- **存储** —— IndexedDB / 本地存储承载命盘与事盘
 
-## 网页版一键启动(从源码)
+## 网页版（从源码）
 
-这是客户端入口。不安装 exe：
+Browser Web Production（无本机 Java / Python）:
 
-- **启动**:双击仓库里的 `local\Horosa_Local_Windows.bat` —— 有现成构建产物时几秒即开浏览器;首次运行自动补齐内置 Python / Java / Node 运行时并构建(Mongo / Redis 对本产品是可选依赖,默认跳过)。默认在 `127.0.0.1` 上起 网页 `8000` / 排盘 `8899` / 后端 `9999`,端口被占会自动换用空闲口。
-- **停止**:回到启动时的控制台窗口按 Enter,或直接关闭它(脚本只回收带本产品指纹的进程,绝不误伤其它软件)。设 `HOROSA_NO_BROWSER=1` 可不自动开浏览器。
-- **首次运行 SmartScreen**:未签名脚本可能触发 Windows 提示,选「更多信息 → 仍要运行」即可。
-- **Git Bash / WSL 用户**:也可用产品源里的 `start_horosa_local.sh` / `stop_horosa_local.sh`(同一套服务,跨平台)。
+- **开发**：`cd local/workspace/Horosa-Web-…/astrostudyui && npm install && npm start`
+- **静态 Web 交付**：`npm run build` → `dist/`
+- **本地文件协议**：`npm run build:file` → `dist-file/`
+- **托管**：见 [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)
 
 ## 常见问题
 
 **怎么打开？**
-双击 `START_HERE.bat`。它启动本机 Java `:9999` 和 Python `:8899`，然后打开系统浏览器。不安装 `Horosa.exe`。
+在 `astrostudyui` 执行 `npm start`，或构建后用静态托管打开 `dist/` / `dist-file/`（见 [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)）。
 
 **还要自己装 Python 或 Java 吗？**
-计算服务仍然需要这两处。启动脚本会尽量使用仓库里准备好的运行时。它们是后端，不是安装器。西洋星历和部分 kentang 仍走这里。
+Browser Web Production **不需要**。历史 PHASE 文档仍记录曾用 Java/Python 后端。
 
 **关掉浏览器会丢掉命例吗？**
-不会。命例与事盘在浏览器本地存储里。停掉 Java / Python 只是暂时不能做仍依赖后端的排盘。
-
-**可以不自动打开浏览器吗？**
-可以。设 `HOROSA_NO_BROWSER=1` 再运行启动脚本，服务照常起来。
-
-**未签名脚本被 SmartScreen 拦住怎么办？**
-选「更多信息 → 仍要运行」。拦住的是启动脚本，不是安装包。
+不会。命例与事盘在浏览器 IndexedDB / 本地存储里。
 
 ## 开发者入口
 
@@ -152,9 +147,8 @@
 - 想看英文完整说明：[README_EN.md](README_EN.md)
 - 想确认第三方许可证：[THIRD_PARTY_NOTICES.md](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/THIRD_PARTY_NOTICES.md)
 - 法律与隐私文档：[docs/legal](docs/legal/)
-- 产品源码：[`local/workspace/Horosa-Web-…/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/) —— 前端 `astrostudyui`，后端 `astrostudysrv` / `astropy`，引擎 `vendor`，星历 `flatlib-ctrad2`
-- 运行时准备脚本（含随包 VC++ 运行时）：[`prepareruntime/`](prepareruntime/)
-- Windows 适配层（Windows 专属补丁与发布哨兵）：[`windows-adaptations/`](windows-adaptations/)
+- 产品源码：[`local/workspace/Horosa-Web-…/astrostudyui/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/)（PHASE 5 Legacy Purge 后仅保留浏览器生产树 + parity 实验）
+- Release 文档：[`docs/FINAL_WEB_ARCHITECTURE.md`](docs/FINAL_WEB_ARCHITECTURE.md) · [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)
 - 历史版本与完整发布说明：[GitHub Releases](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases)
 
 ## 致谢

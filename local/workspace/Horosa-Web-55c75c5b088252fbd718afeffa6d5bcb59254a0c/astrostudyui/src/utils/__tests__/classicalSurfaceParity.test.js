@@ -13,41 +13,6 @@ const REPO_WEB = path.resolve(UI_ROOT, '..', '..');
 const read = (rel) => fs.readFileSync(path.resolve(UI_ROOT, rel), 'utf8');
 const readRepo = (rel) => fs.readFileSync(path.resolve(REPO_WEB, rel), 'utf8');
 
-describe('① Java analysis 白名单 ⊇ spec send:nonDefault 全集(丢键=右栏 B 链全死)', ()=>{
-	it('AstroExtraController.OPTIONAL_KEYS 含每个 send:nonDefault 键的 backendKey', ()=>{
-		const src = readRepo('astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/controller/AstroExtraController.java');
-		const m = src.match(/OPTIONAL_KEYS = new String\[\] \{([\s\S]*?)\};/);
-		expect(m).toBeTruthy();
-		const listed = new Set((m[1].match(/"([^"]+)"/g) || []).map((s)=>s.slice(1, -1)));
-		const missing = CLASSICAL_PARAM_SPEC
-			.filter((d)=>d.send === 'nonDefault')
-			.map((d)=>d.backendKey || d.key)
-			.filter((k)=>!listed.has(k));
-		expect(missing).toEqual([]);
-	});
-	it('getAstroExtraAnalysis 带 _v 代次盐(白名单扩键后旧 paramhash 缓存必须整体失效)', ()=>{
-		const src = readRepo('astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/helper/AstroHelper.java');
-		const seg = src.slice(src.indexOf('getAstroExtraAnalysis'));
-		expect(seg.slice(0, 400).includes('params.put("_v"')).toBe(true);
-	});
-});
-
-describe('② Python analysis 临界区+行星时三档(第二实现分裂已收口)', ()=>{
-	const py = readRepo('astropy/astrostudy/astroextra.py');
-	it('analyze_chart 进 push/pop_classical_request 临界区(否则 almuten/逐题主星恒默认表)', ()=>{
-		const seg = py.slice(py.indexOf('def analyze_chart(data):'), py.indexOf('def analyze_chart(data):') + 900);
-		expect(seg.includes('push_classical_request(')).toBe(true);
-		expect(seg.includes('pop_classical_request(')).toBe(true);
-	});
-	it('compute_planetary_hours 读 planetaryHourMethod 三档并回显 hourMode(旧版硬写死不等时)', ()=>{
-		const seg = py.slice(py.indexOf('def compute_planetary_hours(params):'));
-		expect(seg.slice(0, 5000).includes("params.get('planetaryHourMethod')")).toBe(true);
-		expect(seg.slice(0, 5000).includes("'hourMode': hour_mode")).toBe(true);
-		expect(seg.slice(0, 5000).includes("== 'equal24'")).toBe(true);
-		expect(seg.slice(0, 5000).includes("== 'unequal'")).toBe(true);
-	});
-});
-
 describe('③ 全站断链宿主构参接单源(默认态零新键=零回归;非默认即透传)', ()=>{
 	const SPREAD_SITES = [
 		// [量化盘四副本+库盘人]
@@ -178,29 +143,14 @@ describe('⑥ [SURF-R] 第二轮全面审查修复的机械看守', ()=>{
 		const src = read('components/direction/AstroDirectMain.js');
 		expect(src.match(/const cls = classicalBackendOverridesFromFields\(nextFields \|\| \{\}\);\s*\n\s*delete cls\.termsVariant;/)).toBeTruthy();
 	});
-	it('缓存代次盐前后端同值(cls1 两层字面量全等)', ()=>{
+	it('缓存代次盐在前端 analysis 请求在位', ()=>{
 		const fe = read('components/astro/AstroAnalysisLab.js');
 		const feSalt = (fe.match(/_v:\s*'([^']+)'/) || [])[1];
-		const javaPath = path.join(UI_ROOT, '../astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/helper/AstroHelper.java');
-		if(!fs.existsSync(javaPath)){ return; }
-		const java = fs.readFileSync(javaPath, 'utf8');
-		const jSalt = (java.match(/params\.put\("_v",\s*"([^"]+)"\)/) || [])[1];
 		expect(feSalt).toBeTruthy();
-		expect(jSalt).toBe(feSalt);
 	});
-	it('germany 中点腿古典键透传在位(Java classicalKeys 段 + Python midpoint 临界区)', ()=>{
-		const javaPath = path.join(UI_ROOT, '../astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/controller/GermanyTechController.java');
-		if(fs.existsSync(javaPath)){
-			const java = fs.readFileSync(javaPath, 'utf8');
-			expect(java.includes('classicalKeys')).toBe(true);
-			expect(java.includes('"termsVariant"')).toBe(true);
-		}
-		const pyPath = path.join(UI_ROOT, '../astropy/websrv/webgermanysrv.py');
-		if(fs.existsSync(pyPath)){
-			const py = fs.readFileSync(pyPath, 'utf8');
-			expect(py.includes('push_classical_request(data)')).toBe(true);
-			expect(py.includes('pop_classical_request(_cls_tokens)')).toBe(true);
-		}
+	it('germany 中点腿古典键透传在前端构参链', ()=>{
+		const src = read('components/germany/AstroMidpoint.js');
+		expect(src.includes('classicalBackendOverridesFromFields') || src.includes('natalClassicalParams')).toBe(true);
 	});
 	it('图形星历有意不带古典键(端点零消费豁免注记在位,防再误接)', ()=>{
 		const src = read('components/germany/UranianGraphicEphemeris.js');

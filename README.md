@@ -7,7 +7,7 @@
 # 星阙 Horosa
 
 **浏览器里的玄学工作站**<br />
-*The client is a browser. Local Java and Python stay as calculation services.*
+*Browser Web Production runs without local Java or Python.*
 
 命 · 卜 · 工具 三区 —— **26 门主技法 · 60+ 子技法流派**（完整清单见[全功能清单](#三全功能清单)）
 
@@ -42,10 +42,10 @@
 
 星阙 Horosa 的客户端是浏览器。西方占星、八字、紫微、奇门、六壬、太乙、六爻以及其它 KEEP 技法都在这个页面里。不需要安装 `Horosa.exe` 或 NSIS 安装包。
 
-本机 Java（`:9999`）和 Python（`:8899`）仍然是计算服务：西洋星历、部分 kentang、部分尚未迁进浏览器的接口走这两处。它们不是安装器，删掉它们不会让客户端变成纯静态页。
+**Browser Web Production** 不依赖本机 Java / Python / `Horosa.exe` / Electron。排盘与 KEEP 技法在浏览器内计算；静态托管见 [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)。（PHASE 0–4 曾使用 Java `:9999` 与 Python `:8899`；PHASE 5 Legacy Purge 自工作区移除后端树。）
 
-- **客户端**：系统浏览器，或 `npm run build:file` 之后的静态页
-- **启动**：`START_HERE.bat`（转去 `local\Horosa_Local_Windows.bat`），拉起上述服务后打开浏览器
+- **客户端**：系统浏览器，或 `npm run build` / `npm run build:file` 产物
+- **开发**：在 `astrostudyui` 目录 `npm start`；**交付**：`npm run build`（history）或 `npm run build:file`（hash / 本地文件）
 - **许可**：AGPL-3.0-only
 
 ### 截图
@@ -90,10 +90,10 @@
 | --- | --- | --- |
 | 客户端 | **浏览器** | 不安装 Horosa.exe。Electron / NSIS 不在本检出，也不再是入口 |
 | 前端 | **React 17 + UMI 3 + TypeScript / JS**，Ant Design | D3 绘盘、Babylon.js / Three.js 三维、Plotly 星体地图、Monaco 编辑 AI 导出模板 |
-| 后端（业务） | **Java 17 / Spring Boot 2.7**（多模块 Maven） | 承载占星与中国术数核心服务；监听 `:9999`（前端请求体 RSA 加密），重计算转发 Python |
-| 后端（计算） | **Python 3.11** | 封装 Swiss Ephemeris（`pyswisseph`）+ flatlib（改写版）+ vendored 传统术数计算引擎；CherryPy REST `:8899` |
+| 计算 | **浏览器内引擎** | 西洋星历 / 命盘 / KEEP 技法本地计算（见 `astrostudyui/src/services/astronomy` 与各 `*Browser.js`） |
+| 历史后端 | *已自本检出移除* | PHASE 0–4 曾含 Java 17 + Python 3.11；不再属于 Web Production 运行链 |
 
-**端口约定**：前端 ↔ Java `:9999`（RSA 加密信封）；Java ↔ Python `:8899`；前端静态端口动态分配（多实例不撞）。
+**Web Production**：无 `:9999` / `:8899` 本机依赖；可选远程 AI proxy 仍由产品配置决定（非本机 Java 运行时）。
 
 ---
 
@@ -236,14 +236,14 @@
 
 ---
 
-## 四、网页版一键启动(从源码)
+## 四、网页版（从源码）
 
-不装 exe,直接从源码把星阙跑成本地网页版(适合开发者或想跑源码的用户):
+Browser Web Production（无本机 Java / Python）:
 
-- **启动**:双击仓库里的 `local\Horosa_Local_Windows.bat` —— 有现成构建产物时几秒即开浏览器;首次运行自动补齐内置 Python / Java / Node 运行时并构建(Mongo / Redis 对本产品是可选依赖,默认跳过)。默认在 `127.0.0.1` 上起 网页 `8000` / 排盘 `8899` / 后端 `9999`,端口被占会自动换用空闲口。
-- **停止**:回到启动时的控制台窗口按 Enter,或直接关闭它(脚本只回收带本产品指纹的进程,绝不误伤其它软件)。设 `HOROSA_NO_BROWSER=1` 可不自动开浏览器。
-- **首次运行 SmartScreen**:未签名脚本可能触发 Windows 提示,选「更多信息 → 仍要运行」即可。
-- **Git Bash / WSL 用户**:也可用产品源里的 `start_horosa_local.sh` / `stop_horosa_local.sh`(同一套服务,跨平台)。
+- **开发**：`cd local/workspace/Horosa-Web-…/astrostudyui && npm install && npm start`
+- **静态 Web 交付**：`npm run build` → `dist/`（history + `/static/`）
+- **本地文件协议**：`npm run build:file` → `dist-file/`（hash 路由）
+- **托管**：见 [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)（深链 → `index.html` → SPA）
 
 ---
 
@@ -252,10 +252,9 @@
 - **本项目**：[AGPL-3.0-only](LICENSE)。
 - **法律与隐私**：服务条款 / 隐私政策 / 安全说明 / 网络说明 / 开源声明，见 [docs/legal](docs/legal/)（中英双语）。
 - **第三方**：完整清单与许可证文本见 [THIRD_PARTY_NOTICES.md](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/THIRD_PARTY_NOTICES.md)。
-  - vendored 传统术数计算引擎：部分上游声明 MIT（许可证文本在对应 `vendor/*/LICENSE` 保留）；部分上游未声明许可，单独标注、不擅自假定为任何开源许可。
+  - 传统术数引擎上游致谢与许可证摘要见 `THIRD_PARTY_NOTICES.md`（PHASE 5 起 vendored Python 树已自工作区移除，法律文本仍保留在 notices）。
   - 天球坐标参考数据 d3-celestial（BSD 3-Clause；星座线 / IAU 边界 / 中国三垣派生）。
-  - flatlib（改写版）。
-  - Swiss Ephemeris（`pyswisseph`）。
+  - 浏览器星历：Swiss WASM / astronomy-engine 实验资产（见 `experiments/phase5a-sweph-parity`）。
 
 ---
 
@@ -269,8 +268,8 @@
 
 ## 七、文档与入口
 
-- 浏览器入口：双击 [`START_HERE.bat`](START_HERE.bat)。它调用 [`local/Horosa_Local_Windows.bat`](local/Horosa_Local_Windows.bat)，启动 Java `:9999`、Python `:8899` 和静态页，然后打开系统浏览器。设 `HOROSA_NO_BROWSER=1` 则只起服务。开发时在 `astrostudyui` 里 `npm start`；交付静态页用 `npm run build:file`（产物 `dist-file`）。
-- 源码位置：[`local/workspace/Horosa-Web-…/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/)（前端 `astrostudyui` · Java `astrostudysrv` · Python `astropy` · `vendor` · `flatlib-ctrad2`）。Electron、NSIS、`Horosa.exe` 不在本检出。Java 与 Python 保留。
+- **Web 源码**：[`local/workspace/Horosa-Web-…/astrostudyui/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/)（PHASE 5 Legacy Purge 后仅保留浏览器生产树 + 实验 parity）。
+- **Release 文档**：[`docs/FINAL_WEB_ARCHITECTURE.md`](docs/FINAL_WEB_ARCHITECTURE.md) · [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)
 - 社区文档：[CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [SUPPORT.md](SUPPORT.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - 法律与隐私：[docs/legal](docs/legal/)（服务条款 · 隐私政策 · 安全 · 网络 · 开源声明）
 - 语言详版：[README_ZH.md](README_ZH.md) · [README_EN.md](README_EN.md)

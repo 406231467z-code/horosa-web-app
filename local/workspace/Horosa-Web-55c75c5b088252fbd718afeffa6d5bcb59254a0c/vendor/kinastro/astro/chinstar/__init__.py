@@ -1,1 +1,0 @@
-# astro/chinstar package

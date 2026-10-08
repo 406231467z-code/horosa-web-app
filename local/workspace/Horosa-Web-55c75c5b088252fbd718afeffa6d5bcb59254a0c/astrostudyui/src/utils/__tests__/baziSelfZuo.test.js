@@ -92,7 +92,7 @@ describe('phaseType 长生派别覆盖（resolveDiShiByPhaseType）', () => {
 	});
 	test('🔴 360 格权威对拍:changShengOf 三档全表 ≡ Java wuxingphase.json(单一真值源锁)', () => {
 		// eslint-disable-next-line global-require
-		const J = require('../../../../astrostudysrv/astrostudy/src/main/java/spacex/astrostudy/helper/wuxingphase.json');
+		const J = require('./fixtures/wuxingphase.json');
 		const { changShengOf } = require('../baziLunarLocal');
 		const TBL = { 0: 'huotutong', 1: 'suitutong', 2: 'yingyang' };
 		const GANS10 = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];

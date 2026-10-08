@@ -6,7 +6,8 @@
 
 # Horosa
 
-**A browser client. Local Java and Python stay as calculation services**
+**A browser workstation**<br />
+*Browser Web Production runs without local Java or Python.*
 
 Fate · Divination · Tools — **26 primary disciplines, 60+ sub-techniques & schools** (full catalog in [What's Inside](#whats-inside))
 
@@ -29,11 +30,11 @@ Fate · Divination · Tools — **26 primary disciplines, 60+ sub-techniques & s
 
 The Horosa client is a browser. Western astrology, Bazi, Ziwei, Qimen, Liuren, and Taiyi live on that page. There is no `Horosa.exe` and no NSIS installer to run.
 
-Local Java (`:9999`) and Python (`:8899`) still serve Swiss Ephemeris, part of kentang, and other endpoints that have not moved into the browser. Those processes are calculation services, not a desktop shell.
+**Browser Web Production** does not require local Java, Python, `Horosa.exe`, or Electron. KEEP techniques calculate in the browser; static hosting is documented in [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md). (PHASE 0–4 used Java `:9999` and Python `:8899`; PHASE 5 Legacy Purge removed backend trees from the workspace.)
 
 ## Open
 
-Double-click `START_HERE.bat` at the repository root. It starts those services, then opens the system browser.
+Run `npm start` under `astrostudyui` for development, or `npm run build` / `npm run build:file` and serve the output (see [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)).
 
 - **Legal & privacy**: Terms of Service / Privacy Policy / Security / Network / Open-source notices — see [docs/legal](docs/legal/) (Chinese & English).
 
@@ -114,35 +115,29 @@ Charts and cases save locally with tags, snapshots, and raw backend payloads. Ev
 ## Under the Hood
 
 - **Frontend** — React 17 + Umi 3 + TypeScript with Ant Design; D3 for chart drawing, Babylon.js / Three.js for 3D, Plotly for astrocartography maps, and Monaco for editing AI-export templates
-- **Backend** — Java 17 / Spring Boot hosts the core astrology and Chinese-method services; a Python 3.11 service layer wraps Swiss Ephemeris (`pyswisseph`) and the vendored kentang traditional-method engines
-- **Client** — the system browser. Electron, NSIS, and `Horosa.exe` are not in this checkout and are not the entry
-- **Local services** — the launcher starts Java `:9999` and Python `:8899`. Swiss Ephemeris and part of kentang still go there
+- **Calculation** — KEEP techniques run locally in the browser; Swiss WASM / astronomy-engine experiments live under `experiments/phase5a-sweph-parity`
+- **Client** — the system browser; Electron, NSIS, and `Horosa.exe` were removed from the production tree
+- **Storage** — IndexedDB / browser storage for charts and cases
 
 ## Run the Web Version from Source
 
-This is the client entry. No installer:
+Browser Web Production (no local Java / Python):
 
-- **Start**: double-click `local\Horosa_Local_Windows.bat` in the repo — it opens the browser within seconds when a build already exists; on first run it auto-provisions the bundled Python / Java / Node runtime and builds (Mongo / Redis are optional for this product and skipped by default). It serves web `8000` / chart `8899` / backend `9999` on `127.0.0.1`, auto-switching to free ports if any are taken.
-- **Stop**: return to the console window it opened and press Enter, or just close it (the script only reclaims processes carrying this product's fingerprint — it never touches other software). Set `HOROSA_NO_BROWSER=1` to skip auto-opening the browser.
-- **First-run SmartScreen**: the unsigned script may trigger a Windows prompt — choose "More info → Run anyway".
-- **Git Bash / WSL users**: the product source also ships `start_horosa_local.sh` / `stop_horosa_local.sh` (same services, cross-platform).
+- **Dev**: `cd local/workspace/Horosa-Web-…/astrostudyui && npm install && npm start`
+- **Static web delivery**: `npm run build` → `dist/`
+- **File protocol**: `npm run build:file` → `dist-file/`
+- **Hosting**: see [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)
 
 ## FAQ
 
 **How do I open it?**
-Double-click `START_HERE.bat`. It starts local Java `:9999` and Python `:8899`, then opens the system browser. It does not install `Horosa.exe`.
+Run `npm start` under `astrostudyui`, or build and statically host `dist/` / `dist-file/` (see [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)).
 
 **Do I still need Python or Java?**
-Yes, for the calculation services. The launcher uses a runtime already prepared in the tree when one is present. Those processes are backends, not an installer. Swiss Ephemeris and part of kentang still go there.
+Not for Browser Web Production. Historical PHASE docs still record the former Java/Python backends.
 
 **Does closing the browser delete saved charts?**
-No. Charts and cases stay in browser storage. Stopping Java or Python only pauses charts that still depend on those services.
-
-**Can I skip opening a browser?**
-Set `HOROSA_NO_BROWSER=1` before the launcher. The services still start.
-
-**SmartScreen blocks the unsigned script.**
-Choose "More info → Run anyway". The prompt is about the startup script, not an installer.
+No. Charts and cases stay in IndexedDB / browser storage.
 
 ## For Maintainers
 
@@ -152,9 +147,8 @@ Start from the entry point that matches your goal:
 - the full Chinese guide: [README_ZH.md](README_ZH.md)
 - third-party licensing: [THIRD_PARTY_NOTICES.md](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/THIRD_PARTY_NOTICES.md)
 - legal & privacy documents: [docs/legal](docs/legal/)
-- product source: [`local/workspace/Horosa-Web-…/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/) — frontend `astrostudyui`, backends `astrostudysrv` / `astropy`, engines `vendor`, ephemeris `flatlib-ctrad2`
-- runtime-prep scripts (with bundled VC++ runtime): [`prepareruntime/`](prepareruntime/)
-- Windows adaptation layer (Windows-only patches and release sentinels): [`windows-adaptations/`](windows-adaptations/)
+- product source: [`local/workspace/Horosa-Web-…/astrostudyui/`](local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/) (after PHASE 5 Legacy Purge: browser production tree + parity experiments only)
+- release docs: [`docs/FINAL_WEB_ARCHITECTURE.md`](docs/FINAL_WEB_ARCHITECTURE.md) · [`docs/STATIC_HOSTING_SPA.md`](docs/STATIC_HOSTING_SPA.md)
 - release history & full notes: [GitHub Releases](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows/releases)
 
 ## Acknowledgements
