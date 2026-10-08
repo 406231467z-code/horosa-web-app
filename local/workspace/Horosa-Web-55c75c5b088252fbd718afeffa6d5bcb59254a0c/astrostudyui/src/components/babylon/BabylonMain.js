@@ -2,12 +2,11 @@
 // 数据基座:一次 /chart(恒星黄道·毕宿锚)请求供各产品共用(LRU + inflight 去重 + 240ms prefetch)。
 import { Component } from 'react';
 import { XQTabs as Tabs, XQSelect } from '../xq-ui';
-import request from '../../utils/request';
-import * as Constants from '../../utils/constants';
+import { formatCalcStatus, isCalcStatus } from '../../utils/calcStatus';
+import { babylonLicenseStatus } from '../../utils/babylonAiSnapshot';
 import { saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
 import {
 	babylonChartParams, chartToLons, babylonBirthJdn, buildBabylonSnapshotText,
-	fetchBabylonEphemeris, digestBabylonEphemeris, computeNaKur,
 } from '../../utils/babylonAiSnapshot';
 import { PRODUCTS, SCHEME_ORDER, BABYLON_SCHEMES, schemeOf, judgeOpts, BABYLON_PARAM_SPEC } from '../../divination/babylon/babylonSchools';
 import { buildHoroscope } from '../../divination/babylon/horoscope';
@@ -23,27 +22,8 @@ import './babylon.less';
 
 const TabPane = Tabs.TabPane;
 
-const CACHE_MAX = 32;
-const mem = new Map();
-const inflight = new Map();
-function cacheKey(params){ try{ return JSON.stringify(params); }catch(e){ return ''; } }
 async function fetchSiderealChart(params){
-	const key = cacheKey(params);
-	if(key && mem.has(key)){ return mem.get(key); }
-	if(key && inflight.has(key)){ return inflight.get(key); }
-	const req = request(`${Constants.ServerRoot}/chart`, { body: JSON.stringify(params), silent: true })
-		.then((data) => {
-			const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-			if(key && result){
-				if(mem.has(key)){ mem.delete(key); }
-				mem.set(key, result);
-				if(mem.size > CACHE_MAX){ const f = mem.keys().next().value; if(f){ mem.delete(f); } }
-			}
-			return result;
-		})
-		.finally(() => { if(key){ inflight.delete(key); } });
-	if(key){ inflight.set(key, req); }
-	return req;
+	return babylonLicenseStatus(params);
 }
 
 class BabylonMain extends Component{
@@ -88,28 +68,13 @@ class BabylonMain extends Component{
 		const params = babylonChartParams(this.props.fields);
 		if(!params){ return; }
 		const seq = ++this.reqSeq;
-		const jdn = babylonBirthJdn(this.props.fields);
-		// 星盘与实算历象(朔望/邻近食)并行;历象失败→null(图式行照常,零阻塞)
-		const [result, ephem] = await Promise.all([
-			fetchSiderealChart(params).catch(() => null),
-			fetchBabylonEphemeris(this.props.fields, jdn).catch(() => null),
-		]);
+		const result = await fetchSiderealChart(params);
 		if(this.unmounted || seq !== this.reqSeq){ return; }
-		let ephemDigest = digestBabylonEphemeris(ephem, jdn);
-		this.setState({ chartObj: result, ephemDigest });
-		// NA/KUR 观测量(满月日/残月晨的日月升落)二段轻请求;回填不阻塞首屏。
-		// [issue#74 同类] 回填落地后必须补拍快照:旧实现只 setState,而下方快照在本同步块
-		// 已用「无 na/kur 的裸 digest」产出并冻结(本文件无 refresh-event 监听,导出直吃缓存)
-		// → 页面显示 NA/KUR 而 AI 挂载恒缺两子句。补拍与 render 同构,回包即自愈。
-		if(ephemDigest){
-			computeNaKur(this.props.fields, ephemDigest).then((full) => {
-				if(!this.unmounted && seq === this.reqSeq){
-					this.setState({ ephemDigest: full }, () => this.saveBabylonSnapshot(result, params, jdn, full));
-				}
-				return full;
-			}).catch(() => null);
+		if(isCalcStatus(result)){
+			this.setState({ chartObj: null, calcStatus: result, ephemDigest: null });
+			return;
 		}
-		this.saveBabylonSnapshot(result, params, jdn, ephemDigest);
+		this.setState({ chartObj: result, ephemDigest: null });
 	}
 
 	// 页面侧存模块 AI 快照(AI 导出当前页/挂载候选;meta=生辰签名防串盘)。
@@ -182,15 +147,19 @@ class BabylonMain extends Component{
 		const height = this.props.height ? this.props.height : 760;
 		const childHeight = Math.max(360, height - 44);
 		const opts = this.effectiveOpts();
-		const lons = chartToLons(this.state.chartObj);
+		const blocked = isCalcStatus(this.state.calcStatus);
+		const lons = blocked ? {} : chartToLons(this.state.chartObj);
 		const jdn = babylonBirthJdn(this.props.fields);
-		const bab = (jdn && lons.sun !== undefined)
+		const bab = blocked ? null : ((jdn && lons.sun !== undefined)
 			? buildHoroscope(lons, jdn, opts)
-			: (jdn ? buildHoroscope({}, jdn, opts) : null);
+			: (jdn ? buildHoroscope({}, jdn, opts) : null));
 		const common = { height: childHeight, bab, lons, opts, fields: this.props.fields, ephemDigest: this.state.ephemDigest };
 
 		return (
 			<div className="horosa-aux-module-page xq-chart-renderer xq-chart-renderer-babylon">
+				{isCalcStatus(this.state.calcStatus) ? (
+					<pre style={{ whiteSpace: 'pre-wrap', margin: '8px 12px' }}>{formatCalcStatus(this.state.calcStatus)}</pre>
+				) : null}
 				<Tabs activeKey={this.state.currentTab} onChange={this.changeTab} className="horosa-content-tabs horosa-babylon-subtabs">
 					{PRODUCTS.map((p) => (
 						<TabPane tab={p.cn} key={p.key}>

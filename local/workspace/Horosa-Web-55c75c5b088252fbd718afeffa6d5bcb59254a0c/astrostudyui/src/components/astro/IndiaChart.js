@@ -3,12 +3,12 @@ import AstroChartMain from './AstroChartMain';
 import IndiaEastChart from './IndiaEastChart';
 import IndiaNorthChart from './IndiaNorthChart';
 import IndiaSouthChart from './IndiaSouthChart';
-import request from '../../utils/request';
-import * as Constants from '../../utils/constants';
 import * as AstroConst from '../../constants/AstroConst';
 import { buildAstroSnapshotContent, } from '../../utils/astroAiSnapshot';
 import { saveModuleAISnapshot, } from '../../utils/moduleAiSnapshot';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
+import { IndiaBrowserEngine } from '../../utils/indiaBrowser';
+import { formatCalcStatus, isCalcStatus } from '../../utils/calcStatus';
 
 const indiaChartCache = new Map();
 const INDIA_CHART_CACHE_MAX = 64;   // LRU 上限:印占 payload 大(yogas+多级dasha+varga+shadbala),会话内键空间随分盘/过运日/大运派别/ayanamsa 发散,须封顶防越用越占内存(全仓唯一曾漏上限者)。
@@ -244,43 +244,7 @@ function hasCurrentJyotishPayload(result){
 }
 
 export async function requestIndiaChartData(params){
-	const cacheKey = buildIndiaChartCacheKey(params);
-	let result = indiaChartCache.get(cacheKey);
-	if(result && !hasCurrentJyotishPayload(result)){
-		indiaChartCache.delete(cacheKey);
-		result = null;
-	}
-	if(!result){
-		let inflight = indiaChartInflight.get(cacheKey);
-		if(!inflight){
-			inflight = request(`${Constants.ServerRoot}/india/chart`, {
-				body: JSON.stringify(params),
-				// silent:不触发全局工作区「载入中」满屏压暗遮罩。印度有 keep-stale(旧盘留存 + 「更新中…」角标)
-				// + 首屏本地 dashaLoading/「等待排盘数据」占位,自带加载反馈;否则每次真重算都全屏 loading(用户报的)。
-				silent: true,
-			}).then((data)=>{
-				if(!data || data[Constants.ResultKey] === undefined || data[Constants.ResultKey] === null){
-					return null;
-				}
-				const resolved = data[Constants.ResultKey];
-				if(resolved && hasCurrentJyotishPayload(resolved)){
-					if(indiaChartCache.has(cacheKey)){ indiaChartCache.delete(cacheKey); }
-					indiaChartCache.set(cacheKey, resolved);
-					while(indiaChartCache.size > INDIA_CHART_CACHE_MAX){
-						const oldest = indiaChartCache.keys().next().value;
-						if(oldest === undefined){ break; }
-						indiaChartCache.delete(oldest);
-					}
-				}
-				return resolved;
-			}).finally(()=>{
-				indiaChartInflight.delete(cacheKey);
-			});
-			indiaChartInflight.set(cacheKey, inflight);
-		}
-		result = await inflight;
-	}
-	return result;
+	return IndiaBrowserEngine.calculate(params || {});
 }
 
 function splitSections(text){
@@ -1153,6 +1117,9 @@ export async function buildIndiaSnapshotForFields(fields, chartnum){
 		params.chartnum = chartnum;
 	}
 	const result = await requestIndiaChartData(params);
+	if(isCalcStatus(result)){
+		return formatCalcStatus(result);
+	}
 	if(!result || !result.chart){
 		return '';
 	}
@@ -1204,9 +1171,15 @@ class IndiaChart extends Component{
 		}catch(e){
 			result = null;
 		}
+		if(isCalcStatus(result)){
+			if(!this._mounted) return;
+			this.setState({ chartObj: null, calcStatus: result });
+			return;
+		}
 
 		const st = {
 			chartObj: result,
+			calcStatus: null,
 		};
 
 		if(!this._mounted) return;
@@ -1361,6 +1334,9 @@ class IndiaChart extends Component{
 		let fields = this.props.fields;
 		// suppressFetch:渲染用父层提供的 chartObj(本实例不自取);为 null/falsy 时下游渲染器显占位/载入态。
 		let chartObj = this.props.suppressFetch ? this.props.chartObj : this.state.chartObj;
+		const statusNode = !this.props.suppressFetch && isCalcStatus(this.state.calcStatus) ? (
+			<pre style={{ whiteSpace: 'pre-wrap', margin: '8px 12px' }}>{formatCalcStatus(this.state.calcStatus)}</pre>
+		) : null;
 		let height = this.props.height ? this.props.height : 760;
 		let fractal = resolveIndiaFractal(this.props.chartnum, this.props.hook);
 		let label = resolveIndiaLabel(fractal, this.props.hook);
@@ -1372,6 +1348,7 @@ class IndiaChart extends Component{
 		if(this.props.chartOnly){
 			return (
 				<div className="horosa-india-chart-instance horosa-india-chart-only">
+					{statusNode}
 					<IndiaChartRenderer
 						value={chartObj}
 						chartnum={fractal}
@@ -1394,6 +1371,7 @@ class IndiaChart extends Component{
 
 		return (
 			<div className="horosa-india-chart-instance">
+					{statusNode}
 					<AstroChartMain 
 						value={chartObj} 
 					onChange={this.onFieldsChange}

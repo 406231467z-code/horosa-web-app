@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { Spin, Row, Col } from 'antd';
 import request from '../../utils/request';
 import * as Constants from '../../utils/constants';
-import { fetchChart } from '../../services/astro';
+import { calculateChart } from '../../services/astrologyCalculationService';
 import AstroChart from './AstroChart';
 import { markPanelReady } from '../../utils/perfMark';
 import {
@@ -58,7 +58,7 @@ class AstroPrenatalSyzygy extends Component{
 		if(dt){
 			try{
 				const chartBody = { ...base, date: dt.date, time: dt.time };
-				const rsp = await fetchChart(chartBody);
+				const rsp = await calculateChart(chartBody);
 				chart = unwrapResult(rsp) || null;
 			}catch(e){ chart = null; }
 		}

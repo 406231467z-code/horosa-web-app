@@ -5,7 +5,7 @@
 // 后端复用既有 /astroextra/ephemeris（已返回 lunarPhases / eclipses / ingresses / stations，无需新端点）。
 import request from '../../utils/request';
 import * as Constants from '../../utils/constants';
-import { fetchChart } from '../../services/astro';
+import { calculateChart } from '../../services/astrologyCalculationService';
 import DateTime from '../../components/comp/DateTime';
 import { SIGNS } from '../data/signs';
 
@@ -165,7 +165,7 @@ export async function chartAtMoment(momentStr, fieldsLike){
 		pdaspects: [0, 60, 90, 120, 180],
 	};
 	try{
-		const rsp = await fetchChart(params, { cache: true });
+		const rsp = await calculateChart(params, { cache: true });
 		return (rsp && rsp.Result) ? rsp.Result : null;
 	}catch(e){
 		return null;

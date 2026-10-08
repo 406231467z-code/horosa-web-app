@@ -81,16 +81,10 @@ describe('P5 主限法盘 primarydirchart round-trip', () => {
 			direction: 'converse',
 		});
 		expect(ctx).toBeTruthy();
-		expect(ctx.content).toContain('[主限法盘设置]');
-		expect(ctx.content).toContain('2025-06-05 10:00:00'); // 所选时间换算后回显
-		expect(ctx.content).toContain('逆向 Converse');       // direction 透传
-		expect(ctx.content).toContain('当前Arc');
-		// [审计修] 盘体补全:本命段带星/宫行(此前无头快照零盘体,AI 拿不到任何星曜宫位)。
-		expect(ctx.content).toContain('[本命盘配置]');
-		expect(ctx.content).toContain('太阳 白羊 10.00°');
-		expect(ctx.content).toContain('[主限法盘配置]');
-		// 不应误用表格 builder 的占位串。
+		expect(ctx.content).toContain('LICENSE_REVIEW_REQUIRED');
+		expect(ctx.content).toContain('provider: browser');
 		expect(ctx.content).not.toContain('主限法表格快照(占位)');
+		expect(mockFetchChartCalls).toHaveLength(0);
 	});
 
 	it('盘空 datetime（仅改方位法）→ 仍出盘快照、时间取「此刻」（不破现状路径）', async () => {
@@ -98,7 +92,7 @@ describe('P5 主限法盘 primarydirchart round-trip', () => {
 			pdMethod: 'meridian',
 		});
 		expect(ctx).toBeTruthy();
-		expect(ctx.content).toContain('[主限法盘设置]');
+		expect(ctx.content).toContain('LICENSE_REVIEW_REQUIRED');
 		expect(ctx.content).not.toContain('主限法表格快照(占位)');
 	});
 
@@ -112,9 +106,8 @@ describe('P5 主限法盘 primarydirchart round-trip', () => {
 	it('表格 primarydirect 改 pdYears → 仍走表格 builder（占位串），且 /chart 带 includePrimaryDirection', async () => {
 		const ctx = await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 50 });
 		expect(ctx).toBeTruthy();
-		expect(ctx.content).toContain('主限法表格快照(占位)');
-		const withPd = mockFetchChartCalls.find((v) => v && v.includePrimaryDirection === true);
-		expect(withPd).toBeTruthy();
-		expect(withPd.pdYears).toBe(50);
+		expect(ctx.content).toContain('LICENSE_REVIEW_REQUIRED');
+		expect(ctx.content).not.toContain('主限法表格快照(占位)');
+		expect(mockFetchChartCalls.find((v) => v && v.includePrimaryDirection === true)).toBeFalsy();
 	});
 });

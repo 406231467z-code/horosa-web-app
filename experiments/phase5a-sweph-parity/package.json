@@ -4,6 +4,14 @@
   "type": "module",
   "description": "Isolated Swiss Ephemeris WASM vs PerChart parity. Not a production dependency.",
   "scripts": {
-    "check": "node compare.mjs & node derived.mjs"
+    "check": "node compare.mjs & node derived.mjs",
+    "phase5a3": "node --test phase5a3.sweph.browser.test.js",
+    "phase5a4": "node --test phase5a4.browserChartBuilder.test.js",
+    "phase5a5": "node --test phase5a5.aspects.test.js phase5a5.lots.test.js phase5a5.reception.test.js phase5a5.declParallel.test.js",
+    "phase5a6": "node --test phase5a6.syzygy.test.js phase5a6.declParallel.complete.test.js",
+    "phase5a7": "node --test phase5a7.provenance.test.js",
+    "phase5a8": "node --test tests/phase5a8.nakshatra.test.js tests/phase5a8.guostarsect.test.js tests/phase5a8.su28.test.js tests/phase5a8.licenseGate.test.js",
+    "phase5a9": "node --test tests/phase5a9.providerParity.test.js tests/phase5a9.providerContract.test.js",
+    "phase5a11": "node --test tests/phase5a11.parityCorpus.test.js"
   }
 }

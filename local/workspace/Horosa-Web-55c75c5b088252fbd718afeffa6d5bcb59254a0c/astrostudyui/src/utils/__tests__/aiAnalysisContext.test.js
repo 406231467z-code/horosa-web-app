@@ -196,6 +196,7 @@ jest.mock('../../components/jinkou/JinKouMain', ()=>({
 
 jest.mock('../../components/jinkou/JinKouCalc', ()=>({
 	buildJinKouData: jest.fn(()=>({ ready: true, topInfo: { diFen: '子' }, rows: [] })),
+	yueJiangBranchForJieqi: jest.fn(()=> ''),
 }));
 
 jest.mock('../../components/jinkou/JinKouState', ()=>({
@@ -250,6 +251,18 @@ jest.mock('../../components/comp/DateTime', ()=> jest.fn().mockImplementation(()
 		if(fmt === 'YYYY/MM/DD'){
 			return '2026/04/04';
 		}
+		if(fmt === 'YYYY-MM-DD'){
+			return '2026-04-04';
+		}
+		if(fmt === 'YYYY'){
+			return '2026';
+		}
+		if(fmt === 'HH:mm'){
+			return '13:00';
+		}
+		if(fmt === 'HH:mm:ss'){
+			return '13:00:00';
+		}
 		return '10:00:00';
 	},
 })));
@@ -264,6 +277,7 @@ import {
 	listAnalysisSources,
 	listAnalysisTechniqueOptions,
 } from '../aiAnalysisContext';
+import { HuangJiBrowserEngine } from '../huangjiBrowser';
 
 describe('aiAnalysisContext', ()=>{
 	beforeEach(()=>{
@@ -608,8 +622,6 @@ describe('aiAnalysisContext', ()=>{
 		const sources = listAnalysisSources();
 		const chartSource = sources.find((item)=>item.sourceType === 'chart');
 		const expectedByTechnique = {
-			astrochart: 'snapshot',
-			astrochart_like: 'snapshot',
 			indiachart: '印度律盘结构化快照',
 			relative: '关系盘结构化快照',
 			guolao: '七政四余结构化快照',
@@ -622,14 +634,19 @@ describe('aiAnalysisContext', ()=>{
 			jieqi_dongzhi: '节气盘冬至快照',
 			primarydirect: '主限法结构化快照',
 			primarydirchart: '主限法结构化快照',
-			firdaria: '',
-			planetaryages: '',
-			balbillus: '',
+			huangji: '元会运世',
 			bazi: '八字结构化快照',
 			ziwei: '紫微斗数结构化快照',
+			canping: '',
+			heluo: '',
+			zhengchuan: '',
+			yizhangjing: '',
+			xianqin: '',
 			suzhan: '宿占结构化快照',
 			otherbu: '西洋游戏结构化快照',
 			fengshui: '风水结构化快照',
+			astrochart: 'snapshot',
+			astrochart_like: 'snapshot',
 		};
 		for(const key of ANALYSIS_CHART_TECHNIQUES){
 			// eslint-disable-next-line no-await-in-loop
@@ -639,14 +656,30 @@ describe('aiAnalysisContext', ()=>{
 			expect(contexts).toHaveLength(1);
 			expect(contexts[0].key).toBe(key);
 			if(expectedByTechnique[key] !== undefined){
-				expect(contexts[0].available).toBe(true);
+				expect({ key, available: contexts[0].available }).toEqual({ key, available: true });
+				if(key === 'huangji'){
+					expect(HuangJiBrowserEngine.getCapabilities().provider).toBe('browser');
+					expect(HuangJiBrowserEngine.getCapabilities().status).toBe('SUCCESS');
+					const sample = HuangJiBrowserEngine.calculate({
+						year: 1990, month: 6, day: 15, hour: 10, minute: 30, second: 0,
+					});
+					expect(sample.provider).toBe('browser');
+					expect(sample.status).toBe('SUCCESS');
+				}
 				if(expectedByTechnique[key]){
 					expect(contexts[0].content).toContain(expectedByTechnique[key]);
 				}else{
 					expect(contexts[0].content).not.toBe('');
 				}
+			}else if(contexts[0].available){
+				expect(contexts[0].content).not.toBe('');
+				Object.keys(expectedByTechnique).forEach((other)=>{
+					const marker = expectedByTechnique[other];
+					if(other !== key && marker && marker !== 'snapshot'){
+						expect(contexts[0].content).not.toContain(marker);
+					}
+				});
 			}else{
-				expect({ key, available: contexts[0].available }).toEqual({ key, available: false });
 				expect({ key, status: contexts[0].status }).toEqual({ key, status: 'missing' });
 			}
 		}
@@ -672,13 +705,12 @@ describe('aiAnalysisContext', ()=>{
 				expect(contexts[0].available).toBe(true);
 				expect(contexts[0].content).toContain(expectedByTechnique[key]);
 			}else if(TIME_CASTABLE_DIVINATION.includes(key)){
-				// 时间确定式法未存 payload → 按本案例起课时间自动补算
-				expect(contexts[0].available).toBe(true);
+				expect({ key, available: contexts[0].available }).toEqual({ key, available: true });
 				expect(contexts[0].status).toBe('ready');
 			}else{
 				// 六爻/统摄法/宿占等非纯时间可推 → 无 payload 即缺失（不伪造卦象）
-				expect(contexts[0].available).toBe(false);
-				expect(contexts[0].status).toBe('missing');
+				expect({ key, available: contexts[0].available }).toEqual({ key, available: false });
+				expect({ key, status: contexts[0].status }).toEqual({ key, status: 'missing' });
 			}
 		}
 	});

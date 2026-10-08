@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { Spin, Row, Col } from 'antd';
 import { unwrapResult, symbolWithMeaning, fmtDegree, fmtNum, chartParams, chartRequestKey, cardStyle, SmallTable, parkLoadFailure, clearLoadFailure, loadParked } from './AstroExtraCommon';
-import { fetchChart } from '../../services/astro';
+import { calculateChart } from '../../services/astrologyCalculationService';
 import AstroDoubleChart from './AstroDoubleChart';
 import AstroDeclinationLadder from './AstroDeclinationLadder';
 
@@ -73,8 +73,8 @@ class ProgMethodPanel extends Component{
 			if(sidereal){ natalBody.zodiacal = 1; dirBody.zodiacal = 1; }
 			// 恒星模式两圈都用恒星黄道重取本命；回归模式内圈直接复用 props.value（与主盘一致）省一次请求。
 			const [dirRsp, natalRsp] = await Promise.all([
-				fetchChart(dirBody),
-				sidereal ? fetchChart(natalBody) : Promise.resolve(null),
+				calculateChart(dirBody),
+				sidereal ? calculateChart(natalBody) : Promise.resolve(null),
 			]);
 			if(!this._mounted){ return; }
 			clearLoadFailure(this);

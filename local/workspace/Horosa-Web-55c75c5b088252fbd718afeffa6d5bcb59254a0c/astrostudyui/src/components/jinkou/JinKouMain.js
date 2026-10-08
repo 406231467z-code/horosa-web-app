@@ -3,7 +3,6 @@ import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
 import { sideSectionIcon } from '../../constants/sideSectionIcons'; // [观象P1]
 import { message, Modal } from 'antd';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import { fetchLiurengGods } from '../../utils/liurengGodsLocal';
 import * as LRConst from '../liureng/LRConst';
 import { ZSList, ZhangSheng, } from '../liureng/LRZhangSheng';
@@ -1531,11 +1530,12 @@ class JinKouMain extends Component{
 				pushCache(this.godsCache, godsKey, clonePlain(result), 72);
 			}
 		}
-		if(!result || !result.liureng){
+		const nongli = result && result.liureng && result.liureng.nongli;
+		if(!result || !result.liureng || !nongli || typeof nongli.dayGanZi !== 'string'){
 			return;
 		}
 
-		const dayGanZi = result.liureng.nongli.dayGanZi;
+		const dayGanZi = nongli.dayGanZi;
 		const dayGan = dayGanZi.substr(0, 1);
 		const wx = LRConst.GanZiWuXing[dayGan];
 		const timeZi = normalizeZiFromText(result.liureng.nongli.time);
@@ -1640,24 +1640,7 @@ class JinKouMain extends Component{
 				serverRes = clonePlain(localRunyearHit) || {};
 				pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
 			}else{
-				const req = request(`${Constants.ServerRoot}/liureng/runyear`, {
-					body: JSON.stringify(params),
-					silent: true,
-				}).then((data)=>{
-					return data && data[Constants.ResultKey] ? { ...data[Constants.ResultKey] } : {};
-				}).finally(()=>{
-					if(runyearKey){
-						this.runYearServerInflight.delete(runyearKey);
-					}
-				});
-				if(runyearKey){
-					this.runYearServerInflight.set(runyearKey, req);
-				}
-				serverRes = await req;
-				if(runyearKey){
-					pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-					setLiurengRunyearLocalCache(runyearKey, clonePlain(serverRes));
-				}
+				serverRes = {};
 			}
 			result = {
 				...serverRes,

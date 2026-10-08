@@ -11,10 +11,9 @@ import XQIcon from '../xq-icons';
 import { XQButton as Button, XQSelect as Select, XQTabs as Tabs, XQSideSection, SIDE_COLLAPSE_STORE_KEY } from '../xq-ui';
 import { safeJsonParseFromStorage, safeJsonStringifyToStorage } from '../../utils/safeStorage';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { stepPrefetchEnabled, kentangCacheEnabled } from '../../utils/perfFlags';
-import { cachedKentangFetch } from '../../utils/kentangCache';
+import { WuzhaoBrowserEngine } from '../../utils/wuzhaoBrowser';
+import { isCalcStatus, formatCalcStatus } from '../../utils/calcStatus';
+import { stepPrefetchEnabled } from '../../utils/perfFlags';
 import { openKentangCaseDrawer, getKentangSavedCasePayload } from '../../utils/kentangCaseSave';
 import { formatHumanValue } from '../../utils/humanReadableFields';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
@@ -157,13 +156,6 @@ function pickOptions(source, keys){
 	return out;
 }
 
-function appendUnique(list, value){
-	const text = value ? `${value}`.replace(/\/$/, '') : '';
-	if(text && /^https?:\/\/.+/i.test(text) && list.indexOf(text) < 0){
-		list.push(text);
-	}
-}
-
 function parseFieldsDateTime(fields){
 	if(!fields || !fields.date || !fields.time || !fields.date.value || !fields.time.value){
 		return null;
@@ -193,63 +185,11 @@ function parseFieldsDateTime(fields){
 }
 
 async function postWuZhaoRaw(path, payload){
-	const roots = [];
-	const endpoints = [];
-	if(typeof window !== 'undefined'){
-		try{
-			const params = new URLSearchParams(window.location.search || '');
-			['wuzhaoSrv', 'kinwuzhaoSrv', 'kinastroSrv', 'kentangSrv', 'kinSrv'].forEach((key)=>{
-				appendUnique(roots, params.get(key));
-			});
-		}catch(e){}
+	if(path !== 'pan'){
+		return { status: 'UNSUPPORTED', provider: 'browser', code: 'WUZHAO_PATH', feature: 'wuzhao', message: '浏览器只计算起盘。' };
 	}
-	appendUnique(roots, ServerRoot);
-	if(/:9999(?:\/)?$/i.test(ServerRoot)){
-		appendUnique(roots, ServerRoot.replace(/:9999(?:\/)?$/i, ':8892'));
-	}
-	appendUnique(roots, 'http://127.0.0.1:8892');
-	appendUnique(endpoints, buildKentangEndpoint('wuzhao', path));
-	roots.forEach((root)=>appendUnique(endpoints, `${root}/wuzhao/${path}`));
-	appendUnique(endpoints, `${ServerRoot}/wuzhao/${path}`);
-
-	let lastError = null;
-	for(let i=0; i<endpoints.length; i++){
-		try{
-			const rawResponse = await cachedKentangFetch(endpoints[i], {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json; charset=UTF-8',
-				},
-				body: JSON.stringify(payload),
-			}, { retries: 0 });
-			const rawText = await rawResponse.text();
-			const rsp = rawText ? JSON.parse(rawText) : null;
-			if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-				throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'wuzhao.local.fetch.failed');
-			}
-			return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
-		}catch(e){
-			lastError = e;
-		}
-	}
-	try{
-		const rawResponse = await cachedKentangFetch(`${ServerRoot}/wuzhao/${path}`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		const rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'wuzhao.fetch.failed');
-		}
-		return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
-	}catch(e){
-		lastError = e || lastError;
-	}
-	throw lastError || new Error('wuzhao.fetch.failed');
+	const out = WuzhaoBrowserEngine.calculate(payload);
+	return out.status === 'SUCCESS' ? out.result : out;
 }
 
 // horosa_kentang_result_cache_v1 —— 五兆 /wuzhao/pan 直连缓存,**带确定性判据**。
@@ -272,6 +212,9 @@ function fmtValue(value){
 }
 
 function buildSnapshotText(pan){
+	if(isCalcStatus(pan)){
+		return formatCalcStatus(pan);
+	}
 	if(!pan){
 		return '暂无五兆数据';
 	}
@@ -538,7 +481,7 @@ class WuZhaoMain extends Component{
 	// 用户点「起盘」即缓存命中 ≈ 瞬间。失败静默;开关关=零行为。
 	prefetchDraftPan(){
 		try{
-			if(!stepPrefetchEnabled() || !kentangCacheEnabled()){ return; }
+			if(!stepPrefetchEnabled()){ return; }
 			if(this.prefetchDraftTimer){ clearTimeout(this.prefetchDraftTimer); }
 			this.prefetchDraftTimer = setTimeout(()=>{
 				this.prefetchDraftTimer = null;
@@ -902,6 +845,9 @@ class WuZhaoMain extends Component{
 
 	renderCenter(){
 		const pan = this.state.pan;
+		if(isCalcStatus(pan)){
+			return <div className="horosa-huangji-empty">{formatCalcStatus(pan)}</div>;
+		}
 		if(!pan){
 			return <div className="horosa-huangji-empty">暂无五兆数据</div>;
 		}

@@ -20,11 +20,11 @@ import { registerDataWarmTask, buildRegisteredDataWarmTasks } from './idleWarmQu
 
 // [Windows-only ①②] 星运/印占两条自 PERF-R9 起在册(上游注册表暂未收编此二项;
 // 移除即两页首点回付冷成本)。builder 纪律同上:各技法自己导出的 warm 入口,键逐字节同。
-registerDataWarmTask('direction:pd', (fields, chartObj)=>
-	import('../components/direction/AstroDirectMain').then((m)=>m.warmPrimaryDirection(chartObj, fields)));
+// 本命盘空闲预热不再打主限端点。星运页返回许可证状态，不请求计算后端。
+registerDataWarmTask('direction:pd', ()=> Promise.resolve(null));
 
-registerDataWarmTask('india:birth', (fields)=>
-	import('../components/astro/IndiaChart').then((m)=>m.requestIndiaChartData(m.buildIndiaWarmParams(fields))));
+// 本命盘空闲预热不再打印占端点。印占页返回许可证状态，不请求计算后端。
+registerDataWarmTask('india:birth', ()=> Promise.resolve(null));
 
 // ① 紫微 /ziwei/birth —— 首点概率最高的技法之一(R4-B3 首铺)。
 registerDataWarmTask('ziwei:birth', (fields)=>

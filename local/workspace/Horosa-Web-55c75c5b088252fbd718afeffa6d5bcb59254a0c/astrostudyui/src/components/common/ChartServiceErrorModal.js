@@ -176,7 +176,7 @@ export function showChartServiceError(extraDetail) {
           title: '仍不可达',
           content: isDesktopCalcShell()
             ? '后端可能还在启动中。建议等几秒后再试，或点「重启后端」。'
-            : '计算服务仍不可达，没有生成盘面。请确认 Java :9999 与 Python :8899 已启动后再排盘。',
+            : '没有生成盘面。状态：UNSUPPORTED。',
         });
       }
     },

@@ -3,10 +3,6 @@ import { Solar } from 'lunar-javascript';
 import { buildQimenBaGongSnapshotLines, buildQimenBaGongKeYingSnapshotLines, buildQimenFuShiYiGua, buildQimenOverviewSummary } from './DunJiaBaGongRules';
 import { buildFaQimenAnalysis } from './DunJiaFaCalc';
 import { LUOSHU_NUM } from './DunJiaFaDoc';
-import request from '../../utils/request';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from '../../utils/kentangCache';
 
 export const SEX_OPTIONS = [
 	{ value: 1, label: '男' },
@@ -1337,38 +1333,6 @@ export function normalizeKinqimenData(backendPan, fallbackPan, options, nongli){
 	};
 }
 
-// horosa_kentang_result_cache_v1 —— 奇门(时家转盘)/qimen/pan 直连缓存(LRU 48)。
-// 确定性论证:payload = resolveCalcDateTime(格式化字串+整数)+ qimenMode/qijuMethod/option/school
-// + 真太阳时/节气差字串 + 两个日界开关(0/1);无 Date 对象、无随机、无「现在时刻」依赖;
-// 后端 webqimensrv.py 全文无 random/now(已 grep 核对)→ 同 payload 必同盘。
-// ⚠️ 节气种子只影响**本地** calcDunJia 分支(DunJiaMain.panCache 那条),不进本 payload,故与本层无关。
-// 关 horosa.perf.techniqueResultCache 即逐字回到下面的直连原函数。
-async function fetchQimenPanRaw(payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('qimen', 'pan'), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		});
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'qimen.local.fetch.failed');
-		}
-	}catch(e){
-		rsp = await request(`${ServerRoot}/qimen/pan`, {
-			body: JSON.stringify(payload),
-			silent: true,
-			timeoutMs: 45000,
-			retry: { retries: 2 },
-		});
-	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
-}
-
 // [H-F] 刻家十分局:一时辰(2h)分十刻(12min/刻),初局=本时辰时家局(沿当前起局法链),
 //   逐刻推移:阳遁顺进一局、阴遁逆退一局(第k刻=初局±(k-1),九局循环)。
 //   分遁 keJiaFenDun:zihou(默认)=子后阳午后阴(时支子~巳阳/午~亥阴,与节气无关)/jieqi=沿时家节气分遁。
@@ -1412,29 +1376,19 @@ function calcKeJiaMeta(opts, ganzhi, jieqi, dateParts, context){
 }
 
 export async function fetchQimenPan(fields, nongli, options, context){
-	const baseDt = parseDateTime(fields);
-	if(!baseDt){
-		return null;
+	const pan = calcDunJia(fields, nongli, options, context);
+	if(!pan){
+		return {
+			status: 'UNSUPPORTED',
+			code: 'QIMEN_INPUT',
+			provider: 'browser',
+		};
 	}
-	const opt = options || {};
-	// 按所选时间口径计算:真太阳时(timeAlg=0)用 nongli.birth 校正后的时刻,直接时间(=1)用钟表时。
-	// 与前端 calcDunJia(resolveCalcDateTime)、太乙(resolveCalculationDateTime)一致;此前后端漏用此校正,真太阳时被当直接时间排盘。
-	const dt = resolveCalcDateTime(baseDt, nongli, opt, context);
-	const payload = {
-		...dt,
-		zone: fields && fields.date && fields.date.value ? fields.date.value.zone : '',
-		qimenMode: getKinqimenMode(opt.paiPanType),
-		qijuMethod: normalizeQijuMethod(opt.qijuMethod),
-		option: normalizeQijuMethod(opt.qijuMethod) === 'zhirun' ? 2 : 1,
-		school: normalizeSchool(opt.school),
-		realSunTime: (context && context.displaySolarTime) || (nongli ? (nongli.birth || '') : ''),
-		jiedelta: nongli ? (nongli.jiedelta || '') : '',
-		after23NewDay: opt.after23NewDay !== undefined ? (opt.after23NewDay ? 1 : 0) : 1,
-		lateZiHourUseNextDay: opt.lateZiHourUseNextDay !== undefined ? (opt.lateZiHourUseNextDay ? 1 : 0) : 1,
+	return {
+		...pan,
+		provider: 'browser',
+		engine: 'calcDunJia',
 	};
-	// v3.5.1 收敛:结果级缓存退役 —— Raw 内部已走上游 utils/kentangCache
-	// (L1/L2/L3 + 在途去重,kt-v1|rv 信封);外面再包一层 = 双缓存双内存,零增益。
-	return fetchQimenPanRaw(payload);
 }
 
 function resolvePaiPanMeta(opts, ganzhi, jieqi, dateParts, context){

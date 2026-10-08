@@ -6,10 +6,6 @@ import {
 	getTaiyiStyleLabel,
 	getTaiyiAccumLabel,
 } from './core/TaiYiCore';
-import request from '../../utils/request';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from '../../utils/kentangCache';
 import buildLocalBaziResult from '../../utils/baziLunarLocal';
 import { defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
 import { parseDateParts } from '../../utils/dateStrSafe';
@@ -267,69 +263,20 @@ function normalizeBackendPan(pan, options, nongli, baziLocal){
 	}, nongli, baziLocal);
 }
 
-// horosa_kentang_result_cache_v1 —— 太乙 /taiyi/pan 直连缓存(LRU 48)。缓存的是**后端原始 pan**
-// (ResultKey 剥壳后、normalizeBackendPan 之前),归一化/农历显示仍每次按当前 opt+nongli 现算,
-// 故切流派/切旋转等只改归一化的选项不会吃到错盘。
-// 确定性论证:payload = resolveCalculationDateTime(格式化字串+整数)+ style/tn/sex/tenching/rotation/
-// timeBasis/两个日界开关/enableGameTheory + nongli 派生真太阳时字串;无 Date 对象、无随机、无「现在时刻」;
-// 后端 webtaiyisrv.py 全文无 random/now(已 grep 核对)→ 同 payload 必同盘。关闸即逐字回到直连。
-async function fetchTaiyiPanRaw(payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('taiyi', 'pan'), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		});
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'taiyi.local.fetch.failed');
-		}
-	}catch(e){
-		rsp = await request(`${ServerRoot}/taiyi/pan`, {
-			body: JSON.stringify(payload),
-			silent: true,
-			timeoutMs: 45000,
-			retry: { retries: 2 },
-		});
-	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
-}
-
 export async function fetchTaiyiPan(fields, nongli, options){
-	const dt = resolveCalculationDateTime(fields, nongli, options || {});
-	if(!dt){
-		return null;
+	const pan = calcTaiyi(fields, nongli, options);
+	if(!pan){
+		return {
+			status: 'UNSUPPORTED',
+			code: 'TAIYI_INPUT',
+			provider: 'browser',
+		};
 	}
-	const opt = options || {};
-	const payload = {
-		...dt,
-		style: opt.style !== undefined ? opt.style : 3,
-		tn: opt.tn !== undefined ? opt.tn : 0,
-		sex: opt.sex || '男',
-		tenching: opt.tenching !== undefined ? opt.tenching : 0,
-		rotation: opt.rotation || '固定',
-		timeBasis: opt.timeBasis || 'direct',
-		after23NewDay: opt.after23NewDay !== undefined ? opt.after23NewDay : 0,
-		// v2.2.1: 之前漏传 lateZi 给后端 → 太乙 23 点切晚子时·时柱起干不变。后端 webtaiyisrv.py 已支持。
-		lateZiHourUseNextDay: opt.lateZiHourUseNextDay !== undefined ? opt.lateZiHourUseNextDay : defaultLateZiHourUseNextDay(),
-		enableGameTheory: opt.gameTheory === 1,
-		realSunTime: nongli ? (nongli.birth || '') : '',
-		jiedelta: nongli ? (nongli.jiedelta || '') : '',
+	return {
+		...pan,
+		provider: 'browser',
+		engine: 'calcTaiyi',
 	};
-	// v3.5.1 收敛:结果级缓存退役 —— Raw 内部已走上游 utils/kentangCache(三层+在途去重)。
-	const pan = await fetchTaiyiPanRaw(payload);
-	const baziLocal = buildTaiyiBaziLocal(fields, opt);
-	const normalized = normalizeBackendPan(pan, opt, nongli, baziLocal);
-	if(normalized && !normalized.clockTime && fields && fields.date && fields.date.value && fields.time && fields.time.value){
-		// 直接时间=用户输入的钟表时,恒可自 fields 直出;极端年(lunar-js 域外 baziLocal 缺席、
-		// 后端 pan 无 clockTime)也不许显示「—」。
-		normalized.clockTime = `${fields.date.value.format('YYYY-MM-DD')} ${fields.time.value.format('HH:mm:ss')}`;
-	}
-	return normalized;
 }
 
 export function buildTaiyiSnapshotText(pan){

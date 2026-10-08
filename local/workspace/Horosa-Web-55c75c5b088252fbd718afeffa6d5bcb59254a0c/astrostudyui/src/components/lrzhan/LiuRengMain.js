@@ -8,7 +8,6 @@ import { Modal, message, Tag } from 'antd';
 import { XQButton as Button, XQCard as Card, XQSelect as Select, XQTabs as Tabs, XQSwitch as Switch, XQSideSection  } from '../xq-ui';
 import XQIcon from '../xq-icons';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import { fetchLiurengGods } from '../../utils/liurengGodsLocal';
 import * as AstroConst from '../../constants/AstroConst';
 import {randomStr, randomNum, littleEndian,} from '../../utils/helper';
@@ -5425,24 +5424,7 @@ class LiuRengMain extends Component{
 					serverRes = clonePlain(localRunyearHit) || {};
 					pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
 				}else{
-					const req = request(`${Constants.ServerRoot}/liureng/runyear`, {
-						body: JSON.stringify(params),
-						silent: true,
-					}).then((data)=>{
-						return data && data[Constants.ResultKey] ? { ...data[Constants.ResultKey] } : {};
-					}).finally(()=>{
-						if(runyearKey){
-							this.runYearServerInflight.delete(runyearKey);
-						}
-					});
-					if(runyearKey){
-						this.runYearServerInflight.set(runyearKey, req);
-					}
-					serverRes = await req;
-					if(runyearKey){
-						pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-						setLiurengRunyearLocalCache(runyearKey, clonePlain(serverRes));
-					}
+					serverRes = {};
 				}
 				return serverRes;
 			})();

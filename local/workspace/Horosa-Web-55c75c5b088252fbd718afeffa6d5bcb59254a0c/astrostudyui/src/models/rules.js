@@ -1,6 +1,4 @@
-import { history } from 'umi';
-import { Modal, } from 'antd';
-import * as service from '../services/rules';
+import { getZiweiRulesEnvelope } from '../utils/ziweiRulesLocal';
 
 
 export default {
@@ -18,18 +16,9 @@ export default {
 	},
 
 	effects: {
-		*ziwei({ payload: values }, { call, put }){
-            let params = { };
-
-			// 走会话缓存:app 启动时本 effect 即 prime 缓存,之后紫微排盘路径零 RTT 命中。
-			// prime 是 best-effort:App 启动时后端常在温启动中,失败属预期 → 静默跳过
-			// (缓存层已保证空载荷不入缓存,真排盘路径会自然重试);不 toast、不打断启动。
-			let data = null;
-			try{
-				data = yield call(service.ziweirulesCached, params);
-			}catch(e){
-				return;
-			}
+		*ziwei({ payload: values }, { put }){
+			// /ziwei/rules 是 classpath 静态表，浏览器副本在 ziweiRulesLocal。启动不再打 :9999。
+			const data = getZiweiRulesEnvelope();
 			if(!data){
 				return;
 			}

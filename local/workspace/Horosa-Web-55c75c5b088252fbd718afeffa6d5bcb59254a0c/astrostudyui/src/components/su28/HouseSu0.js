@@ -38,7 +38,7 @@ class HouseSu0 extends HouseSu{
 		let w = this.fontSize + this.margin * 2;
 		let h = this.fontSize + this.margin;
 
-		let data = [this.houseObj.name];
+		let data = [(this.houseObj && this.houseObj.name) || ''];
 
 		this.titleSvg = drawTextH(this.svg, data, x, y, w, h, this.margin, Su28Helper.getSu28Color(0));	
 		this.genTooltip();	

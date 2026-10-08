@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horosa.experimental.phase5a7.provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["label", "notActual", "legalReviewRequired", "fixedStars", "su28", "nakshatra", "guoStarSect", "parans", "licenses"],
+  "properties": {
+    "label": { "const": "DATA-PROVENANCE" },
+    "notActual": { "const": true },
+    "legalReviewRequired": { "const": true },
+    "fixedStars": { "type": "object", "required": ["status", "catalog", "electionTable"] },
+    "su28": { "type": "object", "required": ["status", "defaultMode", "modes"] },
+    "nakshatra": { "type": "object", "required": ["status", "entries", "spanRule", "zeroPoint", "pada", "boundaries"] },
+    "guoStarSect": { "type": "object", "required": ["status", "classification", "entries", "includesNiu"] },
+    "parans": { "type": "object", "required": ["chartJson", "productionAcg", "localApproximation"] },
+    "licenses": { "type": "array", "minItems": 1 }
+  }
+}

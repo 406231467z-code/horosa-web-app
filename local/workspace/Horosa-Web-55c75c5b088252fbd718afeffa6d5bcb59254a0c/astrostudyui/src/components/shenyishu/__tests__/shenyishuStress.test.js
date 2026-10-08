@@ -227,13 +227,15 @@ describe('神易数 穷举压力测试(选项域 × 时间样本)', ()=>{
 		expect(crashes).toEqual([]);
 	});
 
-	test('后端拒绝(网络失败)路径:入口吞错返回空串、不抛', async ()=>{
+	test('网络失败时仍由本地引擎起盘、不抛', async ()=>{
 		const saved = global.fetch;
 		global.fetch = jest.fn(()=>Promise.reject(new Error('network down')));
 		try{
 			const fields = makeFields('2024-06-15', '12:30:00', '+08:00');
 			const out = await buildShenYiShuSnapshotForFields(fields, { hourSource: 'manual', manualHour: 9, seasonSource: 'manual', manualSeason: '秋' });
-			expect(out).toBe('');
+			expect(out).toContain('起盘时间：2024-06-15 12:30:00');
+			expect(out).toContain('入式小时：9时');
+			expect(out).toContain('季令：秋');
 		}catch(e){
 			record('backend-reject', e);
 		}finally{

@@ -1,10 +1,7 @@
 import { isLunarJsYearReliable } from './lunarDomainGuard';
 import { calcZiwei } from '../components/ziwei/ZiweiCalc';
 import { detectPatterns } from '../components/ziwei/ziweiPatterns';
-import request from './request';
-import { ServerRoot, ResultKey } from './constants';
-import { techniqueResultCacheEnabled } from './perfFlags';
-import { cachedPost } from '../services/_requestCache';
+import { ResultKey } from './constants';
 
 // 与 ziweiLocalParity 的 Java 兼容档相同：正月换年、日历农历日、命主按生年支。
 const ZIWEI_JAVA_COMPAT_OPTS = Object.freeze({
@@ -13,7 +10,7 @@ const ZIWEI_JAVA_COMPAT_OPTS = Object.freeze({
 	lifeMasterBy: 'year_branch',
 });
 
-// PHASE 4-C: 可靠域起盘走已对拍的 ZiweiCalc（Java 兼容三键）。域外或公元前仍请求 /ziwei/birth。
+// PHASE 4-C: 可靠域起盘走已对拍的 ZiweiCalc（Java 兼容三键）。域外返回 UNSUPPORTED，不请求 /ziwei/birth。
 
 function solarYearOf(params){
 	const date = `${params && params.date || ''}`.trim();
@@ -78,17 +75,15 @@ export function localZiweiBirthEnvelope(params, extraOpts){
 	};
 }
 
-export function fetchZiweiBirth(params, requestOpts){
+export function fetchZiweiBirth(params){
 	const local = localZiweiBirthEnvelope(params);
 	if(local){
 		return Promise.resolve(local);
 	}
-	const opts = {
-		body: JSON.stringify(params || {}),
-		...(requestOpts || {}),
-	};
-	if(techniqueResultCacheEnabled()){
-		return cachedPost(`${ServerRoot}/ziwei/birth`, params, opts, { ns: 'ziwei/birth' });
-	}
-	return request(`${ServerRoot}/ziwei/birth`, opts);
+	return Promise.resolve({
+		status: 'UNSUPPORTED',
+		code: 'LUNAR_DOMAIN',
+		provider: 'browser',
+		local: false,
+	});
 }

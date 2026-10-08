@@ -31,9 +31,7 @@ import ZiWeiChart from '../ziwei/ZiWeiChart';
 import { buildLocalBaziResult } from '../../utils/baziLunarLocal';   // 中宫四柱兜底(策天/演禽后端不产 pillars)
 import { safeLocalStorageSet } from '../../utils/safeStorage';       // 中宫内容档位持久化
 import { saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from '../../utils/kentangCache';
+import { formatCalcStatus, isCalcStatus, qizhengLicenseStatus, unsupportedStatus } from '../../utils/calcStatus';
 import { formatHumanValue } from '../../utils/humanReadableFields';
 import { normBinaryGender, parseFieldsDateTime, computeKinFieldsResync } from '../../utils/kinAstroFieldsSync';
 import UpdatingBadge from '../common/UpdatingBadge';
@@ -271,32 +269,21 @@ const TECHNIQUE_CONFIG = {
 // 确定性论证:payload 全部来自 parseFieldsDateTime(fields)——'YYYY-MM-DD'/'HH:mm:ss' 格式化字串 +
 // 整数 + 性别/流派开关,无 Date 对象、无随机、无「现在时刻」依赖、后端无写库副作用 → 同 payload 必同盘。
 // 命中返回深拷贝(与直连逐值等价、只更快);关 horosa.perf.techniqueResultCache 即逐字回到下面的直连原函数。
-async function postKinAstroRaw(serviceKey, payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint(serviceKey, 'pan'), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'kinastro.local.fetch.failed');
-		}
-	}catch(e){
-		const rawResponse = await cachedKentangFetch(`${ServerRoot}/${serviceKey}/pan`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
+function kinAstroCalcStatus(serviceKey){
+	if(serviceKey === 'qizhengkin'){
+		return qizhengLicenseStatus('qizhengkin');
 	}
-	if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-		throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'kinastro.fetch.failed');
+	if(serviceKey === 'xianqin'){
+		return unsupportedStatus('xianqin', 'QINXING_NATAL', '禽星命盘没有可移植的浏览器算法。演法仍由本地引擎计算。');
 	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
+	if(serviceKey === 'cetian'){
+		return unsupportedStatus('cetian', 'CETIAN_NATAL', '策天命盘没有可移植的浏览器算法。');
+	}
+	return unsupportedStatus(serviceKey || 'kinastro');
+}
+
+async function postKinAstroRaw(serviceKey){
+	return kinAstroCalcStatus(serviceKey);
 }
 
 function postKinAstro(serviceKey, payload){
@@ -342,13 +329,10 @@ function buildSnapshotText(pan){
 // optionsOverride:挂载「每技法设置」下发的排盘选项(如策天 method/lunarMode/starOrder/show*)。
 // 🔴 曾无此参 → cetian 的 8 个齿轮项在挂载链上全是死开关:UI 提示「已按新设置重算」、
 // 卡片打 regenerated 绿标,快照却逐字节不变(组件 state 只在页面内生效,挂载走本函数)。
-export async function buildKinAstroSnapshotForFields(fields, serviceKey, optionsOverride){
-	if(!serviceKey){
-		return '';
-	}
+export function buildKinAstroRequestPayload(fields, optionsOverride){
 	const payload = parseFieldsDateTime(fields);
 	if(!payload){
-		return '';
+		return null;
 	}
 	if(optionsOverride && typeof optionsOverride === 'object'){
 		Object.keys(optionsOverride).forEach((k)=>{
@@ -356,11 +340,25 @@ export async function buildKinAstroSnapshotForFields(fields, serviceKey, options
 			if(v !== undefined && v !== null && v !== ''){ payload[k] = v; }
 		});
 	}
+	return payload;
+}
+
+export async function buildKinAstroSnapshotForFields(fields, serviceKey, optionsOverride){
+	if(!serviceKey){
+		return '';
+	}
+	const payload = buildKinAstroRequestPayload(fields, optionsOverride);
+	if(!payload){
+		return '';
+	}
 	let text = '';
 	let panForFramework = null;
 	try{
 		const pan = await postKinAstro(serviceKey, payload);
-		if(pan){
+		if(isCalcStatus(pan)){
+			// 演禽仍把许可状态写进快照。其余 kinastro 没有本机盘，状态不是已挂载盘面。
+			text = serviceKey === 'xianqin' ? formatCalcStatus(pan) : '';
+		}else if(pan){
 			panForFramework = pan;
 			const t = buildSnapshotText(pan);
 			text = (t && t !== '暂无 kinastro 数据') ? t : '';
@@ -432,9 +430,32 @@ function saveKinAstroAISnapshots(config, pan, extraSnapshot, moduleKeyOverride, 
 	if(!config || !pan){
 		return;
 	}
-	// 🔴 moduleKey 须随宿主:xianqin 配置静态写 'yanqin'(独立演禽门户口径),但同一配置被
-	// 「命·其他」复用 —— 曾恒写 yanqin → mingother 槽位停在上一技法,AI 挂载/导出在
-	// 命·其他页看演禽却取到策天旧盘。宿主传 hostModuleKey 即写对槽位。
+	if(isCalcStatus(pan)){
+		const moduleKey = moduleKeyOverride || config.moduleKey;
+		let content = formatCalcStatus(pan);
+		if(config.serviceKey === 'xianqin' && fields){
+			try{
+				const payload = parseFieldsDateTime(fields);
+				const yanfa = buildYanqinYanfaSnapshot(payload);
+				if(yanfa){ content = `${content}\n\n${yanfa}`; }
+			}catch(e){ /* 演法失败时仍保留命盘状态 */ }
+		}
+		saveModuleAISnapshot(kinAstroSnapshotKey(config.serviceKey), content, {
+			source: 'browser',
+			status: pan.status,
+			code: pan.code,
+			serviceKey: config.serviceKey,
+			moduleKey,
+		});
+		saveModuleAISnapshot(moduleKey, content, {
+			source: 'browser',
+			status: pan.status,
+			code: pan.code,
+			serviceKey: config.serviceKey,
+			moduleKey,
+		});
+		return;
+	}
 	const moduleKey = moduleKeyOverride || config.moduleKey;
 	const base = buildSnapshotText(pan);
 	let content = extraSnapshot ? `${base}\n\n${extraSnapshot}` : base;
@@ -3510,6 +3531,14 @@ class KinAstroMain extends Component{
 		if(!pan){
 			return <div className="horosa-huangji-empty">暂无{this.config.techniqueLabel}数据</div>;
 		}
+		if(isCalcStatus(pan) && !pan.sections){
+			return (
+				<div className="horosa-huangji-empty" data-status={pan.status}>
+					<div>{pan.status}</div>
+					<div>{pan.message}</div>
+				</div>
+			);
+		}
 		if(this.config.serviceKey === 'xianqin'){
 			return this.renderZiWeiCopiedCenter(pan);
 		}
@@ -3677,24 +3706,10 @@ class KinAstroMain extends Component{
 
 	// 策天典籍全文:惰性拉取 /cetian/texts(一次加载,组件态缓存;失败可重试)。
 	loadCetianTexts = async ()=>{
-		if(this.state.cetianTexts || this.state.cetianTextsLoading){
-			return;
-		}
-		this.setState({ cetianTextsLoading: true });
-		try{
-			let rsp = null;
-			try{
-				const raw = await cachedKentangFetch(buildKentangEndpoint('cetian', 'texts'), { method: 'GET' }, { retries: 0 });
-				rsp = JSON.parse(await raw.text());
-			}catch(e){
-				const raw = await cachedKentangFetch(`${ServerRoot}/cetian/texts`, { method: 'GET' }, { retries: 0 });
-				rsp = JSON.parse(await raw.text());
-			}
-			const texts = rsp && rsp[ResultKey] && rsp[ResultKey].texts ? rsp[ResultKey].texts : null;
-			this.setState({ cetianTexts: texts, cetianTextsLoading: false });
-		}catch(e){
-			this.setState({ cetianTextsLoading: false });
-		}
+		this.setState({
+			cetianTextsLoading: false,
+			cetianTextsStatus: unsupportedStatus('cetian', 'CETIAN_TEXTS', '策天典籍全文没有可移植的浏览器文本，也不请求 /cetian/texts。'),
+		});
 	};
 
 	renderCetianZiliao(){
@@ -3710,7 +3725,9 @@ class KinAstroMain extends Component{
 				{classicsSections.length ? this.renderRows(classicsSections) : null}
 				<div className="horosa-cetian-texts-block">
 					<div className="horosa-info-card-title">典籍全文（《正命二十八宿移语》）</div>
-					{texts ? (
+					{this.state.cetianTextsStatus ? (
+						<div data-status={this.state.cetianTextsStatus.status}>{this.state.cetianTextsStatus.message}</div>
+					) : texts ? (
 						<Collapse className="horosa-cetian-texts-collapse" bordered={false}>
 							{textKeys.map((key)=>{
 								const doc = texts[key] || {};

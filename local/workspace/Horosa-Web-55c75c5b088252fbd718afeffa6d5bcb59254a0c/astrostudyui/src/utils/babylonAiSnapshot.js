@@ -1,9 +1,8 @@
 // utils/babylonAiSnapshot.js —— 巴比伦占星 AI 快照 headless builder(轻依赖:纯逻辑 + request,
 // 不 import 任何巴比伦组件,避免把组件链拖进 aiAnalysisContext 饿链)。
 // 快照 = 恒星黄道(毕宿锚)盘 + 算术历日 + 七曜清单 + 分至天狼星 + 「位」三法 + 行星神性。
-import request from './request';
-import * as Constants from './constants';
 import * as AstroConst from '../constants/AstroConst';
+import { ephemerisLicenseStatus, formatCalcStatus, isCalcStatus } from './calcStatus';
 import { buildHoroscope, PLANET_ORDER } from '../divination/babylon/horoscope';
 import { babylonSign, BABYLON_PLANETS } from '../divination/data/babylonianData';
 import { julianDayIndex } from './julianDayIndex';
@@ -15,45 +14,21 @@ import { classicalBackendOverridesFromFields } from './classicalChartGlobals';
 // 出生 ±183 日窗口的实算历象(朔望/邻近食;/astroextra/ephemeris)。
 // 公元 1 年前(远古纪元)不请求 —— 历日串口径不一,图式方案照常显示。
 export const EPHEM_MIN_JDN = 1721426;
-export async function fetchBabylonEphemeris(fields, jdn){
-	if(!jdn || jdn < EPHEM_MIN_JDN){ return null; }
-	const v = (k, d) => (fields && fields[k] && fields[k].value !== undefined ? fields[k].value : d);
-	try{
-		const data = await request(`${Constants.ServerRoot}/astroextra/ephemeris`, {
-			body: JSON.stringify({
-				date: jdnToDateStr(jdn - 183),
-				time: '12:00:00',                    // 网关必填键(窗口按日,取值不影响)
-				endDate: jdnToDateStr(jdn + 183),
-				zone: v('zone', '+08:00'),
-				lat: v('lat', ''),
-				lon: v('lon', ''),
-				planets: ['Sun', 'Moon'],
-				includeTransits: false,
-			}),
-			silent: true,
-		});
-		return data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-	}catch(e){ return null; }
+export function babylonLicenseStatus(input){
+	const status = ephemerisLicenseStatus('babylon');
+	status.code = 'BABYLON_SIDEREAL_EPHEMERIS';
+	status.message = '巴比伦占星的恒星黄道与历象使用 Swiss 星历。星历许可证未放行，浏览器不请求 /chart 或历象端点。';
+	status.input = input || null;
+	return status;
+}
+
+export async function fetchBabylonEphemeris(){
+	return null;
 }
 
 // 指定历日的日/月升落(供 NA/KUR 实算;单日窗口)
-export async function fetchRiseSetAt(fields, dateStr){
-	const v = (k, d) => (fields && fields[k] && fields[k].value !== undefined ? fields[k].value : d);
-	try{
-		const data = await request(`${Constants.ServerRoot}/astroextra/ephemeris`, {
-			body: JSON.stringify({
-				date: dateStr, time: '12:00:00', endDate: dateStr,
-				zone: v('zone', '+08:00'), lat: v('lat', ''), lon: v('lon', ''),
-				planets: ['Sun', 'Moon'], includeTransits: false,
-			}),
-			silent: true,
-		});
-		const r = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-		const rows = (r && r.riseSet) || [];
-		const sun = rows.find((x) => x.body === 'Sun') || {};
-		const moon = rows.find((x) => x.body === 'Moon') || {};
-		return { sun, moon };
-	}catch(e){ return null; }
+export async function fetchRiseSetAt(){
+	return null;
 }
 
 // 满月日 NA = 日出→月落;残月晨 KUR = 月出→日出(单位 UŠ = 4 分钟;仅当次序成立时给值)
@@ -244,19 +219,9 @@ export async function buildBabylonSnapshotForFields(fields, opts){
 	const params = babylonChartParams(fields);
 	const jdn = babylonBirthJdn(fields);
 	if(!params || !jdn){ return ''; }
-	let lons = {};
-	try{
-		const data = await request(`${Constants.ServerRoot}/chart`, {
-			body: JSON.stringify({ ...params, cid: null }),
-			silent: true,
-		});
-		const chartObj = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-		lons = chartToLons(chartObj);
-	}catch(e){ lons = {}; }
-	const bab = buildHoroscope(lons, jdn, opts || {});
-	// 实算历象(朔望/邻近食/NA/KUR)与页面同源;失败时段内自动缺省(图式行照常)
-	const ephem = await fetchBabylonEphemeris(fields, jdn);
-	let ephemDigest = digestBabylonEphemeris(ephem, jdn);
-	ephemDigest = await computeNaKur(fields, ephemDigest);
-	return buildBabylonSnapshotText(bab, { ...(opts || {}), ephemDigest });
+	const status = babylonLicenseStatus(params);
+	if(isCalcStatus(status)){
+		return formatCalcStatus(status);
+	}
+	return '';
 }

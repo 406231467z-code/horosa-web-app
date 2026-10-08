@@ -553,7 +553,7 @@ class AstroAnalysisLab extends Component{
 						<div style={cardStyle}>
 							<div className="horosa-info-card-title">格局分析未取到</div>
 							<div style={{fontSize: 12, opacity: 0.75, marginBottom: 8}}>
-								{this.state.failedMsg ? '本地计算服务未响应,请稍候重试。' : '本次请求未返回结果。'}
+								{this.state.failedMsg ? '这次分析没有返回结果。状态：UNSUPPORTED。' : '本次请求未返回结果。'}
 							</div>
 							<a onClick={this.retry}>重新计算</a>
 						</div>

@@ -1,10 +1,8 @@
 import { Component } from 'react';
-import { markPanelReady } from '../../utils/perfMark';
 import { safeLocalStorageSet } from '../../utils/safeStorage';
 import moment from 'moment';
 import { DatePicker, Radio, Spin, Empty, Checkbox, Select } from 'antd';
-import request from '../../utils/request';
-import * as Constants from '../../utils/constants';
+import { ephemerisLicenseStatus } from '../../utils/calcStatus';
 import * as AstroConst from '../../constants/AstroConst';
 import * as AstroText from '../../constants/AstroText';
 import { SA_RATE } from '../../utils/uranianDial';
@@ -145,26 +143,8 @@ export default class UranianGraphicEphemeris extends Component {
 	async requestData(){
 		const base = fieldsToBase(this.props.fields);
 		if (!paramsReady(base)) { if (!this.unmounted) this.setState({ note: '请先完善出生信息后查看图形星历', rows: null }); return; }
-		// 后端 dailyPositions 上限 ~370 天;范围超限则截断并提示。
-		let s = this.state.start, e = this.state.end;
-		if (e.diff(s, 'days') > 366) { e = s.clone().add(366, 'days'); }
-		const params = {
-			...base,
-			startDate: s.format('YYYY/MM/DD'), endDate: e.format('YYYY/MM/DD'),
-			startTime: '00:00:00', endTime: '00:00:00',
-			planets: this.planetSet(), includeTransits: false,
-		};
-		this.setState({ loading: true, note: null });
-		try {
-			const data = await request(`${Constants.ServerRoot}/astroextra/ephemeris`, { body: JSON.stringify(params), silent: true });
-			const res = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-			const rows = res && Array.isArray(res.dailyPositions) ? res.dailyPositions : [];
-			// horosa_panel_ready_v1:图形星历(量化盘第三子页)的折线图与右侧图例全部由 rows 派生,
-			// 这一次 setState 即「面板数据落定」(折叠计算是纯前端同步,随本次 render 一并完成)。
-			if (!this.unmounted) this.setState({ rows, loading: false, note: rows.length ? null : '该区间无星历数据' }, ()=>{
-				markPanelReady('auxchart');
-			});
-		} catch (err) { if (!this.unmounted) this.setState({ loading: false, note: '星历获取失败' }); }
+		const blocked = ephemerisLicenseStatus('graphic-ephemeris');
+		if (!this.unmounted) this.setState({ loading: false, rows: null, note: blocked.message, calcStatus: blocked });
 	}
 
 	// 太阳弧生命图(Lebensdiagramm):X=年龄 0..90、Y=折叠黄经。本命因子=水平虚线;

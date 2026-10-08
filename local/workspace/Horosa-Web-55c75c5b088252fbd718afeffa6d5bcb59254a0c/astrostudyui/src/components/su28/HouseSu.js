@@ -125,7 +125,7 @@ class HouseSu {
 			txtplanet = (flags & AstroConst.CHART_TXTPLANET) === 0 ? false : true;
 		}
 		let res = [];
-		let planets = this.houseObj.planets;
+		let planets = (this.houseObj && Array.isArray(this.houseObj.planets)) ? this.houseObj.planets : [];
 		for(let i=0; i<planets.length; i++){
 			let pnt = planets[i];
 			let pntstr = pnt.id;

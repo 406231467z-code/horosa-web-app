@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horosa.experimental.browserChart.v2",
+  "title": "Horosa experimental browser chart v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meta", "jd", "objects", "ascmc", "houses", "derived"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "stage", "goldenType", "legalReviewRequired"],
+      "properties": {
+        "source": { "const": "browser" },
+        "stage": { "const": "derived-experimental" },
+        "goldenType": { "const": "WEB-EXPERIMENTAL-RESULT" },
+        "legalReviewRequired": { "const": true }
+      }
+    },
+    "jd": { "type": "number" },
+    "objects": { "type": "object" },
+    "ascmc": { "type": "object" },
+    "houses": { "type": "object" },
+    "derived": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["aspects", "lots", "receptions", "mutuals", "declParallel", "syzygy", "parans", "fixedStars", "nakshatras"],
+      "properties": {
+        "aspects": { "type": "object", "required": ["status", "normalAsp", "signAsp", "immediateAsp"] },
+        "lots": { "type": "object", "required": ["status", "diurnal", "items"] },
+        "receptions": { "type": "object", "required": ["status", "normal", "abnormal"] },
+        "mutuals": { "type": "object", "required": ["status", "normal", "abnormal"] },
+        "declParallel": { "type": "object", "required": ["status", "parallel", "contraParallel"] },
+        "syzygy": {
+          "type": "object",
+          "required": ["status", "source", "derivedFrom"],
+          "properties": {
+            "status": { "enum": ["COMPUTED", "MISSING_INPUT"] },
+            "source": { "type": "string" },
+            "syzygyType": { "enum": ["new-moon", "full-moon"] },
+            "jd": { "type": "number" },
+            "longitude": { "type": "number" },
+            "latitude": { "type": "number" },
+            "declination": { "type": "number" },
+            "derivedFrom": { "type": "array", "items": { "type": "string" } },
+            "zodiac": { "const": "tropical" },
+            "direction": { "const": "previous" }
+          }
+        },
+        "parans": { "type": "object", "required": ["status", "dependency"] },
+        "fixedStars": { "type": "object", "required": ["status", "dataDependency"] },
+        "nakshatras": { "type": "object", "required": ["status", "dataDependency"] },
+        "guoStarSect": { "type": "object", "required": ["status", "su", "includesNiu"] },
+        "su28": {
+          "type": "object",
+          "required": ["mode", "modeName", "status"],
+          "properties": {
+            "status": { "enum": ["READY", "EXPERIMENTAL", "LICENSE_BLOCKED", "MISSING_INPUT", "UNSUPPORTED"] }
+          }
+        },
+        "fixedStarsCapability": {
+          "type": "object",
+          "required": ["status", "source", "productionReady"],
+          "properties": { "status": { "const": "LICENSE_BLOCKED" }, "productionReady": { "const": false } }
+        },
+        "qizhengCapability": {
+          "type": "object",
+          "required": ["status", "source", "productionReady"],
+          "properties": { "status": { "const": "LICENSE_BLOCKED" }, "productionReady": { "const": false } }
+        }
+      }
+    }
+  }
+}

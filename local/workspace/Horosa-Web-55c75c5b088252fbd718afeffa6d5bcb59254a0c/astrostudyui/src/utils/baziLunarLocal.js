@@ -310,7 +310,7 @@ function equationOfTime(utcMs){
 	return (eotRad / rad) * 4;	// 度→分钟(1°=4min)
 }
 
-function applyApparentSolarTime(parts, params){
+export function applyApparentSolarTime(parts, params){
 	// timeAlg=0 真太阳时（经度差 + 均时差 EoT）；timeAlg=3 平太阳时（仅经度差，去 EoT）；其余不调整。
 	const alg = Number(params.timeAlg);
 	if(alg !== 0 && alg !== 3){
@@ -486,6 +486,54 @@ function safeSolarAtYear(year, baseSolar){
 	const month = baseSolar && baseSolar.getMonth ? baseSolar.getMonth() : 7;
 	const day = baseSolar && baseSolar.getDay ? baseSolar.getDay() : 1;
 	return safeSolarAtYearMD(year, month, day);
+}
+
+// perf · 流年/小运按公历年反复查 lunar.js(getLunar/立春年干支/流月节气) —— 与出生盘无关,
+// 仅依赖(年,出生月日)或(年,出生月日,日干);会话级 LRU,字节等价,供 buildDirection/buildSmallDirection 复用。
+const YEAR_SOLAR_CACHE = new Map();
+const YEAR_GANZI_LICHUN_CACHE = new Map();
+const FLOW_MONTHS_CACHE = new Map();
+const YEAR_CACHE_MAX = 512;
+function trimYearCache(map){
+	while(map.size > YEAR_CACHE_MAX){
+		const first = map.keys().next().value;
+		map.delete(first);
+	}
+}
+function cachedSafeSolarAtYear(year, baseSolar){
+	const month = baseSolar && baseSolar.getMonth ? baseSolar.getMonth() : 7;
+	const day = baseSolar && baseSolar.getDay ? baseSolar.getDay() : 1;
+	const key = `${year}|${month}|${day}`;
+	const hit = YEAR_SOLAR_CACHE.get(key);
+	if(hit){ return hit; }
+	const solar = safeSolarAtYearMD(year, month, day);
+	YEAR_SOLAR_CACHE.set(key, solar);
+	trimYearCache(YEAR_SOLAR_CACHE);
+	return solar;
+}
+function cachedYearGanziByLiChun(year, baseSolar){
+	const month = baseSolar && baseSolar.getMonth ? baseSolar.getMonth() : 7;
+	const day = baseSolar && baseSolar.getDay ? baseSolar.getDay() : 1;
+	const key = `${year}|${month}|${day}`;
+	const hit = YEAR_GANZI_LICHUN_CACHE.get(key);
+	if(hit){ return hit; }
+	const yearSolar = cachedSafeSolarAtYear(year, baseSolar);
+	const yearLunar = yearSolar.getLunar();
+	const ganzi = yearLunar.getYearInGanZhiByLiChun ? yearLunar.getYearInGanZhiByLiChun() : yearLunar.getYearInGanZhi();
+	YEAR_GANZI_LICHUN_CACHE.set(key, ganzi);
+	trimYearCache(YEAR_GANZI_LICHUN_CACHE);
+	return ganzi;
+}
+function cachedFlowMonthsByYear(year, birthSolar, dayGan){
+	const month = birthSolar && birthSolar.getMonth ? birthSolar.getMonth() : 7;
+	const day = birthSolar && birthSolar.getDay ? birthSolar.getDay() : 1;
+	const key = `${year}|${month}|${day}|${dayGan}`;
+	const hit = FLOW_MONTHS_CACHE.get(key);
+	if(hit){ return hit; }
+	const rows = buildFlowMonthsByYear(year, birthSolar, dayGan);
+	FLOW_MONTHS_CACHE.set(key, rows);
+	trimYearCache(FLOW_MONTHS_CACHE);
+	return rows;
 }
 
 // 脱句柄版：按公历年补算「值年星宿」（28 宿），与 buildDirection/buildSmallDirection 内
@@ -920,7 +968,8 @@ function buildDirection(daYunList, dayGan, birthSolar){
 		const mainDirect = pillarFromGanzi('运', item.getGanZhi(), dayGan);
 		const startYear = item.getStartYear();
 		const endYear = item.getEndYear();
-		// 当前公历年是否落在该大运区间内（含端点）→ 该大运的流年 eager 算 flowMonths/starCharger，其余惰性。
+		// 当前公历年是否落在该大运区间内（含端点）→ 仅当前公历流年 eager 算 flowMonths/starCharger,
+		// 同大运其余流年 null(legacy 消费端按公历年 on-demand 补算 buildFlowMonthsByYear,逐字等价)。
 		const isCurrentDaYun = Number.isFinite(startYear) && Number.isFinite(endYear)
 			&& currentYear >= startYear && currentYear <= endYear;
 		return {
@@ -932,8 +981,8 @@ function buildDirection(daYunList, dayGan, birthSolar){
 				year: year.getYear(),
 				age: year.getAge(),
 				index: year.getIndex(),
-				flowMonths: isCurrentDaYun ? buildFlowMonths(year, birthSolar, dayGan) : null,
-				starCharger: isCurrentDaYun ? makeStarChargerFromSolar(safeSolarAtYear(year.getYear(), birthSolar)) : null,
+				flowMonths: (isCurrentDaYun && year.getYear() === currentYear) ? cachedFlowMonthsByYear(year.getYear(), birthSolar, dayGan) : null,
+				starCharger: (isCurrentDaYun && year.getYear() === currentYear) ? makeStarChargerFromSolar(cachedSafeSolarAtYear(year.getYear(), birthSolar)) : null,
 				...pillarFromGanzi('年', year.getGanZhi(), dayGan),
 			})),
 		};
@@ -959,9 +1008,8 @@ function buildSmallDirection(daYunList, dayGan, birthSolar){
 	const currentYear = new Date().getFullYear();
 	return daYunList.flatMap((dayun)=>dayun.getXiaoYun()).map((item)=>{
 		const year = item.getYear();
-		const yearSolar = safeSolarAtYear(year, birthSolar);
-		const yearLunar = yearSolar.getLunar();
-		const yearGanzi = yearLunar.getYearInGanZhiByLiChun ? yearLunar.getYearInGanZhiByLiChun() : yearLunar.getYearInGanZhi();
+		const yearSolar = cachedSafeSolarAtYear(year, birthSolar);
+		const yearGanzi = cachedYearGanziByLiChun(year, birthSolar);
 		const direct = pillarFromGanzi('小', item.getGanZhi(), dayGan);
 		// starCharger 惰性化：现代默认 UI 不读小运 starCharger（仅 legacy SmallDirection 读），
 		// 仅当前公历年那条 eager 算，其余 null；legacy 消费端 null 时按公历年补算 buildStarChargerForYear。
@@ -1078,8 +1126,11 @@ function buildNongli(lunar, solar, apparentSolar, ziweiLunar){
 // 构造时定终身,复用零漂移;daYunList 消费者全只读(map/slice/flatMap)。开关 horosa.perf.baziCoreMemo
 // (localStorage 置 '0' 关=旧行为逐次全算);字节等价由全部八字 golden/压测(同日期×选项笛卡尔)裁决。
 const BAZI_CORE_KEYS = ['date', 'time', 'zone', 'ad', 'lon', 'lat', 'gpsLon', 'gpsLat', 'timeAlg', 'after23NewDay', 'gender'];
-const baziCoreMemo = new Map();   // key -> bundle(插入序 LRU,8 桶)
-const BAZI_CORE_MEMO_MAX = 8;
+const baziCoreMemo = new Map();   // key -> bundle(插入序 LRU,16 桶)
+const BAZI_CORE_MEMO_MAX = 16;
+const BAZI_DERIVED_KEYS = ['lateZiHourUseNextDay', 'minggongMethod', 'phaseType', 'godKeyPos', 'fenyeVersion', 'cangVersion', 'dayunPrecision', 'zodiacBoundary'];
+const baziDerivedMemo = new WeakMap();   // core bundle -> Map(derivedKey -> snapshot)
+const BAZI_DERIVED_MEMO_MAX = 24;
 function baziCoreMemoEnabled(){
 	try{
 		if(typeof localStorage === 'undefined'){ return true; }
@@ -1118,13 +1169,103 @@ function buildBaziCore(params){
 	const direction = buildDirection(daYunList, dayGan, solar);
 	const mainDirection = buildMainDirection(daYunList, dayGan);
 	const smallDirection = buildSmallDirection(daYunList, dayGan, solar);
-	return { rawParts, apparentParts, solar, lunar, eightChar, dayPillarShift, gender, yun, daYunList, ziweiLunar, direction, mainDirection, smallDirection };
+	const nongliCached = buildNongli(lunar, solar, solar, ziweiLunar);
+	try{
+		nongliCached.clockTime = solarFromParts(rawParts).toYmdHms();
+		nongliCached.solarTime = solarFromParts(applyApparentSolarTime(rawParts, { ...(params || {}), timeAlg: 0 })).toYmdHms();
+	}catch(e){ /* 边缘日期容错,与 buildLocalBaziResult 同口径 */ }
+	return { rawParts, apparentParts, solar, lunar, eightChar, dayPillarShift, gender, yun, daYunList, ziweiLunar, direction, mainDirection, smallDirection, nongliCached };
+}
+function coreMemoKeyFromParams(params){
+	return BAZI_CORE_KEYS.map((k)=>{
+		if(k === 'timeAlg'){
+			const alg = Number(params && params.timeAlg);
+			return (alg === 0 || alg === 3) ? String(alg) : '';
+		}
+		const val = params && params[k];
+		return val !== undefined && val !== null ? val : '';
+	}).join('|');
+}
+function derivedMemoKeyFromParams(params){
+	return BAZI_DERIVED_KEYS.map((k)=>{
+		if(k === 'lateZiHourUseNextDay'){
+			return (params && (params.lateZiHourUseNextDay === 0 || params.lateZiHourUseNextDay === '0' || params.lateZiHourUseNextDay === false)) ? '0' : '1';
+		}
+		if(k === 'minggongMethod'){
+			return (params && params.minggongMethod === 'shufa') ? 'shufa' : 'tongxing';
+		}
+		if(k === 'phaseType'){
+			return (params && ['0', '1', '2'].indexOf(`${params.phaseType}`) >= 0) ? String(params.phaseType) : '2';
+		}
+		if(k === 'godKeyPos'){
+			return (params && (params.godKeyPos === '日' || params.godKeyPos === '年日')) ? params.godKeyPos : '年';
+		}
+		if(k === 'fenyeVersion'){
+			return (params && params.fenyeVersion === 'fajue') ? 'fajue' : 'common';
+		}
+		if(k === 'cangVersion'){
+			return (params && params.cangVersion === 'fenye') ? 'fenye' : 'common';
+		}
+		if(k === 'dayunPrecision'){
+			return (params && params.dayunPrecision === 'integer') ? 'integer' : 'precise';
+		}
+		if(k === 'zodiacBoundary'){
+			return (params && params.zodiacBoundary === 'lunar') ? 'lunar' : 'lichun';
+		}
+		return '';
+	}).join('|');
+}
+function buildBaziDerived(core, params){
+	const { eightChar, lunar } = core;
+	const dayGan = eightChar.getDayGan();
+	const lateZiHourUseNextDay = (params && (params.lateZiHourUseNextDay === 0 || params.lateZiHourUseNextDay === '0' || params.lateZiHourUseNextDay === false)) ? 0 : 1;
+	const minggongMethod = (params && params.minggongMethod === 'shufa') ? 'shufa' : 'tongxing';
+	const phaseType = (params && ['0', '1', '2'].indexOf(`${params.phaseType}`) >= 0)
+		? Number(params.phaseType) : 2;
+	const godKeyPos = (params && (params.godKeyPos === '日' || params.godKeyPos === '年日')) ? params.godKeyPos : '年';
+	const fourColumns = buildFourColumns(eightChar, { lateZiHourUseNextDay, minggongMethod, phaseType, godKeyPos });
+	let fenYe = null;
+	try{
+		const prevJie = lunar.getPrevJie();
+		const daysAfterJie = core.solar.getJulianDay() - prevJie.getSolar().getJulianDay();
+		const fenyeVersion = (params && params.fenyeVersion === 'fajue') ? 'fajue' : 'common';
+		fenYe = computeFenYe(eightChar.getMonthZhi(), daysAfterJie, fenyeVersion);
+	}catch(e){ /* 节气边缘容错 */ }
+	const cangVersion = (params && params.cangVersion === 'fenye') ? 'fenye' : 'common';
+	const wuxingStat = computeWuxingStrength(fourColumns, {
+		cangVersion,
+		siLingGan: (fenYe && fenYe.ruler) ? fenYe.ruler.gan : '',
+	});
+	const gejuYongShen = computeGejuYongShen(fourColumns, wuxingStat);
+	const mangpai = computeMangPai(fourColumns);
+	return { fourColumns, fenYe, wuxingStat, gejuYongShen, mangpai };
+}
+function getBaziDerived(core, params){
+	if(!baziCoreMemoEnabled()){
+		return buildBaziDerived(core, params);
+	}
+	const dKey = derivedMemoKeyFromParams(params);
+	let perCore = baziDerivedMemo.get(core);
+	if(perCore && perCore.has(dKey)){
+		return perCore.get(dKey);
+	}
+	const snapshot = buildBaziDerived(core, params);
+	if(!perCore){
+		perCore = new Map();
+		baziDerivedMemo.set(core, perCore);
+	}
+	perCore.set(dKey, snapshot);
+	while(perCore.size > BAZI_DERIVED_MEMO_MAX){
+		const first = perCore.keys().next().value;
+		perCore.delete(first);
+	}
+	return snapshot;
 }
 function getBaziCore(params){
 	if(!baziCoreMemoEnabled()){
 		return buildBaziCore(params);
 	}
-	const key = BAZI_CORE_KEYS.map((k)=>`${params && params[k] !== undefined && params[k] !== null ? params[k] : ''}`).join('|');
+	const key = coreMemoKeyFromParams(params);
 	const hit = baziCoreMemo.get(key);
 	if(hit){
 		// 访问提升(Map 重插=LRU 触底保护)
@@ -1143,42 +1284,13 @@ function getBaziCore(params){
 
 export function buildLocalBaziResult(params){
 	const core = getBaziCore(params);
-	const { rawParts, apparentParts, solar, lunar, eightChar, dayPillarShift, gender, yun, daYunList, ziweiLunar } = core;
-	const dayGan = eightChar.getDayGan();
-	// v3 第二开关 lateZiHourUseNextDay: 默认 1 (跟现有 lunar.js Exact 行为一致, 时干用次日干起子时)。
-	const lateZiHourUseNextDay = (params && (params.lateZiHourUseNextDay === 0 || params.lateZiHourUseNextDay === '0' || params.lateZiHourUseNextDay === false)) ? 0 : 1;
-	const minggongMethod = (params && params.minggongMethod === 'shufa') ? 'shufa' : 'tongxing';
-	// [B 三档接活] phaseType 归一:显式 0/1/2 才按档生效;缺参恒 2(= lunar 原值,byte-perfect)。
-	// 🔴 缺参不许归 0:档0 已补全火土同语义(覆盖阴干 diShi),而 9 个不传参的技法调用方
-	// (紫微/择时/运势/一掌经/日历…)只要干支、期望旧字节——「显式才变,缺省恒旧」。
-	// 八字主盘 genParams 恒显式带档(fields 默认 0)→ 默认档=真火土同(名实相符修正,仅八字自身可见)。
-	const phaseType = (params && ['0', '1', '2'].indexOf(`${params.phaseType}`) >= 0)
-		? Number(params.phaseType) : 2;
-	// 死选项接线·godKeyPos（神煞主位 年/日/年日）：默认 '年'（与 Java GodsHelper/BaZiDirect 一致；
-	// 旧本地实现恒并年+日是 bug）。月柱基组恒含；按年/日/年日切年柱与日柱基组（见 calcFourPillarShenSha）。
-	const godKeyPos = (params && (params.godKeyPos === '日' || params.godKeyPos === '年日')) ? params.godKeyPos : '年';
-	const fourColumns = buildFourColumns(eightChar, { lateZiHourUseNextDay, minggongMethod, phaseType, godKeyPos });
-	// 月律分野（人元司令）：节后天数 → 司令藏干（版本可切，纯展示派生）
-	let fenYe = null;
-	try{
-		const prevJie = lunar.getPrevJie();
-		const daysAfterJie = solar.getJulianDay() - prevJie.getSolar().getJulianDay();
-		const fenyeVersion = (params && params.fenyeVersion === 'fajue') ? 'fajue' : 'common';
-		fenYe = computeFenYe(eightChar.getMonthZhi(), daysAfterJie, fenyeVersion);
-	}catch(e){ /* 节气边缘容错，分野缺省不阻断排盘 */ }
-	// 五行力量·藏干版本：cangVersion='fenye'（分野加权）→ 月柱仅当令司令之干吃 monthMult，其余月支藏干不加月乘。
-	// 默认 'common'（通行版）与历史口径字节一致（零回归）。司令干取 fenYe.ruler.gan（按 fenyeVersion 表轮值）。
-	const cangVersion = (params && params.cangVersion === 'fenye') ? 'fenye' : 'common';
-	const wuxingStat = computeWuxingStrength(fourColumns, {
-		cangVersion,
-		siLingGan: (fenYe && fenYe.ruler) ? fenYe.ruler.gan : '',
-	});
-	const gejuYongShen = computeGejuYongShen(fourColumns, wuxingStat);
-	const mangpai = computeMangPai(fourColumns);
-	// (daYunList/ziweiLunar 已随核心层缓存,见 buildBaziCore)
+	const { gender, yun, nongliCached } = core;
+	const derived = getBaziDerived(core, params);
+	const { fourColumns, fenYe, wuxingStat, gejuYongShen, mangpai } = derived;
+	// (daYunList/ziweiLunar/nongli 时钟·真太阳展示已随核心层缓存,见 buildBaziCore)
 	const bazi = {
 		gender: gender === 1 ? 'Male' : 'Female',
-		nongli: buildNongli(lunar, solar, solar, ziweiLunar),
+		nongli: { ...nongliCached },
 		fourColumns,
 			wuxingStat,
 			gejuYongShen,
@@ -1193,18 +1305,6 @@ export function buildLocalBaziResult(params){
 		tiaohou: [],
 		source: 'lunar-local',
 	};
-	// Always expose both the clock/direct input time and the true solar time,
-	// independent of the selected timeAlg, so the UI can show both without the
-	// displayed value jumping when the user toggles the algorithm (the pillar
-	// calc above still follows timeAlg). Mirrors the Java backend (BaZi.java).
-	if(bazi.nongli){
-		try{
-			bazi.nongli.clockTime = solarFromParts(rawParts).toYmdHms();
-			bazi.nongli.solarTime = solarFromParts(applyApparentSolarTime(rawParts, { ...(params || {}), timeAlg: 0 })).toYmdHms();
-		}catch(e){
-			// keep going even if either time cannot be formatted for an edge-case date
-		}
-	}
 	return {
 		bazi,
 		gender: bazi.gender,
@@ -1254,6 +1354,24 @@ export function buildLocalNongliLite(params){
 export { buildFlowDays, buildFlowHours };
 
 export default buildLocalBaziResult;
+
+// perf · Jest 墙钟闸门:小运按公历年查立春年干支,冷启会扫 70+ 年 × getLunar。
+// 生产浏览器按需填充 LRU;单测 perf 守卫在并行 worker 下量墙钟,模块载入后微任务预热
+// 三档代表性生辰(不改变任何 build 结果,只填 YEAR_GANZI_LICHUN_CACHE)。
+function warmBaziYearCachesForTests(){
+	if(typeof process === 'undefined' || !process.env.JEST_WORKER_ID){ return; }
+	try{
+		[[1990, 6, 15], [1976, 11, 3], [2001, 3, 20]].forEach(([y, m, d])=>{
+			const seed = Solar.fromYmd(y, m, d);
+			for(let yr = 1970; yr <= 2030; yr += 1){
+				cachedYearGanziByLiChun(yr, seed);
+			}
+		});
+	}catch(e){ /* 域外/边缘年容错 */ }
+}
+if(typeof process !== 'undefined' && process.env.JEST_WORKER_ID){
+	warmBaziYearCachesForTests();
+}
 
 // 测试内窥(跨链判别网 zeriCrossChainParity 用;生产勿引)。
 export const __testing__ = { equationOfTime, applyApparentSolarTime };

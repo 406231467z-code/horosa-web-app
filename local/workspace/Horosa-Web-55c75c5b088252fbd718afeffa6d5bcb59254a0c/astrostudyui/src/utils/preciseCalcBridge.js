@@ -1,5 +1,3 @@
-import request from './request';
-import { ServerRoot, ResultKey } from './constants';
 import {
 	getNongliLocalCache,
 	setNongliLocalCache,
@@ -389,45 +387,20 @@ export async function fetchPreciseNongli(params){
 	if(key && nongliInflight.has(key)){
 		return nongliInflight.get(key);
 	}
-	const req = (async()=>{
-		try{
-			const rsp = await request(`${ServerRoot}/nongli/time`, {
-				body: JSON.stringify(reqParams),
-				silent: true,
-				timeoutMs: PRECISE_REQ_TIMEOUT_MS,
-			});
-			const result = rsp && rsp[ResultKey] ? rsp[ResultKey] : null;
-			if(result){
-				pushCache(nongliMem, key, result);
-				setNongliLocalCache(reqParams, result);
-				return result;
-			}
-			// 软失败:后端返非 0 码 / 网络抖动会让 request 返回 undefined(不抛异常),
-			// 原本写在下面 catch 里的本地兜底永不触发 → 奇门/太乙离线即空、改经纬度(缓存未命中)即暴露。
-			// 故对 !result 的软失败也走一次本地兜底,与 /liureng/gods 行为对齐。
-			const softFallback = buildLocalNongliFallback(reqParams);
-			if(softFallback){
-				pushCache(nongliMem, key, softFallback);
-				setNongliLocalCache(reqParams, softFallback);
-			}
-			return softFallback;
-		}catch(e){
-			const fallback = buildLocalNongliFallback(reqParams);
-			if(fallback){
-				pushCache(nongliMem, key, fallback);
-				setNongliLocalCache(reqParams, fallback);
-			}
-			return fallback;
-		}
-	})().finally(()=>{
+	const local = buildLocalNongliFallback(reqParams);
+	if(local){
 		if(key){
-			nongliInflight.delete(key);
+			pushCache(nongliMem, key, local);
 		}
-	});
-	if(key){
-		nongliInflight.set(key, req);
+		setNongliLocalCache(reqParams, local);
+		return local;
 	}
-	return req;
+	return {
+		status: 'UNSUPPORTED',
+		code: 'LUNAR_DOMAIN',
+		provider: 'browser',
+		local: false,
+	};
 }
 
 export async function fetchPreciseJieqiYear(params){
@@ -459,37 +432,12 @@ export async function fetchPreciseJieqiYear(params){
 	if(key && jieqiYearInflight.has(key)){
 		return jieqiYearInflight.get(key);
 	}
-	const req = (async()=>{
-		try{
-			const rsp = await request(`${ServerRoot}/jieqi/year`, {
-				body: JSON.stringify(reqParams),
-				silent: true,
-				timeoutMs: PRECISE_REQ_TIMEOUT_MS,
-			});
-			const result = rsp && rsp[ResultKey] ? rsp[ResultKey] : null;
-			if(result){
-				const filledResult = fillJieqiDayGanzhiFromLocal(result, reqParams);
-				pushCache(jieqiYearMem, key, filledResult);
-				setJieqiYearLocalCache(reqParams, filledResult);
-			}
-			return result ? fillJieqiDayGanzhiFromLocal(result, reqParams) : result;
-		}catch(e){
-			const fallback = localHit || buildLocalJieqiYearFallback(reqParams);
-			if(fallback){
-				pushCache(jieqiYearMem, key, fallback);
-				setJieqiYearLocalCache(reqParams, fallback);
-			}
-			return fallback || null;
-		}
-	})().finally(()=>{
-		if(key){
-			jieqiYearInflight.delete(key);
-		}
-	});
-	if(key){
-		jieqiYearInflight.set(key, req);
-	}
-	return req;
+	return {
+		status: 'UNSUPPORTED',
+		code: 'LUNAR_DOMAIN',
+		provider: 'browser',
+		local: false,
+	};
 }
 
 // PERF-R8 P3(邻位预取):分至图年份步进的 year±1 静默预取 —— 只在「当前年已取到」之后

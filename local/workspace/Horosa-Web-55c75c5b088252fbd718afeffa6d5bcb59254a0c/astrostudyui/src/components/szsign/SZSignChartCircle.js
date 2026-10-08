@@ -30,7 +30,7 @@ class SZSignChartCircle extends Su28ChartCircle{
 		let innerR = r - rStep;
 		let txtPosR = r - rStep / 2 - this.TxtOffsetTop;
 
-		let signsRA = this.chartObj.signsRA;
+		let signsRA = Array.isArray(this.chartObj.signsRA) ? this.chartObj.signsRA : [];
 		let signs = this.svg.append('g');
 		for(let i=0; i<signsRA.length; i++){
 			let su = signsRA[i];

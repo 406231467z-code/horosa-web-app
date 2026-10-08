@@ -11,6 +11,7 @@ import { waitForBackendBoot } from './backendBootGate';
 // horosa_prefetch_runtime_whitelist_v1(R4-B1):预取作用域内的 URL 闸(纵深防御)。
 // 非预取作用域恒放行 —— 用户真实请求逐字节零行为变化。
 import { guardPrefetchUrl } from './stepPrefetch';
+import { browserCalculationBlock } from './browserCalcGate';
 
 var tmDelta = 0;
 // eslint-disable-next-line import/no-cycle
@@ -93,7 +94,7 @@ function humanizeBackendError(text){
 	}
 	// 连接类 → 明确指向本地服务;其余技术异常 → 通用可行动提示。两者都不回显原始堆栈。
 	if(/Connect(ion)? (to|refused|timed out)|SocketTimeout|ECONNREFUSED|HttpHostConnect/i.test(raw)){
-		return '需要计算服务：本地计算服务未响应。星盘等历算暂不可用，本次没有生成结果。请启动服务后重试。';
+		return '这项计算没有完成。状态：UNSUPPORTED。本次没有生成结果。';
 	}
 	return '后端处理出错，请稍候重试；若持续如此，请重启应用。';
 }
@@ -528,6 +529,10 @@ export async function healAndRetryOnce(url, options, err, replay){
  * @return {object}           An object containing either "data" or "err"
  */
 export default async function request(url, options) {
+    const blocked = browserCalculationBlock(url);
+    if(blocked){
+        return blocked;
+    }
     // horosa_prefetch_runtime_whitelist_v1:仅当【步进预取任务正在同步起调】时才判定;
     // 白名单外的端点直接拒发(返回 undefined —— 与本函数既有「网络失败吞错 resolve undefined」
     // 同一语义,调用方既有空载荷守卫原样接住)。预取关闸/非预取路径:此判定恒 true,零影响。

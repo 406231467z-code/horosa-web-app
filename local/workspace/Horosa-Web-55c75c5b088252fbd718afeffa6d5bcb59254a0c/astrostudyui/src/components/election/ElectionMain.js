@@ -6,7 +6,7 @@ import { XQSelect, XQButton, XQSideSection } from '../xq-ui';
 import DivinationChartShell from '../divination/DivinationChartShell';
 import ElectionJudgment from './ElectionJudgment';
 import ElectionReference from './ElectionReference';
-import { fetchChart } from '../../services/astro';
+import { calculateChart } from '../../services/astrologyCalculationService';
 import { buildChartParams } from '../../divination/engine/chartRequest';
 import { buildFacts } from '../../divination/engine/chartFacts';
 import { runElection } from '../../divination/election/electionEngine';
@@ -144,7 +144,7 @@ class ElectionMain extends Component{
 		try{
 			const R = await chartAtMoment(`${dateStr} 12:00:00`, fieldsLike);
 			const F = R ? buildFacts(R) : null;
-			const moonLon = F && F.planets.moon ? F.planets.moon.lon : null;
+			const moonLon = F && F.planets && F.planets.moon ? F.planets.moon.lon : null;
 			setExtra({ crisisBase: moonLon != null ? { date: dateStr, moonLon } : null });
 		}catch(e){ setExtra({ crisisBase: null }); }
 		this.setState({ crisisLoading: false });
@@ -163,7 +163,7 @@ class ElectionMain extends Component{
 		};
 		this.setState({ natalLoading: true });
 		try{
-			const rsp = await fetchChart(params, { cache: true });
+			const rsp = await calculateChart(params, { cache: true });
 			const R = rsp && rsp.Result;
 			const natalFacts = R ? buildFacts(R) : null;
 			this.setState({ natalRec: rec, natalFacts, natalLoading: false });
@@ -233,7 +233,7 @@ class ElectionMain extends Component{
 				ad: { value: c.dt.ad, name: ['ad'] },
 				zone: { value: c.dt.zone, name: ['zone'] },
 			};
-			return fetchChart(buildChartParams(f), { cache: true }).then((rsp) => {
+			return calculateChart(buildChartParams(f), { cache: true }).then((rsp) => {
 				const R = rsp && rsp.Result;
 				if(!R) return null;
 				const rep = runElection(R, topicId, null, null, this._elecOpts || { westSchool: this._westSchool });

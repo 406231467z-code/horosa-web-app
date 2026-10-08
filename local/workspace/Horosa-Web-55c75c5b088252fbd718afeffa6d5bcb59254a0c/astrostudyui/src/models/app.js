@@ -457,6 +457,21 @@ export default {
                 }
             }
 
+            const desktopCalc = typeof window !== 'undefined' && (!!window.__TAURI__ || !!window.horosaDesktop);
+            if(!desktopCalc){
+                const store = yield select((s)=>s);
+                const fld = {
+                    ...store.astro.fields,
+                };
+                applyPredictiveSetupToFields(fld, store.app);
+                yield put({
+                    type: 'astro/nowChart',
+                    payload: {
+                        fields: fld,
+                    },
+                });
+                return;
+            }
             const rsp = yield call(appService.checkUser, param);
             if(!rsp || !rsp.Result){
                 localStorage.removeItem(Constants.TokenKey);
@@ -653,6 +668,10 @@ export default {
         },
 
         *getSysTime({ payload:values }, { put, call }){
+            const desktopCalc = typeof window !== 'undefined' && (!!window.__TAURI__ || !!window.horosaDesktop);
+            if(!desktopCalc){
+                return;
+            }
             const Result = yield call(appService.systime);
             if(Result === undefined || Result === null){
                 return;

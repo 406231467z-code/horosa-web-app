@@ -14,7 +14,7 @@ import {
 	immediateAspects,
 	normalAspects,
 	signAspects,
-} from './productionRules.mjs';
+} from './productionRules.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(here, '..', '..');

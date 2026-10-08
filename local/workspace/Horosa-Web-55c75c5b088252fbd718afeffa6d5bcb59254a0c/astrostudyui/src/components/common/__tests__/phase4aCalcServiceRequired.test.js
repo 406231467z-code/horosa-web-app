@@ -33,7 +33,7 @@ describe('PHASE 4-A calc service required', () => {
 		try { delete window.horosaDesktop; } catch (e) { window.horosaDesktop = undefined; }
 	});
 
-	test('纯浏览器连接被拒：放行主界面并标明需要计算服务，不报在线', async () => {
+	test('纯浏览器不探测 heartbeat，缺 Java 也不标成未生成结果', async () => {
 		expect(isDesktopCalcShell()).toBe(false);
 		global.fetch = jest.fn(() => Promise.reject(new TypeError('Failed to fetch')));
 		await act(async () => {
@@ -42,14 +42,14 @@ describe('PHASE 4-A calc service required', () => {
 		await act(async () => {
 			await Promise.resolve();
 		});
-		expect(isServiceOnline()).toBe(false);
+		expect(global.fetch).not.toHaveBeenCalled();
+		expect(isServiceOnline()).toBe(true);
 		expect(host.textContent || '').not.toContain('正在连接本地服务');
 		await act(async () => {
 			render(<ServiceStatusBanner />, host);
 		});
-		expect(host.textContent).toContain('需要计算服务');
-		expect(host.textContent).toContain(CALC_SERVICE_REQUIRED_MESSAGE);
-		expect(host.textContent).not.toContain('重启应用');
+		expect(host.textContent || '').not.toContain('需要计算服务');
+		expect(host.textContent || '').not.toContain(CALC_SERVICE_REQUIRED_MESSAGE);
 	});
 
 	test('桌面壳连接被拒：仍保持启动覆盖，不假装服务已就绪', async () => {

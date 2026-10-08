@@ -58,6 +58,7 @@ jest.mock('../aiAnalysisStore', () => ({
 	putStoreRecord: jest.fn(async (s, r) => r),
 }));
 
+import request from '../request';
 import { getAnalysisTechniqueContextWithOptions } from '../aiAnalysisContext';
 
 const SOURCE = {
@@ -79,11 +80,17 @@ function countSegments(text) {
 }
 
 describe('P4 区间扫描 profection round-trip', () => {
+	beforeEach(() => {
+		request.mockClear();
+	});
+
 	it('默认（无 datetimeEnd/scanStep）→ 单点：无「时段」分段（=现状路径）', async () => {
 		// 仅给非 datetime 字段一个非默认值以触发 override 路径（asporb），但不设区间扫描 → 仍单点。
 		const ctx = await getAnalysisTechniqueContextWithOptions(SOURCE, 'profection', { asporb: 2 });
 		expect(ctx).toBeTruthy();
-		expect(ctx.content).toContain('PRED@');
+		expect(ctx.content).toContain('status: UNSUPPORTED');
+		expect(ctx.content).toContain('PREDICTIVE_BROWSER');
+		expect(request).not.toHaveBeenCalled();
 		expect(countSegments(ctx.content)).toBe(0); // 单点不加段头
 	});
 

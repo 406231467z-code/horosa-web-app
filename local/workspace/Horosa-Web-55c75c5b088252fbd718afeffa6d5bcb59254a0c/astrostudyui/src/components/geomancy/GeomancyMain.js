@@ -8,10 +8,8 @@ import { Input, InputNumber, Spin, message } from 'antd';
 import XQIcon from '../xq-icons';
 import { XQButton as Button, XQSelect as Select, XQTabs as Tabs, XQSideSection } from '../xq-ui';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
-import { ServerRoot, ResultKey } from '../../utils/constants';
 import { AstroFont } from '../../constants/AstroConst';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from '../../utils/kentangCache';
+import { computeGeomancyReading } from '../../utils/geomancyBrowser';
 import { openKentangCaseDrawer, getKentangSavedCasePayload } from '../../utils/kentangCaseSave';
 import TechniqueErrorBoundary from '../common/TechniqueErrorBoundary';
 import { getSignSymbol } from '../astro/IndiaSouthChart';
@@ -401,31 +399,16 @@ function fmtDegMin(v){
 }
 
 async function postGeomancy(path, payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('geomancy', path), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'geomancy.local.fetch.failed');
-		}
-	}catch(e){
-		const rawResponse = await cachedKentangFetch(`${ServerRoot}/geomancy/${path}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
+	if(path && path !== 'reading'){
+		return {
+			status: 'UNSUPPORTED',
+			provider: 'browser',
+			code: 'GEOMANCY_PATH',
+			feature: 'geomancy',
+			message: '该地占路径没有浏览器算法。',
+		};
 	}
-	if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-		throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'geomancy.fetch.failed');
-	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
+	return computeGeomancyReading(payload);
 }
 
 function figureLine(fig, role){

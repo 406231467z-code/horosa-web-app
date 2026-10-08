@@ -12,7 +12,7 @@ import { XQButton, XQSegmented, XQSelect, XQTabs, XQSideSection } from '../xq-ui
 import { sideSectionIcon } from '../../constants/sideSectionIcons'; // [观象P1]
 import XQIcon from '../xq-icons';
 import * as AstroConst from '../../constants/AstroConst';
-import { fetchChart } from '../../services/astro';
+import { calculateChart } from '../../services/astrologyCalculationService';
 import { buildChartParams } from '../../divination/engine/chartRequest';
 import { submitStepPrefetch } from '../../utils/stepPrefetch';
 import { stepSelectPrefetchEnabled } from '../../utils/perfFlags';
@@ -292,7 +292,7 @@ class DivinationChartShell extends Component{
 		const params = buildChartParams(this.state.fields);
 		const seq = ++this._reqSeq;
 		this.setState({ busy: true, err: null });
-		fetchChart(params, { cache: true }).then((rsp)=>{
+		calculateChart(params, { cache: true }).then((rsp)=>{
 			if(seq !== this._reqSeq || !this._mounted){
 				return; // 过期请求或已卸载，丢弃
 			}
@@ -338,7 +338,7 @@ class DivinationChartShell extends Component{
 				const nextFields = { ...this.state.fields };
 				nextFields.date = { value: nd, name: ['date'] };
 				nextFields.time = { value: nd.clone ? nd.clone() : nd, name: ['time'] };
-				fetchChart(buildChartParams(nextFields), { cache: true, silent: true }).catch(()=>{ /* 预取静默 */ });
+				calculateChart(buildChartParams(nextFields), { cache: true, silent: true }).catch(()=>{ /* 预取静默 */ });
 			}catch(e){ /* 预取失败无害 */ }
 		}
 	}
@@ -362,7 +362,7 @@ class DivinationChartShell extends Component{
 				name: `divchart${pl.dir > 0 ? '+' : '-'}${pl.k}${unit}`,
 				path: '/chart',   // R4-B1 运行时白名单契约:无 path 的任务会被 submitStepPrefetch 丢弃
 				// silent+零重试:预取失败静默、绝不退避风暴(主链纪律同款)
-				run: ()=>fetchChart(params, { cache: true, silent: true, retry: { retries: 0 } }),
+				run: ()=>calculateChart(params, { cache: true, silent: true, retry: { retries: 0 } }),
 			});
 		}
 		return tasks;

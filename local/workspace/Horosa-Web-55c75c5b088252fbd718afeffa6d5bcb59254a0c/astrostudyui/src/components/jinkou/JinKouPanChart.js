@@ -184,6 +184,9 @@ class JinKouPanChart {
 	}
 
 	drawKeChuan(cord){
+		if(!this.ke){
+			return;
+		}
 		const w = (cord.w - this.margin * 2) * 4 / 7;
 		const h = cord.h - this.margin;
 		const x = cord.x + this.margin / 2;

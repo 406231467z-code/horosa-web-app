@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
 import moment from 'moment';
 import { Row, Col, Slider, Tree, Collapse, Table, Modal, Input } from 'antd';
-import request from '../../utils/request';
+import { ephemerisLicenseStatus } from '../../utils/calcStatus';
 import * as Constants from '../../utils/constants';
 import * as AstroConst from '../../constants/AstroConst';
 import * as AstroText from '../../constants/AstroText';
@@ -404,29 +404,8 @@ export default class UranianDialMain extends Component {
 		const params = fieldsToParams(this.props.fields);
 		const perr = dialParamsError(params);
 		if (perr) { if (!this.unmounted) this.setState({ dataNote: perr }); return; }
-		if (!this.unmounted && this.state.dataNote) this.setState({ dataNote: null });
-		try {
-			// B5 戴维森:开关开且已选合盘人 → 请求附 davison(第二人出生参数);后端只增响应字段。
-			const dav = this.state.showDavison ? this.davisonPartnerParams() : null;
-			const data = await request(`${Constants.ServerRoot}/germany/midpoint`, { body: JSON.stringify({ ...params, ...schoolRequestParams(this.state), ...(dav ? { davison: dav } : {}) }), silent: true });
-			const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-			if (!this.unmounted && result) {
-				const patch = {};
-				if (Array.isArray(result.tnp)) patch.natalTnp = result.tnp;
-				// 赤纬接触(WP-11):后端缺该字段(declination:false 或老后端)→ 存 null,面板显「需后端赤纬数据」。
-				patch.natalDecl = (result.declination && typeof result.declination === 'object') ? result.declination : null;
-				// B5:戴维森因子表(未请求/老后端 → null,环自然不画);B7:东点/宿命点黄经随 houseFrames 带回。
-				patch.davisonData = (result.davison && typeof result.davison === 'object') ? result.davison : null;
-				const hf = result.houseFrames;
-				patch.natalEastPoint = (hf && Number.isFinite(Number(hf.eastPoint))) ? Number(hf.eastPoint) : null;
-				patch.natalVertex = (hf && Number.isFinite(Number(hf.vertex))) ? Number(hf.vertex) : null;
-				// horosa_panel_ready_v1:90°中点盘自有的后端数据(TNP + 赤纬)在此落定;
-				// 盘面其余点来自 props.chart(主盘),故这一次 setState 是本子盘「画完」的最后一次。
-				this.setState(patch, ()=>{
-					markPanelReady('auxchart');
-				});
-			}
-		} catch (e) { /* 静默 */ }
+		const blocked = ephemerisLicenseStatus('uranian-midpoint');
+		if (!this.unmounted) this.setState({ dataNote: blocked.message, calcStatus: blocked });
 	}
 
 	// B5:戴维森盘第二人 = 第一位合盘叠加人(当前盘/库盘)的完整起盘参数(后端 PerChart 全量吃)。
@@ -464,26 +443,8 @@ export default class UranianDialMain extends Component {
 	async requestTransit(){
 		const base = fieldsToParams(this.props.fields);
 		if (dialParamsError(base)) return; // 缺出生地经纬度等 → 不发 transit /chart，避免 param error 提示
-		// 行运时刻可调：state.transitTime(moment)优先，否则此刻。
-		const tt = this.state.transitTime;
-		const dstr = tt ? tt.format('YYYY/MM/DD') : (() => { const n = new Date(); return `${n.getFullYear()}/${pad(n.getMonth() + 1)}/${pad(n.getDate())}`; })();
-		const tstr = tt ? tt.format('HH:mm:ss') : (() => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}:00`; })();
-		// 行运地点可调：null=同本命；显式数字才覆盖（relocated transit）。
-		const overrideLat = this.state.transitLat, overrideLon = this.state.transitLon;
-		const loc = (overrideLat != null && overrideLon != null) ? { lat: overrideLat, lon: overrideLon, gpsLat: overrideLat, gpsLon: overrideLon } : {};
-		const params = { ...base, ...loc, date: dstr, time: tstr };
-		try {
-			const [chartData, mpData] = await Promise.all([
-				request(`${Constants.ServerRoot}/chart`, { body: JSON.stringify({ ...params, cid: null }), silent: true }),
-				request(`${Constants.ServerRoot}/germany/midpoint`, { body: JSON.stringify({ ...params, ...schoolRequestParams(this.state) }), silent: true }),
-			]);
-			const chartObj = chartData && chartData[Constants.ResultKey] ? chartData[Constants.ResultKey] : null;
-			const mp = mpData && mpData[Constants.ResultKey] ? mpData[Constants.ResultKey] : null;
-			const pts = chartToPoints(chartObj);
-			// TNP 透传(过滤交给 buildRings 统一裁剪,避免开关时还需重发请求);带 lonspeed 供逆行标记。
-			if (mp && Array.isArray(mp.tnp)) mp.tnp.forEach((t) => pts.push({ id: t.id, lon: t.lon, speed: Number.isFinite(Number(t.lonspeed)) ? Number(t.lonspeed) : null }));
-			if (!this.unmounted) this.setState({ transitPoints: pts });
-		} catch (e) { /* 静默 */ }
+		const blocked = ephemerisLicenseStatus('uranian-transit');
+		if (!this.unmounted) this.setState({ dataNote: blocked.message, calcStatus: blocked });
 	}
 
 	// WP-9:取某「叠盘人」(当前页盘或命盘库盘)的盘点(行星+三王+交点+Asc/MC + TNP)。
@@ -491,17 +452,8 @@ export default class UranianDialMain extends Component {
 	//   (当前盘→fieldsToParams / 库盘→libraryChartParams),此处只管发请求落盘点。
 	async requestPersonChart(personId, params){
 		if (dialParamsError(params)) return; // 缺出生信息 → 不发请求
-		try {
-			const [chartData, mpData] = await Promise.all([
-				request(`${Constants.ServerRoot}/chart`, { body: JSON.stringify({ ...params, cid: null }), silent: true }),
-				request(`${Constants.ServerRoot}/germany/midpoint`, { body: JSON.stringify({ ...params, ...schoolRequestParams(this.state) }), silent: true }),
-			]);
-			const chartObj = chartData && chartData[Constants.ResultKey] ? chartData[Constants.ResultKey] : null;
-			const mp = mpData && mpData[Constants.ResultKey] ? mpData[Constants.ResultKey] : null;
-			const pts = chartToPoints(chartObj);
-			if (mp && Array.isArray(mp.tnp)) mp.tnp.forEach((t) => pts.push({ id: t.id, lon: t.lon, speed: Number.isFinite(Number(t.lonspeed)) ? Number(t.lonspeed) : null }));
-			if (!this.unmounted) this.setState((s) => ({ synastryPersonPoints: { ...s.synastryPersonPoints, [personId]: pts } }));
-		} catch (e) { /* 静默 */ }
+		const blocked = ephemerisLicenseStatus('uranian-synastry');
+		if (!this.unmounted) this.setState({ dataNote: blocked.message, calcStatus: blocked });
 	}
 
 	// 拉取所有当前选中但尚未缓存的叠盘人盘点(切人/切流派后调用)。
@@ -556,17 +508,8 @@ export default class UranianDialMain extends Component {
 		const birth = this.props.fields && this.props.fields.date ? this.props.fields.date.value : null;
 		const ms = birthEpochMs(birth);
 		if (dialParamsError(base) || natalSun == null || !Number.isFinite(ms)) return;
-		const ageYears = (Date.now() - ms) / (86400000 * 365.2422);
-		const d = new Date(ms + ageYears * 86400000); // 出生 + age 日（1日=1年二次推进）
-		const overrideLat = this.state.saLat, overrideLon = this.state.saLon;
-		const loc = (overrideLat != null && overrideLon != null) ? { lat: overrideLat, lon: overrideLon, gpsLat: overrideLat, gpsLon: overrideLon } : {};
-		const params = { ...base, ...loc, date: `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`, time: `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` };
-		try {
-			const chartData = await request(`${Constants.ServerRoot}/chart`, { body: JSON.stringify({ ...params, cid: null }), silent: true });
-			const co = chartData && chartData[Constants.ResultKey] ? chartData[Constants.ResultKey] : null;
-			const progSun = sunLon(co);
-			if (progSun != null && !this.unmounted) this.setState({ saArcDeg: (((progSun - natalSun) % 360) + 360) % 360 });
-		} catch (e) { /* 退回近似 */ }
+		const blocked = ephemerisLicenseStatus('solar-arc');
+		if (!this.unmounted) this.setState({ dataNote: blocked.message, calcStatus: blocked });
 	}
 
 	solarArcDeg(){

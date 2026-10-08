@@ -37,14 +37,14 @@ describe('PHASE 4-C ziwei birth and liuren gods', ()=>{
 		expect(fetched.Result.chart.lifeMaster).toBe(java.lifeMaster);
 	});
 
-	test('域外年份不编造紫微盘，改走 /ziwei/birth', async ()=>{
+	test('域外年份不编造紫微盘，也不请求 /ziwei/birth', async ()=>{
 		expect(localZiweiBirthEnvelope({ date: '12000-06-01', time: '12:00:00', ad: 1 })).toBeNull();
 		expect(localZiweiBirthEnvelope({ date: '500-01-01', time: '12:00:00', ad: -1 })).toBeNull();
-		request.mockResolvedValue({ Result: { chart: { remote: true } } });
 		const env = await fetchZiweiBirth({ date: '12000-06-01', time: '12:00:00', ad: 1 });
-		expect(request).toHaveBeenCalled();
-		expect(String(request.mock.calls[0][0])).toContain('/ziwei/birth');
-		expect(env.Result.chart.remote).toBe(true);
+		expect(request).not.toHaveBeenCalled();
+		expect(env.status).toBe('UNSUPPORTED');
+		expect(env.code).toBe('LUNAR_DOMAIN');
+		expect(env.provider).toBe('browser');
 	});
 
 	test('格局规则是静态表', ()=>{
@@ -89,7 +89,8 @@ describe('PHASE 4-C ziwei birth and liuren gods', ()=>{
 		expect(buildLocalLiureng({ date: '12000-01-01', time: '12:00:00', ad: 1 })).toBeNull();
 		request.mockResolvedValue(undefined);
 		const missing = await fetchLiurengGods({ date: '12000-01-01', time: '12:00:00', ad: 1 });
-		expect(request).toHaveBeenCalled();
-		expect(missing).toBeUndefined();
+		expect(request).not.toHaveBeenCalled();
+		expect(missing.status).toBe('UNSUPPORTED');
+		expect(missing.provider).toBe('browser');
 	});
 });

@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import MidpointMain from './MidpointMain';
-import request from '../../utils/request';
+import { ephemerisLicenseStatus, formatCalcStatus } from '../../utils/calcStatus';
 import * as Constants from '../../utils/constants';
 import * as AstroConst from '../../constants/AstroConst';
 import * as AstroText from '../../constants/AstroText';
@@ -279,75 +279,13 @@ export function buildHamburgLines(disp, dialPoints, result, snapOrb, extras){
 // 存储流派派生(school/orb/personalOrb,**不含** declination 键——那是 AI 无头版的口径,
 // body 不同不可混用)→ url+body 逐字节一致 → requestDedupe L1/L2 命中。silent 丢结果,
 // 绝不 setState/dispatch。失败静默。
-export async function warmGermanyMidpoint(fields){
-	try{
-		if(!fields || !fields.date || !fields.date.value || !fields.date.value.format){ return null; }
-		const params = fieldsToParams(fields);
-		const disp = getStoredUranianDisplay();
-		const schoolParams = { ...schoolToBackendParams(disp.school), orb: disp.orb, personalOrb: disp.orbPersonal };
-		return await request(`${Constants.ServerRoot}/germany/midpoint`, {
-			body: JSON.stringify({ ...params, ...schoolParams }),
-			silent: true,
-			// PERF-R9 Ship 7:预热/预取一律零重试(显式声明,不吃调用链上的任何重试默认值)。
-			retry: { retries: 0 },
-		});
-	}catch(e){
-		return null; // 预热失败静默:首点回到冷即付的现状
-	}
+export async function warmGermanyMidpoint(){
+	return ephemerisLicenseStatus('germany-midpoint');
 }
 
 // 供 AI 分析无头复算：取本命西洋盘 + 中点盘，生成量化盘快照（不依赖组件挂载）。
-export async function buildGermanySnapshotForFields(fields, dispOverride){
-	if(!fields){
-		return '';
-	}
-	const params = fieldsToParams(fields);
-	const chartData = await request(`${Constants.ServerRoot}/chart`, {
-		body: JSON.stringify({ ...params, cid: null }),
-		silent: true,
-	});
-	const chartObj = chartData && chartData[Constants.ResultKey] ? chartData[Constants.ResultKey] : null;
-	// 流派/赤纬随「90°中点盘」存储派生(同盘口径);默认 classic → schoolParams=后端默认、declination 默认开,既有段字节零回归。
-	// dispOverride:AI 挂载齿轮覆盖(school/orb/orbPersonal/strictFactors/showDeclination/frames);
-	// 缺省 = 全局显示仓原值(现状零回归)。
-	const dispReq = { ...getStoredUranianDisplay(), ...(dispOverride && typeof dispOverride === 'object' ? dispOverride : {}) };
-	// 供给面与 90°盘页面同参面(第3组):strictFactors/frames(live+东点)/davison 条件下发——
-	// 默认全关时逐字节同旧请求(零回归);开启后快照与页面判读永不分叉。
-	const partnerParams = (dispReq.showComposite || dispReq.showDavison) ? firstSynastryPartnerParams(dispReq) : null;
-	const schoolReq = {
-		...schoolToBackendParams(dispReq.school), orb: dispReq.orb, personalOrb: dispReq.orbPersonal,
-		declination: dispReq.showDeclination !== false,
-		frames: dispReq.showHouseFrames !== false || !!dispReq.showEastPoint,
-		...(dispReq.strictFactors ? { strictFactors: true } : {}),
-		...(dispReq.showDavison && partnerParams ? { davison: partnerParams } : {}),
-	};
-	const mpData = await request(`${Constants.ServerRoot}/germany/midpoint`, {
-		body: JSON.stringify({ ...params, ...schoolReq }),
-		silent: true,
-	});
-	const result = mpData && mpData[Constants.ResultKey] ? mpData[Constants.ResultKey] : null;
-	if(!result){
-		return '';
-	}
-	// [组合盘] 段数据:开启且伙伴可解析(命盘库来源)时拉伙伴盘点,前端近中点合成。
-	let extras = null;
-	if(dispReq.showComposite && partnerParams){
-		try{
-			const [pcData, pmData] = await Promise.all([
-				request(`${Constants.ServerRoot}/chart`, { body: JSON.stringify({ ...partnerParams, cid: null }), silent: true }),
-				request(`${Constants.ServerRoot}/germany/midpoint`, { body: JSON.stringify({ ...partnerParams, ...schoolToBackendParams(dispReq.school) }), silent: true }),
-			]);
-			const pChart = pcData && pcData[Constants.ResultKey] ? pcData[Constants.ResultKey] : null;
-			const pMp = pmData && pmData[Constants.ResultKey] ? pmData[Constants.ResultKey] : null;
-			const pPts = chartToPoints(pChart);
-			if(pMp && Array.isArray(pMp.tnp)) pMp.tnp.forEach((t)=>pPts.push({ id: t.id, lon: t.lon }));
-			const natalPts = chartToPoints(chartObj);
-			if(Array.isArray(result.tnp)) result.tnp.forEach((t)=>natalPts.push({ id: t.id, lon: t.lon }));
-			const cpts = compositeChart(natalPts, pPts);
-			if(cpts.length) extras = { compositePts: cpts, partnerLabel: partnerParams.name || '叠盘对象' };
-		}catch(e){ /* 伙伴盘拉取失败 → 跳过组合段(仅数据可得时附) */ }
-	}
-	return buildGermanySnapshotText(params, chartObj, result, fields, extras);
+export async function buildGermanySnapshotForFields(){
+	return formatCalcStatus(ephemerisLicenseStatus('germany-midpoint'));
 }
 
 export function buildGermanySnapshotText(params, chartObj, result, fields, extras){
@@ -553,26 +491,13 @@ class AstroMidpoint extends Component{
 			...(disp.strictFactors ? { strictFactors: true } : {}),
 			...(partnerParams ? { davison: partnerParams } : {}),
 		};
-		const data = await request(`${Constants.ServerRoot}/germany/midpoint`, {
-			body: JSON.stringify({ ...params, ...schoolParams }),
-		});
-		const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null; // 后端无响应/异常时优雅降级(与本文件 229/237 同口径),不再 data undefined 时 data[ResultKey] 崩红屏
-
+		const status = ephemerisLicenseStatus('germany-midpoint');
 		if(this.unmounted || seq !== this._mpSeq){ return; }
-		const st = {
-			midpoints: result,
-		};
-
 		this.lastSnapshotParams = params;
-		// horosa_panel_ready_v1:量化盘(辅盘默认子页)中栏盘 + 右栏中点/相位列表全部由
-		// midpoints 派生,这一次 setState 即「面板数据落定」。
-		this.setState(st, ()=>{
+		this.setState({ midpoints: null, calcStatus: status }, ()=>{
 			markPanelReady('auxchart');
 		});
-		// AI 快照重建(planetaryPictures/midpointList/spiegelContacts 的 O(n²~n³) 扫描 + 全文拼装)
-		// 移出交互路径 → 空闲时段。导出/分析侧永远走 horosa:refresh-module-snapshot 事件同步重建
-		// (handleSnapshotRefreshRequest),故此处延后**不会**让 AI 拿到陈旧快照;卸载前同步兜底 flush。
-		this.scheduleSnapshotSave(params, result);
+		this.scheduleSnapshotSave(params, status);
 	}
 
 	// horosa_snapshot_idle_v1(PERF-R9 Ship 6):快照重建合并到空闲时段,同一批多次触发只跑最后一次。
@@ -712,6 +637,11 @@ class AstroMidpoint extends Component{
 
 		return (
 			<div className="horosa-midpoint-host">
+					{this.state.calcStatus ? (
+						<div data-status={this.state.calcStatus.status} style={{ padding: 12 }}>
+							{this.state.calcStatus.message}
+						</div>
+					) : null}
 					<MidpointMain
 						value={chartObj}
 						onChange={this.onFieldsChange}

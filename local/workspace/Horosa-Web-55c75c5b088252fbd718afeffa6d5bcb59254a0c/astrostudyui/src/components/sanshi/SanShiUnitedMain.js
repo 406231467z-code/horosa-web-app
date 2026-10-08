@@ -31,7 +31,6 @@ import {
 	SCHOOL_OPTIONS,
 	ZHIRUN_LEAP_OPTIONS,
 	calcDunJia,
-	fetchQimenPan,
 	normalizeKinqimenData,
 	getXunHead,
 	GUXU,
@@ -2699,12 +2698,7 @@ class SanShiUnitedMain extends Component{
 								const displaySolarTime = await this.resolveDisplaySolarTime(params, nongli);
 								// isDiurnal 取现值 chartWrap(±数步内昼夜大概率不变=同键;跨昼夜界偶发白预取无害)。
 								const isDiurnal = extractIsDiurnalFromChartWrap(this.props.chartObj || this.props.chart || null);
-								jobs.push(fetchQimenPan(steppedFields, nongli, qimenOptions, {
-									year,
-									jieqiYearSeeds: this.jieqiYearSeeds,
-									isDiurnal,
-									displaySolarTime,
-								}).catch(()=>null));
+								jobs.push(this.getKinqimenDunJia(steppedFields, nongli, qimenOptions, year, isDiurnal, displaySolarTime).catch(()=>null));
 							}
 						}catch(e){ /* 奇门预热构参失败静默 */ }
 						try{
@@ -2840,29 +2834,10 @@ class SanShiUnitedMain extends Component{
 
 	async getKinqimenDunJia(fields, nongli, qimenOptions, year, isDiurnal, displaySolarTime){
 		const fallbackPan = this.getCachedDunJia(fields, nongli, qimenOptions, year, isDiurnal, displaySolarTime);
-		// 🔴 路由与独立页 DunJiaMain.getResolvedPan 完全一致(否则结果分叉=用户报的「三式合一遁甲≠独立遁甲」):
-		//   本地 calcDunJia ← 年/月/日家(!isKinqimenMode,各家局法) 或 飞盘/混合/报数(后端不支持);
-		//   后端 fetchQimenPan ← 时家转盘等(isKinqimenMode,保「时家=转盘」原有行为零回归)。
-		// 本地 calcDunJia 返回的 pan 不带 source 字段(source:'kinqimen' 仅后端合并路径有),故本地分支不校验 source。
-		const o = qimenOptions || {};
-		const localOnly = !isKinqimenMode(o.paiPanType) || o.school === '飞盘' || o.school === '混合' || o.qijuMethod === 'shuzi';
-		if(localOnly){
-			if(!fallbackPan){
-				throw new Error('sanshi.qimen.kinqimen_unavailable');
-			}
-			return this.applySanshiFaRelated(fallbackPan, o);
+		if(!fallbackPan){
+			throw new Error('sanshi.qimen.local_unavailable');
 		}
-		const backendPan = await fetchQimenPan(fields, nongli, qimenOptions, {
-			year,
-			jieqiYearSeeds: this.jieqiYearSeeds,
-			isDiurnal,
-			displaySolarTime,
-		});
-		const pan = normalizeKinqimenData(backendPan, fallbackPan, qimenOptions, nongli);
-		if(!pan || pan.source !== 'kinqimen'){
-			throw new Error('sanshi.qimen.kinqimen_unavailable');
-		}
-		return this.applySanshiFaRelated(pan, o);
+		return this.applySanshiFaRelated(fallbackPan, qimenOptions || {});
 	}
 
 	// [H-A] 三式相关人员挂 pan(与独立页 applyFaRelatedToPan 同单源语义:法奇门 DunJiaFaCalc 读 pan.faRelatedPeople 数组)。
@@ -2887,8 +2862,8 @@ class SanShiUnitedMain extends Component{
 			// 博弈分析(去硬编码:对齐独立 TaiYiMain;默认 0=关闭,与原行为一致)。
 			gameTheory: options && options.gameTheory === 1 ? 1 : 0,
 		});
-		if(!pan || pan.source !== 'kintaiyi'){
-			throw new Error('sanshi.taiyi.kintaiyi_unavailable');
+		if(!pan || pan.status === 'UNSUPPORTED'){
+			throw new Error('sanshi.taiyi.local_unavailable');
 		}
 		// 太乙流派覆盖层(对齐独立 TaiYiMain.recalc):以 base pan 为底按所选流派开关覆盖受影响神煞 + 几何重算主客算;
 		// 默认全 default → applyTaiyiSchool 为空操作,字节不变(零回归)。

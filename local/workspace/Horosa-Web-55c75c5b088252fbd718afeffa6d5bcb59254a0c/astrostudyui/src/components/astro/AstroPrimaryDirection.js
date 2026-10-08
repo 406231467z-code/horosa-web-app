@@ -1,5 +1,6 @@
 import { fetchPdPoles } from '../../services/astroPd3d';
 import { markPanelReady } from '../../utils/perfMark';
+import { isCalcStatus } from '../../utils/calcStatus';
 import { Component } from 'react';
 import { safeLocalStorageSet } from '../../utils/safeStorage';
 import { Popover, Checkbox } from 'antd';
@@ -784,8 +785,12 @@ class AstroPrimaryDirection extends Component{
 		this.pdPolesKey = key;
 		fetchPdPoles(body).then((res)=>{
 			if(this.pdPolesKey !== key){ return; }
+			if(isCalcStatus(res)){
+				this.setState({ pdPolesData: {}, pdPolesStatus: res });
+				return;
+			}
 			const poles = res && res.poles ? res.poles : (res && res.data && res.data.poles ? res.data.poles : null);
-			this.setState({ pdPolesData: poles || {} });
+			this.setState({ pdPolesData: poles || {}, pdPolesStatus: null });
 		}).catch(()=>{
 			if(this.pdPolesKey === key){ this.setState({ pdPolesData: {} }); }
 		});

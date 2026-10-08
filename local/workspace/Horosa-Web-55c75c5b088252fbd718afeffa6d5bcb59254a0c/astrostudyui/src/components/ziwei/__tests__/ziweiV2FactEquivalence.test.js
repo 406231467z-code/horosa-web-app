@@ -38,6 +38,11 @@ jest.mock('../../../utils/request', () => ({
 	__esModule: true,
 	default: jest.fn(async () => ({ Result: { chart: JSON.parse(JSON.stringify(mockState.chart)), patterns: [] } })),
 }));
+jest.mock('../../../utils/ziweiBirthLocal', () => ({
+	fetchZiweiBirth: jest.fn(async () => ({
+		Result: { chart: JSON.parse(JSON.stringify(mockState.chart)), patterns: [] },
+	})),
+}));
 
 import { buildZiweiSnapshotForParams } from '../ZiWeiMain';
 const baseline = require('./fixtures/ziweiV2Baseline.json');

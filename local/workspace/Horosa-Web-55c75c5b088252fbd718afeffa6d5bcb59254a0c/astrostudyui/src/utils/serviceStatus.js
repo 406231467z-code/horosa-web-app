@@ -63,7 +63,7 @@ export function isDesktopCalcShell() {
   }
 }
 
-export const CALC_SERVICE_REQUIRED_MESSAGE = '需要计算服务：本机 Java（:9999）与 Python（:8899）未响应。星盘等历算暂不可用，本次没有生成结果。本地命盘仍可使用。服务启动后点「立即重试」。';
+export const CALC_SERVICE_REQUIRED_MESSAGE = '这项计算没有在浏览器里完成。状态：UNSUPPORTED。本次没有生成结果。';
 
 // 严格的「后端不可达」判定(见文件头注释)。
 export function isBackendUnreachableError(err) {

@@ -547,6 +547,9 @@ export function getSignZi(sign){
 }
 
 export function getGuiZi(chartObj, guirengType, isDiurnalOverride, yinyangSystem){
+	if(!chartObj || !chartObj.nongli || typeof chartObj.nongli.dayGanZi !== 'string' || !chartObj.nongli.dayGanZi){
+		return null;
+	}
 	let guirengobj = GuiRengs[guirengType];
 	let dayGui = guirengobj.day;
 	let nightGui = guirengobj.night;

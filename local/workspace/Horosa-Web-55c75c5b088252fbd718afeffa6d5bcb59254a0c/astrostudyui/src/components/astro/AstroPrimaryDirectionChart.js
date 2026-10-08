@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { singleTriggerPredictiveEnabled, stepPrefetchEnabled, stepSelectPrefetchEnabled } from '../../utils/perfFlags';
 // R4-B4:主限法推运轴选步长预取(正轴 /predict/pdchart,经共享调度器)。
 import { submitStepPrefetch } from '../../utils/stepPrefetch';
-import { Row, Col, Divider } from 'antd';
+import { Row, Col, Divider, message } from 'antd';
 import AstroDoubleChart from './AstroDoubleChart';
 import PlusMinusTime from './PlusMinusTime';
 import * as AstroConst from '../../constants/AstroConst';
@@ -10,8 +10,9 @@ import { termsTableForVariant } from '../../divination/data/hellenisticData';
 import * as AstroText from '../../constants/AstroText';
 import { saveModuleAISnapshot, } from '../../utils/moduleAiSnapshot';
 import { saveAstroAISnapshot, buildStarAndLotPositionLines, buildHouseCuspLines, } from '../../utils/astroAiSnapshot';
-import request from '../../utils/request';
 import * as Constants from '../../utils/constants';
+import { DirectionBrowserEngine } from '../../utils/directionBrowser';
+import { formatCalcStatus, isCalcStatus } from '../../utils/calcStatus';
 import styles from '../../css/styles.less';
 import DateTime from '../comp/DateTime';
 import {
@@ -465,6 +466,7 @@ class AstroPrimaryDirectionChart extends Component{
 			pdTimeKeyCustomValue: null,
 			pdDirectionValue: 'direct', // 向运方向：direct(默认) / converse
 			dirChart: null,
+			calcStatus: null,
 		};
 
 		this.handleTimeChanged = this.handleTimeChanged.bind(this);
@@ -868,11 +870,14 @@ class AstroPrimaryDirectionChart extends Component{
 		}
 		let pdRows = null;
 		try{
-			const data = await request(`${Constants.ServerRoot}/predict/pd`, {
-				body: JSON.stringify(req),
-				cache: 'no-store',
-			});
-			const result = unwrapPredictiveResponse(data);
+			const result = DirectionBrowserEngine.calculate(req);
+			if(isCalcStatus(result)){
+				if(!this.unmounted && seq === this.requestSeq){
+					this.setState({ calcStatus: result });
+					try{ message.warning(result.message); }catch(e){ /* SSR */ }
+				}
+				return;
+			}
 			pdRows = result && Array.isArray(result.pd) ? result.pd : null;
 		}catch(e){
 			pdRows = null;
@@ -1005,12 +1010,7 @@ class AstroPrimaryDirectionChart extends Component{
 					tasks.push({
 						name: `pd${dir > 0 ? '+' : '-'}${k}${unit}`,
 						path: '/predict/pdchart',
-						run: ()=> request(`${Constants.ServerRoot}/predict/pdchart`, {
-							body: JSON.stringify(params),
-							cache: 'no-store',
-							silent: true,
-							retry: { retries: 0 },
-						}),
+						run: ()=> Promise.resolve(DirectionBrowserEngine.calculate(params)),
 					});
 				}catch(e){ /* 单步构参失败静默跳过 */ }
 			});
@@ -1036,11 +1036,7 @@ class AstroPrimaryDirectionChart extends Component{
 		const seq = ++this.requestSeq;
 		let result = null;
 		try{
-			const data = await request(`${Constants.ServerRoot}/predict/pdchart`, {
-				body: JSON.stringify(params),
-				cache: 'no-store',
-			});
-			result = unwrapPredictiveResponse(data);
+			result = DirectionBrowserEngine.calculate(params);
 		}catch(e){
 			result = null;
 		}
@@ -1048,6 +1044,11 @@ class AstroPrimaryDirectionChart extends Component{
 			return;
 		}
 		this._syncSigInFlight = false;   // settle:同签名的下一次真实请求可再发(如手动刷新同参)
+		if(isCalcStatus(result)){
+			this.setState({ dirChart: null, calcStatus: result });
+			try{ message.warning(result.message); }catch(e){ /* SSR */ }
+			return;
+		}
 		if(!result || result.err){
 			this.setState({
 				dirChart: null,
@@ -1150,6 +1151,9 @@ class AstroPrimaryDirectionChart extends Component{
 
 		return (
 			<div>
+				{isCalcStatus(this.state.calcStatus) ? (
+					<pre style={{ whiteSpace: 'pre-wrap', margin: '8px 12px' }}>{formatCalcStatus(this.state.calcStatus)}</pre>
+				) : null}
 				<Row gutter={6}>
 					<Col span={17}>
 							<AstroDoubleChart

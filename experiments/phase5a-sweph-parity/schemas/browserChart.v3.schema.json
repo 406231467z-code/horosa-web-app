@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horosa.experimental.browserChart.v3",
+  "title": "Horosa experimental mansion layer",
+  "type": "object",
+  "required": ["meta", "derived"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["source", "stage", "legalReviewRequired"],
+      "properties": {
+        "stage": { "const": "mansion-experimental" },
+        "legalReviewRequired": { "const": true }
+      }
+    },
+    "derived": {
+      "type": "object",
+      "required": ["nakshatras", "guoStarSect", "su28", "fixedStars", "qizheng", "parans"],
+      "properties": {
+        "nakshatras": { "type": ["object", "null"] },
+        "guoStarSect": { "type": "object", "required": ["status", "su", "houses", "includesNiu"] },
+        "su28": {
+          "type": "object",
+          "required": ["mode", "modeName", "status", "entries"],
+          "properties": {
+            "status": { "enum": ["READY", "EXPERIMENTAL", "LICENSE_BLOCKED", "MISSING_INPUT", "UNSUPPORTED"] },
+            "entries": { "type": ["array", "null"] }
+          }
+        },
+        "fixedStars": {
+          "type": "object",
+          "required": ["status", "source", "actual"],
+          "properties": { "status": { "const": "LICENSE_BLOCKED" } }
+        },
+        "qizheng": {
+          "type": "object",
+          "required": ["status"],
+          "properties": { "status": { "const": "LICENSE_BLOCKED" } }
+        },
+        "parans": {
+          "type": "object",
+          "required": ["status", "natalChartStatus"],
+          "properties": { "status": { "const": "DEFERRED" } }
+        }
+      }
+    }
+  }
+}

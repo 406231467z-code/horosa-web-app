@@ -1,4 +1,4 @@
-import { buildQimenXiangTipObj } from '../QimenXiangDoc';
+import { buildQimenXiangTipObj, formatQimenDocLineToHtml } from '../QimenXiangDoc';
 
 function joinTextBlocks(tipObj){
 	if(!tipObj || !Array.isArray(tipObj.blocks)){
@@ -34,6 +34,24 @@ describe('QimenXiangDoc 简体化', ()=>{
 		const content = joinTextBlocks(tipObj);
 		expect(content).toContain('乾，亥，火墓');
 		expect(content).not.toContain('干，亥，火墓');
+	});
+
+	test('词条里的红字和加粗仍渲染，用户文本里的标签被转义', ()=>{
+		const tipObj = buildQimenXiangTipObj('stem', '甲');
+		const line = joinTextBlocks(tipObj).split('\n').find((item)=>item.includes('<font'));
+		expect(line).toBeTruthy();
+		const html = formatQimenDocLineToHtml(line);
+		expect(html).toContain('<span style="color:#cc0000;">');
+		expect(html).toContain('</span>');
+		expect(html).not.toContain('<font');
+		const hostile = formatQimenDocLineToHtml('<img src=x onerror=alert(1)><script>alert(1)</script>**甲**');
+		expect(hostile).toContain('<strong>甲</strong>');
+		expect(hostile).not.toContain('<script>');
+		expect(hostile).not.toContain('<img');
+		expect(hostile).toContain('&lt;script&gt;');
+		const breakout = formatQimenDocLineToHtml('<font color="red;background:url(javascript:alert(1))">x</font>');
+		expect(breakout).not.toContain('<span');
+		expect(breakout).toContain('&lt;font');
 	});
 
 	test('飞盘九神 勾陈/太常/朱雀 应有词条(单字与全名均可查)', ()=>{

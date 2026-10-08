@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horosa.experimental.browserChart",
+  "title": "Horosa experimental browser chart",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "engineVersion", "input", "jd", "objects", "ascmc", "houses", "capability", "meta"],
+  "properties": {
+    "source": { "const": "browser-sweph-experiment" },
+    "engineVersion": { "const": "0.1.0" },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "time", "timezone", "latitude", "longitude", "zodiacal", "siderealAyanamsa", "houseSystem", "westNodeType", "westLilithType"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "time": { "type": "string", "pattern": "^\\d{2}:\\d{2}:\\d{2}$" },
+        "timezone": { "type": "string", "pattern": "^[+-]\\d{2}:\\d{2}$" },
+        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "longitude": { "type": "number", "minimum": -180, "maximum": 180 },
+        "zodiacal": { "enum": ["Tropical", "Sidereal"] },
+        "siderealAyanamsa": { "type": "string" },
+        "houseSystem": { "type": "integer", "minimum": 0, "maximum": 24 },
+        "westNodeType": { "type": "boolean" },
+        "westLilithType": { "type": "boolean" }
+      }
+    },
+    "jd": { "type": "number" },
+    "objects": {
+      "type": "object",
+      "required": ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "North Node", "Dark Moon"],
+      "additionalProperties": false,
+      "patternProperties": {
+        ".*": { "$ref": "#/$defs/body" }
+      }
+    },
+    "ascmc": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["Asc", "MC", "Desc", "IC"],
+      "properties": {
+        "Asc": { "$ref": "#/$defs/angle" },
+        "MC": { "$ref": "#/$defs/angle" },
+        "Desc": { "$ref": "#/$defs/angle" },
+        "IC": { "$ref": "#/$defs/angle" }
+      }
+    },
+    "houses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "letter", "cusps"],
+      "properties": {
+        "system": { "type": "string" },
+        "letter": { "type": "string", "minLength": 1 },
+        "cusps": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["House1", "House2", "House3", "House4", "House5", "House6", "House7", "House8", "House9", "House10", "House11", "House12"],
+          "patternProperties": {
+            "^House([1-9]|1[0-2])$": { "$ref": "#/$defs/cusp" }
+          }
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["aspects", "lots", "receptions", "mutuals", "fixedStars", "nakshatras", "declParallel", "parans"],
+      "properties": {
+        "aspects": { "const": "NOT_IMPLEMENTED" },
+        "lots": { "const": "NOT_IMPLEMENTED" },
+        "receptions": { "const": "NOT_IMPLEMENTED" },
+        "mutuals": { "const": "NOT_IMPLEMENTED" },
+        "fixedStars": { "const": "NOT_IMPLEMENTED" },
+        "nakshatras": { "const": "NOT_IMPLEMENTED" },
+        "declParallel": { "const": "NOT_IMPLEMENTED" },
+        "parans": { "const": "NOT_IMPLEMENTED" }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "engine", "engineVersion", "goldenType", "legacyReference", "siderealStatus", "license"],
+      "properties": {
+        "source": { "const": "browser" },
+        "engine": { "const": "swisseph-wasm" },
+        "engineVersion": { "const": "0.1.0" },
+        "goldenType": { "const": "EXPERIMENTAL" },
+        "legacyReference": { "const": "HISTORICAL-GOLDEN" },
+        "siderealStatus": { "type": "string" },
+        "license": { "const": "LEGAL_REVIEW_REQUIRED" }
+      }
+    }
+  },
+  "$defs": {
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "lon", "lat", "lonspeed", "decl", "retrograde"],
+      "properties": {
+        "id": { "type": "string" },
+        "lon": { "type": "number" },
+        "lat": { "type": "number" },
+        "lonspeed": { "type": "number" },
+        "decl": { "type": "number" },
+        "retrograde": { "type": "boolean" }
+      }
+    },
+    "angle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "lon"],
+      "properties": {
+        "id": { "type": "string" },
+        "lon": { "type": "number" }
+      }
+    },
+    "cusp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "lon"],
+      "properties": {
+        "id": { "type": "string" },
+        "lon": { "type": "number" }
+      }
+    }
+  }
+}

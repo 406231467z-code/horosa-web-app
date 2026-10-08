@@ -20,6 +20,7 @@ import { XQTabs as Tabs, XQSideSection  } from '../xq-ui';
 import XQIcon from '../xq-icons';
 import { markPanelReady } from '../../utils/perfMark';
 import { FreezeSubTab } from '../comp/FreezeInactive';
+import { formatCalcStatus, isCalcStatus, unsupportedStatus } from '../../utils/calcStatus';
 
 const { TabPane } = Tabs;
 
@@ -791,6 +792,17 @@ class SuZhanMain extends Component{
 		let chart = (chartObj && chartObj.chart) ? { ...chartObj.chart } : {};
 		chart.aspects = chartObj ? chartObj.aspects : {};
 		chart.lots = chartObj ? chartObj.lots : [];
+		const mansions = Array.isArray(chart.fixedStarSu28) ? chart.fixedStarSu28 : [];
+		const rawSu = chartObj && chartObj.su28;
+		const suStatus = rawSu && isCalcStatus(rawSu)
+			? {
+				...rawSu,
+				provider: rawSu.provider || 'browser',
+				feature: rawSu.feature || 'suzhan',
+				code: rawSu.code || 'SU28_MANSIONS',
+				message: rawSu.message || rawSu.reason || '',
+			}
+			: unsupportedStatus('suzhan', 'SU28_MANSIONS', '二十八宿界不在本盘结果里。浏览器不请求计算后端。');
 
 			return (
 				<div className={`horosa-suzhan-page horosa-astro-redesign horosa-suzhan-redesign${this.props.hideQuickDock ? ' horosa-suzhan-embedded' : ''}`} style={{ height: height, minHeight: height, overflow: 'hidden' }}>
@@ -801,13 +813,17 @@ class SuZhanMain extends Component{
 						</div>
 						<div className="horosa-chart-stage horosa-chart-stage-redesign horosa-suzhan-chart-panel xq-chart-renderer xq-chart-renderer-suzhan">
 							<div className="horosa-suzhan-board-host">
-								<SuZhanChart
-									value={chart}
-									height={Math.max(560, height - 22)}
-									fields={this.props.fields}
-									chartDisplay={this.props.chartDisplay}
-									planetDisplay={this.props.planetDisplay}
-								/>
+								{mansions.length ? (
+									<SuZhanChart
+										value={chart}
+										height={Math.max(560, height - 22)}
+										fields={this.props.fields}
+										chartDisplay={this.props.chartDisplay}
+										planetDisplay={this.props.planetDisplay}
+									/>
+								) : (
+									<pre className="horosa-calc-status">{formatCalcStatus(suStatus)}</pre>
+								)}
 							</div>
 						</div>
 						<div className="horosa-inspector-panel horosa-astro-content-panel horosa-suzhan-info-panel">

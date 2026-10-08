@@ -1,5 +1,4 @@
 // 量化盘 六大宫框(定局法 WP-2)主面板。
-import { markPanelReady } from '../../utils/perfMark';
 import { sameDisplayList } from '../../utils/chartUpdateGuard';
 import { chartSCUEnabled } from '../../utils/perfFlags';
 // 顶部 XQSelect 六框下拉(子午/上升/太阳/月亮/交点/地球)看一框盘 + XQTable 落宫表 + 「缩略全览」看六小轮。
@@ -9,7 +8,7 @@ import { chartSCUEnabled } from '../../utils/perfFlags';
 // showHouseFrames(WP-1 持久化开关)关时本 Tab 在 AstroGermany 里隐藏;此处再兜一层提示。
 import React, { Component } from 'react';
 import { Row, Col, Switch, Spin, Empty } from 'antd';
-import request from '../../utils/request';
+import { ephemerisLicenseStatus } from '../../utils/calcStatus';
 import * as Constants from '../../utils/constants';
 import * as AstroConst from '../../constants/AstroConst';
 import * as AstroText from '../../constants/AstroText';
@@ -211,30 +210,8 @@ export default class UranianHouseFrames extends Component {
 	async load(){
 		const params = fieldsToParams(this.props.fields);
 		if (!paramsReady(params)){ this.setState({ note: '请先设置出生日期/时间与经纬度', points: [], houseFrames: null }); return; }
-		this.setState({ loading: true, note: null });
-		const sp = schoolToBackendParams(this.state.school); // {school, includeTnp, ..., frames}
-		try {
-			const [chartData, mid] = await Promise.all([
-				request(`${Constants.ServerRoot}/chart`, { body: JSON.stringify({ ...params, cid: null }), silent: true }),
-				request(`${Constants.ServerRoot}/germany/midpoint`, { body: JSON.stringify({ ...params, ...sp, frames: true }), silent: true }),
-			]);
-			if (this.unmounted) return;
-			// 后端响应走 {ResultCode, Result} 信封,真值在 .Result(与 UranianDialMain 同口径);兜底取原对象。
-			const chartObj = (chartData && chartData[Constants.ResultKey]) ? chartData[Constants.ResultKey] : chartData;
-			const m = (mid && mid[Constants.ResultKey]) ? mid[Constants.ResultKey] : mid;
-			const tnp = (m && m.tnp) || [];
-			const points = collectPoints(chartObj, tnp);
-			// horosa_panel_ready_v1:六宫框子盘的中栏(框盘)+右栏(落宫表)全部由 points/houseFrames 派生,
-			// 两个分支各自都是「面板数据落定」的那一次 setState。
-			if (m && m.houseFrames && m.houseFrames.frames){
-				this.setState({ points, houseFrames: m.houseFrames, degraded: false, loading: false }, ()=>{ markPanelReady('auxchart'); });
-			} else {
-				// 后端缺 houseFrames(老服务)→ 前端等宫降级合成(子午局近似)。
-				this.setState({ points, houseFrames: degradeFrames(points), degraded: true, loading: false }, ()=>{ markPanelReady('auxchart'); });
-			}
-		} catch (e){
-			if (!this.unmounted) this.setState({ loading: false, note: '排盘失败,请稍后重试' });
-		}
+		const blocked = ephemerisLicenseStatus('uranian-house-frames');
+		this.setState({ loading: false, note: blocked.message, calcStatus: blocked, points: [], houseFrames: null });
 	}
 
 	// 当前框 cusps + 落宫表行。

@@ -9,10 +9,8 @@ import { subscribeRemoteNongli, geoPatchFromRec } from '../../utils/divinationTi
 import XQIcon from '../xq-icons';
 import { XQButton as Button, XQSelect as Select, XQTabs as Tabs, XQSideSection  } from '../xq-ui';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { stepPrefetchEnabled, kentangCacheEnabled } from '../../utils/perfFlags';
-import { cachedKentangFetch } from '../../utils/kentangCache';
+import { stepPrefetchEnabled } from '../../utils/perfFlags';
+import { HuangJiBrowserEngine, classicCatalog, xinyiFromPayload } from '../../utils/huangjiBrowser';
 import { openKentangCaseDrawer, getKentangSavedCasePayload } from '../../utils/kentangCaseSave';
 import { formatHumanValue } from '../../utils/humanReadableFields';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
@@ -61,35 +59,21 @@ function parseFieldsDateTime(fields){
 }
 
 async function postWangJi(path, payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('wangji', path), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'wangji.local.fetch.failed');
+	if(path === 'classic'){
+		return classicCatalog(payload && payload.classicKey);
+	}
+	if(path === 'xinyi'){
+		const xinyi = xinyiFromPayload(payload || {});
+		if(!xinyi){
+			throw new Error('huangji.xinyi.failed');
 		}
-	}catch(e){
-		const rawResponse = await cachedKentangFetch(`${ServerRoot}/wangji/${path}`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
+		return xinyi;
 	}
-	if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-		throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'wangji.fetch.failed');
+	const out = HuangJiBrowserEngine.calculate(payload || {});
+	if(!out || out.status !== 'SUCCESS'){
+		throw new Error((out && out.message) || 'huangji.browser.failed');
 	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
+	return out.result;
 }
 
 // v3.5.1 收敛:结果级缓存退役 —— postWangJi 内部已走上游 utils/kentangCache
@@ -103,12 +87,7 @@ function fmtValue(value){
 	return formatHumanValue(value);
 }
 
-// horosa_wangji_classics_ondemand_v1 —— 典籍正文按需取。
-// 后端 /wangji/pan 只回典籍目录(level+title,~12KB);全书正文(皇極經世書 ~980KB)改由
-// /wangji/classic 按 classicKey 取一次,存进本模块级缓存,再合并回 state 里的 sections。
-// 因此:① 历史年/随机历史年/改典籍 触发的重新起盘不再各拖一份全书;② 章节切换(changeClassicSection)
-// 与显示切换(changeClassicView)仍是纯本地读 state,零网络、瞬时;③ AI 快照读的是同一份已合并
-// sections,正文一字不少(合并在 setState 之前完成,见 fetchPan / buildHuangJiSnapshotForFields)。
+// 典籍目录由浏览器引擎随盘返回，正文不请求网络。章节切换只读已返回的目录。
 const CLASSIC_SECTION_CACHE = {};
 const CLASSIC_SECTION_PENDING = {};
 
@@ -486,7 +465,7 @@ class HuangJiMain extends Component{
 	// 用户点「起盘」即缓存命中 ≈ 瞬间。失败静默;开关关=零行为。
 	prefetchDraftPan(){
 		try{
-			if(!stepPrefetchEnabled() || !kentangCacheEnabled()){ return; }
+			if(!stepPrefetchEnabled()){ return; }
 			if(this.prefetchDraftTimer){ clearTimeout(this.prefetchDraftTimer); }
 			this.prefetchDraftTimer = setTimeout(()=>{
 				this.prefetchDraftTimer = null;
@@ -562,7 +541,7 @@ class HuangJiMain extends Component{
 			const payload = { ...dt, historyYear: this.state.historyYear, classicKey: this.state.classicKey };
 			return [{
 				name: 'wangji',
-				path: '/wangji/pan',
+				path: 'browser',
 				run: ()=> postWangJiCached('pan', payload).catch(()=>{ /* 预取失败静默 */ }),
 			}];
 		}catch(e){

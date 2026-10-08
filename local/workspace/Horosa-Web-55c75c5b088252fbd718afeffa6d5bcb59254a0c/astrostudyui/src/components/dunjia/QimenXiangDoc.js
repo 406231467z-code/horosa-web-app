@@ -318,10 +318,18 @@ function resolveEntry(type, rawText){
 	return QIMEN_DOC[type] && QIMEN_DOC[type][key] ? QIMEN_DOC[type][key] : null;
 }
 
+function escapeHtmlText(text){
+	return `${text || ''}`
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+}
+
 export function formatQimenDocLineToHtml(line){
-	let html = toSafeSimplified(line);
-	html = html.replace(/<font\s+color=([^>\s]+)>/gi, (_, color)=>`<span style=\"color:${color};\">`);
-	html = html.replace(/<\/font>/gi, '</span>');
+	let html = escapeHtmlText(toSafeSimplified(line));
+	html = html.replace(/&lt;font\s+color=(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})&gt;/gi, (_, color)=>`<span style="color:${color};">`);
+	html = html.replace(/&lt;\/font&gt;/gi, '</span>');
 	html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 	return html;
 }

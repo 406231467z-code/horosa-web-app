@@ -1,5 +1,5 @@
 import React from 'react';
-import { subscribeServiceStatus, markServiceOnline, markServiceOffline, isDesktopCalcShell, CALC_SERVICE_REQUIRED_MESSAGE } from '../../utils/serviceStatus';
+import { subscribeServiceStatus, markServiceOnline, markServiceOffline, isDesktopCalcShell } from '../../utils/serviceStatus';
 import { verifyBackendIdentity, renegotiateLocalServerRoot } from '../../utils/backendIdentity';
 import { startRecoveryPolling, buildDefaultRecoveryProbe, invokeLightServiceRestart } from '../../utils/serviceRecovery';
 import { ServerRoot } from '../../utils/constants';
@@ -64,7 +64,7 @@ export default function ServiceStatusBanner() {
 
   // 离线期自动恢复轮询:自愈成功即自动消横幅(在线时零定时器)。
   React.useEffect(() => {
-    if (online) return undefined;
+    if (online || !isDesktopCalcShell()) return undefined;
     const stop = startRecoveryPolling({
       intervalMs: 10000,
       probe: buildDefaultRecoveryProbe({
@@ -204,15 +204,15 @@ export default function ServiceStatusBanner() {
     color: '#7a4f01',
   };
 
+  if (!desktopShell) return null;
+
   return (
     <div style={wrapStyle} aria-live="polite">
       <div style={barStyle}>
         <span>
           {gaveUpMsg
             ? `⚠️ ${gaveUpMsg}`
-            : (desktopShell
-              ? '⚠️ 本地服务暂时不可达，正在自动探测恢复，操作会自动重试。'
-              : `⚠️ ${CALC_SERVICE_REQUIRED_MESSAGE}`)}
+            : '⚠️ 本地服务暂时不可达，正在自动探测恢复，操作会自动重试。'}
         </span>
         <button type="button" disabled={retrying} onClick={handleRetry} style={btnStyle}>
           {retrying ? '正在重试…' : '立即重试'}

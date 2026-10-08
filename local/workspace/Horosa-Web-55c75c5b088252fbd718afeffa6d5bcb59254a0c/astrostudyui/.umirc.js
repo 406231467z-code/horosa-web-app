@@ -1,10 +1,13 @@
+const path = require('path');
 const buildForFile = process.env.BUILD_FOR_FILE === '1';
+const phase5aDerived = path.resolve(__dirname, '../../../../experiments/phase5a-sweph-parity');
 
 export default {
 	publicPath: buildForFile ? './' : '/static/',
 	outputPath: buildForFile ? 'dist-file' : 'dist',
 	history: buildForFile ? { type: 'hash' } : undefined,
 	hash: true,
+	extraBabelIncludes: [phase5aDerived],
 	dva: {
 		immer: false,
 	},

@@ -6,7 +6,7 @@
 import moment from 'moment';
 import { chartAtMoment } from '../mundane/momentPipeline';
 import { buildFacts } from '../engine/chartFacts';
-import { fetchChart } from '../../services/astro';
+import { calculateChart } from '../../services/astrologyCalculationService';
 import { PLANETS } from '../data/planets';
 import { SIGNS } from '../data/signs';
 import { SOLAR_RETURN_DAYS, LUNAR_RETURN_DAYS } from '../engine/timeLords';
@@ -107,7 +107,7 @@ export async function fetchPdHitsNearElection(natalParams, electionDateStr, opts
 		pdaspects: [0, 60, 90, 120, 180],
 	};
 	try{
-		const rsp = await fetchChart(params, { cache: true });
+		const rsp = await calculateChart(params, { cache: true });
 		const R = rsp && rsp.Result;
 		const rows = (R && R.predictives && R.predictives.primaryDirection) || [];
 		const elec = moment(electionDateStr, 'YYYY-MM-DD');

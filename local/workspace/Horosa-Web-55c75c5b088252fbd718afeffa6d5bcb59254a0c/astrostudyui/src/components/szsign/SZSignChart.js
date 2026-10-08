@@ -16,11 +16,16 @@ class SZSignChart extends SZChartComm{
 	}
 
 	initDraw(){
-		if(this.chartObj.signsObjRA){
+		if(this.chartObj.signsObjRA && Array.isArray(this.chartObj.signsRA)){
 			return;
 		}
+		if(!Array.isArray(this.chartObj.signsRA)){
+			this.chartObj.signsRA = [];
+		}
 
-		this.chartObj.signsObjRA = {};
+		this.chartObj.signsObjRA = this.chartObj.signsObjRA && typeof this.chartObj.signsObjRA === 'object'
+			? this.chartObj.signsObjRA
+			: {};
 		for(let i=0; i<this.chartObj.signsRA.length; i++){
 			let sigra = this.chartObj.signsRA[i];
 			this.chartObj.signsObjRA[sigra.id] = sigra;

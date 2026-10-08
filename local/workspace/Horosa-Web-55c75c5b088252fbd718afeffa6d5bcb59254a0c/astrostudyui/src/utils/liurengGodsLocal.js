@@ -2,11 +2,10 @@ import gods from './data/gods.json';
 import taisui from './data/taisui.json';
 import { buildLocalNongliLite } from './baziLunarLocal';
 import { isLunarJsYearReliable } from './lunarDomainGuard';
-import request from './request';
-import { ServerRoot, ResultKey } from './constants';
+import { ResultKey } from './constants';
 
 // PHASE 4-C: 六壬神煞与旬日。公式对齐 LiuReng.fillGods / fillXun 与 GodsHelper.findGods、findTaiSuiGods。
-// 四柱来自既有本地农历。域外抛错则返回 null，由调用方改走 /liureng/gods。
+// 四柱来自既有本地农历。域外返回 UNSUPPORTED，不请求 /liureng/gods。
 
 const GAN = '甲乙丙丁戊己庚辛壬癸'.split('');
 const ZHI = '子丑寅卯辰巳午未申酉戌亥'.split('');
@@ -181,14 +180,15 @@ export function buildLocalLiureng(params){
 	};
 }
 
-export function fetchLiurengGods(params, requestOpts){
+export function fetchLiurengGods(params){
 	const local = buildLocalLiureng(params);
 	if(local){
 		return Promise.resolve({ [ResultKey]: { liureng: local } });
 	}
-	const opts = {
-		body: JSON.stringify(params || {}),
-		...(requestOpts || {}),
-	};
-	return request(`${ServerRoot}/liureng/gods`, opts);
+	return Promise.resolve({
+		status: 'UNSUPPORTED',
+		code: 'LUNAR_DOMAIN',
+		provider: 'browser',
+		local: false,
+	});
 }

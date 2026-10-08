@@ -7,6 +7,8 @@ import { sideSectionIcon } from '../../constants/sideSectionIcons'; // [观象P1
 import { createPortal } from 'react-dom';
 import moment from 'moment';
 import IndiaChart, { fieldsToParams, requestIndiaChartData } from './IndiaChart';
+import { formatCalcStatus, isCalcStatus } from '../../utils/calcStatus';
+import { IndiaBrowserEngine } from '../../utils/indiaBrowser';
 import { resolveLagnaRefSignNumber } from './IndiaSouthChart';
 import IndiaSbcChart from './IndiaSbcChart';
 import IndiaTripatakiChart from './IndiaTripatakiChart';
@@ -679,74 +681,8 @@ function buildVimshottariDasha(chartObj, fields, system){
 			})),
 		};
 	}
-	// Yogini/Ashtottari 只走后端(引擎恒算);无后端不回退 Vimshottari 老算法,避免错算。
-	if(sys !== 'vimshottari'){
-		return null;
-	}
-	const moon = getMoonObject(chartObj);
-	const moonLon = normalizeDegree(moon ? moon.lon : null);
-	const birth = buildBirthMoment(fields);
-	if(moonLon === null || !birth){
-		return null;
-	}
-	const nakIndex = Math.min(26, Math.floor(moonLon / NAKSHATRA_SIZE));
-	const nakStart = nakIndex * NAKSHATRA_SIZE;
-	const progress = (moonLon - nakStart) / NAKSHATRA_SIZE;
-	const remainingRatio = Math.max(0, Math.min(1, 1 - progress));
-	const nak = NAKSHATRAS[nakIndex];
-	const firstLord = DASHA_BY_KEY[nak[1]];
-	if(!firstLord){
-		return null;
-	}
-	const firstBalance = firstLord.years * remainingRatio;
-	const firstElapsed = firstLord.years - firstBalance;
-	const items = [];
-	if(!birth.clone){
-		return null;
-	}
-	let start = subtractDashaYears(birth, firstElapsed);
-	if(!start || !start.clone){
-		return null;
-	}
-	let lordIndex = firstLord.idx;
-	for(let i=0; i<10; i++){
-		const currentLordIndex = lordIndex % DASHA_SEQUENCE.length;
-		const lord = {
-			...DASHA_SEQUENCE[currentLordIndex],
-			idx: currentLordIndex,
-		};
-		const years = lord.years;
-		const end = addDashaYears(start, years);
-		if(!end || !end.clone){
-			break;
-		}
-		items.push({
-			lord,
-			years,
-			start: start.clone(),
-			end: end.clone(),
-			startAge: start.diff(birth, 'days', true) / currentDashaYearDays(),
-			endAge: end.diff(birth, 'days', true) / currentDashaYearDays(),
-			isBirthBalance: i === 0,
-			active: Date.now() >= start.valueOf() && Date.now() < end.valueOf(),
-		});
-		start = end;
-		lordIndex += 1;
-	}
-	return {
-		moon,
-		moonLon,
-		nakshatra: {
-			name: nak[0],
-			index: nakIndex + 1,
-			progress,
-			remainingRatio,
-			lord: firstLord,
-		},
-		firstBalance,
-		firstElapsed,
-		items,
-	};
+	// 没有 jyotish 块时不拿回归黄道月亮自造月宿。那不是生产印占核。
+	return null;
 }
 
 function getJyotish(chartObj){
@@ -3822,7 +3758,7 @@ class IndiaChartMain extends Component{
 			return (
 				<div className="horosa-india-dasha-panel">
 					{selector}
-					<div className="horosa-india-dasha-empty">暂无 {sysTitle} 数据</div>
+					<pre style={{ whiteSpace: 'pre-wrap', margin: '8px 12px' }}>{formatCalcStatus(IndiaBrowserEngine.calculate({ feature: 'indiachart' }))}</pre>
 				</div>
 			);
 		}
@@ -4953,16 +4889,8 @@ class IndiaChartMain extends Component{
 				rectifyStepSeconds: this.state.rectifyStepSeconds,
 				rectifyRpSource: this.state.rectifyRpSource,
 			};
-			// 🔴 必须走应用加密传输层(与 /india/chart 同通道):Java 网关收 RSA 密文,
-			//    裸 fetch 发明文 → 解密拦截器 500 且不达 Python(实测抓获,勿回退裸 fetch)。
-			const { default: request } = require('../../utils/request');
-			const Constants = require('../../utils/constants');
-			const data = await request(`${Constants.ServerRoot}/india/rectify`, {
-				body: JSON.stringify(payload),
-				silent: true,
-			});
-			const res = data ? data[Constants.ResultKey] : null;
-			this.setState({ rectifyRunning: false, rectifyResult: res && res.available ? res : null });
+			const status = IndiaBrowserEngine.calculate(payload);
+			this.setState({ rectifyRunning: false, rectifyResult: status });
 			try{
 				safeLocalStorageSet('horosa.india.rectify.prefs.v1', JSON.stringify({
 					w: this.state.rectifyWindowMinutes, s: this.state.rectifyStepSeconds, rp: this.state.rectifyRpSource,
@@ -5017,6 +4945,9 @@ class IndiaChartMain extends Component{
 				onClose={()=>this.setState({ rectifyDrawerOpen: false })}
 			>
 				<div className="horosa-india-rectify-drawer">
+					{isCalcStatus(res) ? (
+						<pre style={{ whiteSpace: 'pre-wrap', margin: '8px 12px' }}>{formatCalcStatus(res)}</pre>
+					) : null}
 					<div className="horosa-india-rectify-controls">
 						<div className="horosa-india-rectify-field">
 							<span>扫描半窗(分)</span>

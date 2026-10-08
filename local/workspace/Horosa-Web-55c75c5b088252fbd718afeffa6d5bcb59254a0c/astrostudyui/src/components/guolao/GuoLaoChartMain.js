@@ -9,7 +9,7 @@ import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/d
 import { XQModal, XQTabs as Tabs } from '../xq-ui';
 import XQIcon from '../xq-icons';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
+import { ephemerisLicenseStatus, qizhengLicenseStatus, formatCalcStatus } from '../../utils/calcStatus';
 import {randomStr,} from '../../utils/helper';
 import * as AstroConst from '../../constants/AstroConst';
 import DateTime from '../comp/DateTime';
@@ -1368,40 +1368,11 @@ function isChartObjMatchParams(chartObj, params){
 	return !!chartKey && chartKey === paramKey;
 }
 
-async function fetchGuolaoChartCached(params, options){
-	const opt = options || {};
-	const key = buildGuolaoKey(params);
-	const disableCache = opt.cache === false;
-	if(!disableCache && key && guolaoMem.has(key)){
-		const cached = guolaoMem.get(key);
-		if(hasGuolaoRiseSetFields(cached)){
-			return clonePlain(cached);
-		}
-		guolaoMem.delete(key);
-	}
-	if(!disableCache && key && guolaoInflight.has(key)){
-		const inflight = await guolaoInflight.get(key);
-		return clonePlain(inflight);
-	}
-	const req = request(`${Constants.ServerRoot}/chart`, {
-		body: JSON.stringify(params),
-		silent: opt.silent !== false,
-	}).then((data)=>{
-		const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-		if(!disableCache && key && result){
-			pushCache(guolaoMem, key, clonePlain(result));
-		}
-		return result;
-	}).finally(()=>{
-		if(!disableCache && key){
-			guolaoInflight.delete(key);
-		}
-	});
-	if(!disableCache && key){
-		guolaoInflight.set(key, req);
-	}
-	const result = await req;
-	return clonePlain(result);
+async function fetchGuolaoChartCached(){
+	return {
+		...ephemerisLicenseStatus('guolao'),
+		qizheng: qizhengLicenseStatus('guolao'),
+	};
 }
 
 // R4-B3(数据层空闲预热):按当前命盘 fields 预热七政「本命盘」进 guolao 缓存 —— 与用户
@@ -1754,33 +1725,12 @@ function buildHouseGodsSection(result, fields){
 }
 
 // 供 AI 分析无头复算：按出生字段取七政四余盘并生成快照（命度/罗计沿用已保存设置，显示全部传统星曜）。
-export async function buildGuolaoSnapshotForFields(fields){
-	if(!fields){
-		return '';
-	}
-	const params = fieldsToParams(fields);
-	const data = await request(`${Constants.ServerRoot}/chart`, {
-		body: JSON.stringify({ ...params, cid: null }),
-		silent: true,
-	});
-	const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-	if(!result){
-		return '';
-	}
-	// [审计修] 无头路径曾漏传第 5 参 moiraRules(恒 undefined)→ 挂载复算恒丢 [虚实]/[本命化曜]/
-	// [流年流曜] 三段、[神煞] 降级历法源——与页面快照不等长。补:远端规则同页面口径,
-	// 不完整/失败回退本地纯算(与 requestMoiraRules 同两级兜底,绝不阻断主体段)。
-	let rules = null;
-	try{
-		const rsp = await fetchMoiraQizhengRules({
-			params, chartObj: result, transitParams: null, transitChartObj: null,
-		}, { silent: true, timeoutMs: 12000 });
-		const remote = rsp && rsp[Constants.ResultKey] ? rsp[Constants.ResultKey] : null;
-		rules = isIncompleteMoiraRules(remote) ? buildLocalMoiraRules(params, result, fields, 'headless-fallback') : remote;
-	}catch(e){
-		try{ rules = buildLocalMoiraRules(params, result, fields, 'headless-error'); }catch(_e){ rules = null; }
-	}
-	return buildGuolaoSnapshotTextV2(params, result, null, fields, rules);
+export async function buildGuolaoSnapshotForFields(){
+	const status = {
+		...ephemerisLicenseStatus('guolao'),
+		qizheng: qizhengLicenseStatus('guolao'),
+	};
+	return formatCalcStatus(status);
 }
 
 // AI 快照·神煞段与盘面同源(rules 引擎 godHits+十二长生;rules 未到回退历法 ziGods)——
@@ -4292,6 +4242,15 @@ class GuoLaoChartMain extends Component{
 	}
 
 	render(){
+		const chartObj = this.state.chartObj;
+		if(chartObj && chartObj.status && !chartObj.chart && !chartObj.objects){
+			return (
+				<div className="horosa-guolao-status" data-status={chartObj.status} style={{ padding: 16 }}>
+					<div>{chartObj.message}</div>
+					{chartObj.qizheng ? <div data-status={chartObj.qizheng.status}>{chartObj.qizheng.message}</div> : null}
+				</div>
+			);
+		}
 		let height = this.props.height ? this.props.height : 760;
 		if(height === '100%'){
 			height = 'calc(100% - 70px)'
@@ -4299,7 +4258,6 @@ class GuoLaoChartMain extends Component{
 			height = height - 20
 		}
 
-		let chartObj = this.state.chartObj;
 		// horosa_guolao_render_slice_v1(PERF-R12 W3d-G0):渲染期变异根除 —— 旧写法在 render 里
 		// 就地把 aspects/lots 挂到 state 里的 chartObj.chart 上(同引用被悄悄改写 = 任何按引用
 		// 比较的 memo 边界语义被毁;对抗校验点名「先修这处再上 memo」)。改为**带单键缓存的派生

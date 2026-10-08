@@ -51,8 +51,7 @@ describe('sanshiStepFluency(连续进退四资产)', () => {
 		expect(SRC).toContain("unregisterStepPrefetcher('sanshiunited', this._sanshiStepPrefetcher)");
 		expect(SRC).toContain("name: 'sanshi:stage1'");
 		expect(SRC).toContain("path: '/nongli/time'");
-		// 预取链含 kinqimen 盘与太乙盘两段(kentangCache 收口)
-		expect(SRC).toMatch(/jobs\.push\(fetchQimenPan\(steppedFields, nongli, qimenOptions/);
+		expect(SRC).toMatch(/jobs\.push\(this\.getKinqimenDunJia\(steppedFields, nongli, qimenOptions/);
 		expect(SRC).toMatch(/jobs\.push\(this\.getKintaiyiPan\(steppedFields, nongli/);
 	});
 

@@ -1,0 +1,190 @@
+{
+  "label": "DATA-PROVENANCE",
+  "notActual": true,
+  "legalReviewRequired": true,
+  "fixedStars": {
+    "status": "CONFIRMED",
+    "horosaBehavior": "perchart.getFixedStars and getStars call flatlib chart.getFixedStars, which calls swe.fixstar_ut for const.LIST_FIXED_STARS.",
+    "swissCapabilityIsNotHorosaBehavior": true,
+    "names": "Horosa ids in LIST_FIXED_STARS; display names from const.STAR_NAMES, else the catalog id.",
+    "subset": {
+      "listedIds": 67,
+      "uniqueIds": 66,
+      "duplicate": "STAR_UNUKALHAI is listed twice. The cache comment says 67."
+    },
+    "catalog": {
+      "data": "Swiss fixed-star catalog used for chart longitude",
+      "source": "IN-REPO",
+      "path": "local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/flatlib-ctrad2/flatlib/resources/swefiles/sefstars.txt",
+      "openedBy": "flatlib sets the ephemeris path to resources/swefiles. swe_fixstar_ut reads sefstars.txt. ephem.py names that file.",
+      "format": "sefstars.txt text records",
+      "recordFields": ["traditional name", "nomenclature", "equinox", "RA hours", "RA minutes", "RA seconds", "Dec degrees", "Dec minutes", "Dec seconds", "proper motion RA in 0.001 arcsec/year times cos(decl)", "proper motion Dec in 0.001 arcsec/year", "radial velocity km/s", "annual parallax in 0.001 arcsec", "magnitude V"],
+      "records": 1360,
+      "bytes": 136618,
+      "epoch": "Per record: 1950, 2000, or ICRS. EPOCH_RULE is the record field, not a Horosa-wide J2000 default.",
+      "referenceFrame": "The equinox field of each catalog record.",
+      "zodiac": "Output longitude follows the chart flags: tropical by default, sidereal when applySiderealMode is on.",
+      "precession": "Swiss swe_fixstar_ut moves the catalog position to the chart Julian day. Horosa does not apply its own precession on this path.",
+      "precision": "Catalog RA and Dec are stored as hours or degrees, minutes, and seconds. Output lon, lat, ra, and decl are the floats returned by fixstar_ut. Magnitude comes from fixstar_mag.",
+      "displayedLongitude": "sweFixedStar lon at the chart JD. A southern chart then adds 180 degrees in perchart.relocateSouthObjects. The 1990 golden latitude is north, so that shift is off.",
+      "outputFields": ["id", "name", "mag", "lon", "lat", "ra", "decl"],
+      "conjunction": "getStars keeps a star when the shortest ecliptic separation is strictly less than the orb. Default orb is 1 degree.",
+      "browserReady": "LICENSE_BLOCKED",
+      "experimentCatalog": "MISSING in experiments/phase4d-sweph-wasm. The wasm package has no sefstars file."
+    },
+    "siblingFilesNotSubstituted": [
+      {
+        "path": "flatlib-ctrad2/flatlib/resources/swefiles/sefstars-2.txt",
+        "bytes": 134721,
+        "status": "PRESENT_NOT_THE_FILENAME_SWISS_OPENS",
+        "note": "Same directory. Swiss opens sefstars.txt, not this name."
+      },
+      {
+        "path": "flatlib-ctrad2/flatlib/resources/swefiles/fixstars.cat",
+        "bytes": 107283,
+        "status": "MAGNITUDE_FILE",
+        "note": "swe.py says fixstar_mag parses fixstars.cat. Positions stay on sefstars.txt."
+      },
+      {
+        "path": "vendor/kinastro/astro/data/fixed_stars.json",
+        "bytes": 29124,
+        "status": "NOT_THE_CHART_PATH"
+      }
+    ],
+    "conjunctionList": {
+      "function": "perchart.getStars",
+      "orbDegreesDefault": 1,
+      "orbByMagnitude": "only when starOrbMode is byMagnitude",
+      "row": ["star id", "sign", "signlon", "shortest separation", "name"]
+    },
+    "electionTable": {
+      "status": "SEPARATE_FROM_CHART",
+      "source": "IN-REPO",
+      "path": "astrostudyui/src/divination/data/fixedStars.js",
+      "entries": 41,
+      "epoch": "1995",
+      "frame": "tropical longitude lon_1995",
+      "precession": "PRECESSION_ARCSEC_PER_YEAR = 50.27 in that file. This is not swe_fixstar_ut.",
+      "browserReady": "BROWSER_READY",
+      "doNotUseAsChartCatalog": true
+    }
+  },
+  "su28": {
+    "status": "CONFIRMED",
+    "doNotChooseAMode": true,
+    "defaultMode": 0,
+    "defaultName": "SU28_MODE_REAL",
+    "count": 28,
+    "namesPath": "flatlib/const.py LIST_FIXED_SU28_NAME",
+    "leapMansion": "The 28-name list includes 牛. Nakshatra Abhijit is a different overlay and is not this leap.",
+    "modes": [
+      {"mode": 0, "name": "REAL", "table": "live equatorial distance stars", "path": "perchart.getAdjustFixedStarSu28", "coordinate": "RA", "epoch": "chart JD", "precession": "Swiss", "zodiac": "equatorial placement"},
+      {"mode": 1, "name": "DOUBING", "table": "Guo74 SuDeg widths", "path": "astropy/astrostudy/guostarsect/guo74.py", "coordinate": "RA", "epoch": "table widths, not a star catalog epoch", "precession": "not the Swiss star path", "zodiac": "equatorial"},
+      {"mode": 2, "name": "MOIRA_CURRENT", "table": "MOIRA_DISTAR_J2000 precessed to tropical longitude", "path": "perchart.py", "coordinate": "ecliptic longitude", "epoch": "J2000 input, chart JD output", "precession": "IAU precession inside _moira_distar_lons", "zodiac": "tropical", "entries": 28},
+      {"mode": 3, "name": "MOIRA_KAIXI", "table": "MOIRA_KAIXI_STELLAR_DEGREES plus ayanamsha", "path": "perchart.py", "coordinate": "ecliptic longitude", "epoch": "Kaixi base year 1300, ayanamsha base 4.0 degrees", "precession": "ayanamsha added to the fixed degrees", "zodiac": "mixed base plus ayanamsha", "entries": 28},
+      {"mode": 4, "name": "ZHENG_SIDEREAL", "table": "MOIRA_CURRENT_STELLAR_DEGREES used as sidereal degrees", "path": "perchart.py", "coordinate": "ecliptic longitude", "epoch": "fixed degree list", "precession": "not reapplied; chart is already sidereal", "zodiac": "sidereal", "entries": 28},
+      {"mode": 5, "name": "EQUATORIAL_SIDEREAL", "table": "equatorial distance-star RA", "path": "perchart.getEquatorialSu28", "coordinate": "RA", "epoch": "chart JD", "precession": "Swiss", "zodiac": "sidereal equatorial"},
+      {"mode": 6, "name": "GUFA_LICHENG", "table": "Shoushi-li widths", "path": "perchart.getGufaLichengSu28", "coordinate": "ecliptic longitude", "epoch": "Yuan-era fixed widths, or precessing when that option is on", "precession": "optional", "zodiac": "ecliptic"},
+      {"mode": 7, "name": "EQUATORIAL_TROPICAL", "table": "fixed Yuan-Ming equatorial widths", "path": "perchart.getEquatorialTropicalSu28", "coordinate": "RA", "epoch": "fixed constants", "precession": "does not follow precession", "zodiac": "tropical equatorial"},
+      {"mode": 8, "name": "EQUATORIAL_TROPICAL_LIVE", "table": "live RA widths with the mode-7 anchor", "path": "perchart.getEquatorialTropicalLiveSu28", "coordinate": "RA", "epoch": "chart JD", "precession": "live star RA", "zodiac": "tropical equatorial"}
+    ],
+    "browserReady": "BROWSER_READY_AFTER_TRANSFORM",
+    "qizhengKinNotChartPath": {
+      "status": "CONFIRMED",
+      "classification": "MIXED",
+      "source": "VENDORED",
+      "path": "vendor/kinastro/astro/qizheng/constants.py",
+      "endpoint": "astropy/websrv/webqizhengkinsrv.py",
+      "engine": "kinastro-qizheng",
+      "notChartFixedStarSu28": true,
+      "notGuoStarSect": true,
+      "tables": [
+        {"name": "TWENTY_EIGHT_MANSIONS", "entries": 28, "field": "start_lon", "note": "Comment says the 室 boundary 353.49 was added because the cited MOIRA list had 27 points."},
+        {"name": "TWENTY_EIGHT_MANSIONS_LIMING", "entries": 28, "field": "start_lon", "note": "Comment says these bounds are shifted for 今制立命."},
+        {"name": "TWENTY_EIGHT_MANSIONS_ANCIENT", "entries": 28, "field": "start_lon", "note": "Comment says classical degrees."}
+      ],
+      "algorithm": "calculator.py _compute_liming_lon",
+      "ayanamsaConstant": 29.185,
+      "ayanamsaSymbol": "_TANG_EPOCH_AYANAMSA_AT_J2000",
+      "julianDayJ2000": 2451545.0,
+      "precessionArcsecPerYear": 50.29,
+      "citation": "File comment names BahnAstro/MOIRA_chinese_astrology. No URL and no license sentence in the file.",
+      "browserReady": "BACKEND_REQUIRED"
+    }
+  },
+  "nakshatra": {
+    "status": "CONFIRMED",
+    "source": "IN-REPO",
+    "path": "astropy/astrostudy/nakshatra.py",
+    "entries": 27,
+    "spanDegrees": 13.333333333333334,
+    "spanRule": "360 / 27",
+    "zeroPoint": "0 degrees of the sidereal longitude passed in. The function does not name Lahiri.",
+    "ayanamsaSource": "The chart object longitude. perchart.getChartObj calls nakshatra_from_lon only when zodiacal is sidereal. Empty siderealAyanamsa follows the Swiss Ephemeris current default, recorded in perchart, not inside nakshatra.py.",
+    "rounding": "index = min(26, int(normalizedLongitude / span)). An exact boundary belongs to the next mansion.",
+    "wrap": "longitude modulo 360",
+    "pada": {
+      "present": true,
+      "rule": "min(4, int(progress * 4) + 1)",
+      "boundaries": [0, 0.25, 0.5, 0.75]
+    },
+    "abhijit": {
+      "present": true,
+      "path": "astropy/astrostudy/india/primitives.py",
+      "startDegrees": 276.6666666666667,
+      "endDegrees": 280.8888888888889,
+      "changes27LordFields": false
+    },
+    "tropicalChart": "nakshatras is null",
+    "outputFields": ["index", "name", "label", "lord", "pada", "progress", "remainingRatio", "isAbhijit", "nak28Index", "nak28Name", "nak28Label"],
+    "browserReady": "BROWSER_READY",
+    "boundaries": [0, 13.333333333333334, 26.666666666666668, 40, 53.333333333333336, 66.66666666666667, 80, 93.33333333333333, 106.66666666666667, 120, 133.33333333333334, 146.66666666666666, 160, 173.33333333333334, 186.66666666666666, 200, 213.33333333333334, 226.66666666666666, 240, 253.33333333333334, 266.6666666666667, 280, 293.3333333333333, 306.6666666666667, 320, 333.3333333333333, 346.6666666666667, 360]
+  },
+  "guoStarSect": {
+    "status": "CONFIRMED",
+    "classification": "MIXED",
+    "source": "IN-REPO",
+    "path": "astropy/astrostudy/guostarsect/guotables.py",
+    "algorithm": "astropy/astrostudy/guostarsect/guostarsect.py GuoStarSect.allTerm",
+    "placement": "perchart.setupPlanets writes planet.su from TERM_SU27 using the planet sign and sign longitude.",
+    "entries": 27,
+    "includesNiu": false,
+    "notTheSameAsFixedStarSu28": true,
+    "dayNight": "The Moon mansion is lifesu. Relations in LIST_SU_RELATION are counted from that mansion. There is no separate day-chart and night-chart mansion table in this function.",
+    "epoch": "Static degrees inside each sign. The sign itself follows the chart zodiac.",
+    "frame": "ecliptic sign longitude",
+    "precession": false,
+    "bytes": 12081,
+    "browserReady": "BROWSER_READY_AFTER_TRANSFORM",
+    "license": "No separate license header in guotables.py. In-repo source."
+  },
+  "parans": {
+    "chartJson": "ABSENT. POST /chart emits declParallel from perchart.getParallel. It does not emit parans.",
+    "productionAcg": {
+      "status": "CONFIRMED",
+      "source": "IN-REPO",
+      "path": "astropy/astrostudy/acg/ACGraph.py",
+      "function": "_parans",
+      "outputKey": "parans",
+      "inputs": ["planet right ascension", "planet declination", "event pair rise/set/mc/ic", "geographic latitude of the simultaneous contact"],
+      "notNatalChartParans": true
+    },
+    "localApproximation": {
+      "status": "LEGACY-LOCAL-APPROXIMATION",
+      "path": "astrostudyui/src/divination/engine/paransLocal.js",
+      "obliquity": 23.4367,
+      "defaultOrbDegrees": 2,
+      "notProductionChartParans": true
+    },
+    "browserReady": "BACKEND_REQUIRED"
+  },
+  "licenses": [
+    {"data": "flatlib-ctrad2/LICENSE", "license": "MIT, copyright 2015 FlatAngle. This covers the Python wrapper. It does not cover sefstars.txt.", "legalReviewRequired": false},
+    {"data": "sefstars.txt, sefstars-2.txt, fixstars.cat, swe_fixstar_ut", "license": "No license sentence in the sefstars header. Header credits S. Moshier, Valentin Abramov, Dieter Koch, later SIMBAD and IAU names. Swiss Ephemeris commercial use stays uncleared.", "legalReviewRequired": true},
+    {"data": "nakshatra.py and primitives.py Abhijit constants", "license": "In-repo source. No separate third-party header on the table.", "legalReviewRequired": false},
+    {"data": "guotables.py", "license": "In-repo source. No separate license header.", "legalReviewRequired": false},
+    {"data": "fixedStars.js election table", "license": "In-repo UI source. Separate from the Swiss catalog.", "legalReviewRequired": false},
+    {"data": "MOIRA_DISTAR_J2000", "license": "In-repo numeric table inside perchart.py.", "legalReviewRequired": false},
+    {"data": "vendor qizheng TWENTY_EIGHT_MANSIONS tables", "license": "Vendored source. Comment cites BahnAstro/MOIRA_chinese_astrology. No URL and no license sentence in constants.py.", "legalReviewRequired": true}
+  ]
+}

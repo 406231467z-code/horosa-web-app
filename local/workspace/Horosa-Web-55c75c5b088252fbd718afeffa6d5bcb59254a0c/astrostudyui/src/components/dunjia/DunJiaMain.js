@@ -60,7 +60,6 @@ import {
 	CHART_CATEGORY_OPTIONS,
 	birthToYearGan,
 	calcDunJia,
-	fetchQimenPan,
 	isKinqimenMode,
 	normalizeKinqimenData,
 	buildDunJiaSnapshotText,
@@ -870,15 +869,7 @@ class DunJiaMain extends Component {
 	}
 
 	async getResolvedPan(fields, nongli, options, displaySolarTime){
-		const ctx = this.getContext(fields, displaySolarTime);
-		const fallbackPan = this.getCachedPan(fields, nongli, options, displaySolarTime);
-		// 飞盘(飞宫九神)/混合(飞转结合)/数字起局(报数定局)均走本地 calcDunJia——后端不支持(飞盘/混合 须重启:8899 才认 school;
-		// 数字报数定局后端无此入参,走后端会被节气定局覆盖)。转盘等仍走后端(时/刻/综合)。
-		if(!fallbackPan || !isKinqimenMode(options && options.paiPanType) || (options && (options.school === '飞盘' || options.school === '混合' || options.qijuMethod === 'shuzi'))){
-			return fallbackPan;
-		}
-		const backendPan = await fetchQimenPan(fields, nongli, options, ctx);
-		return normalizeKinqimenData(backendPan, fallbackPan, options, nongli);
+		return this.getCachedPan(fields, nongli, options, displaySolarTime);
 	}
 
 
@@ -1389,7 +1380,7 @@ class DunJiaMain extends Component {
 					const displaySolarTime = await this.resolveDisplaySolarTime(params, nongli);
 					if(this.unmounted){ return; }
 					const ctx = this.getContext(flds, displaySolarTime);
-					await fetchQimenPan(flds, nongli, options, ctx);
+					this.getCachedPan(flds, nongli, options, displaySolarTime || (ctx && ctx.displaySolarTime));
 				}).catch(()=>null);
 			});
 		}catch(e){ /* 预取失败无害 */ }

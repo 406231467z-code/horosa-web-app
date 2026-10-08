@@ -62,6 +62,8 @@ export default function StartupGate() {
   }, []);
 
   React.useEffect(() => {
+    // 浏览器盘面由本机历算生成。heartbeat 只回答 Java 是否在 :9999，不能决定盘有没有生成。
+    if (!isDesktopCalcShell()) { setReady(true); return undefined; }
     if (!currentProbeUrl() || typeof fetch !== 'function') { setReady(true); return undefined; }
     let cancelled = false;
     let timer = null;

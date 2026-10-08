@@ -40,8 +40,9 @@ import AstroPrenatalSyzygy from '../astro/AstroPrenatalSyzygy';
 import * as AstroConst from '../../constants/AstroConst';
 import * as AstroText from '../../constants/AstroText';
 import * as AstroHelper from '../astro/AstroHelper';
-import request from '../../utils/request';
 import * as Constants from '../../utils/constants';
+import { DirectionBrowserEngine } from '../../utils/directionBrowser';
+import { isCalcStatus } from '../../utils/calcStatus';
 import { saveModuleAISnapshot, } from '../../utils/moduleAiSnapshot';
 import { buildCurrentMomentLines, buildMethodNoteLines, } from '../../utils/astroAiSnapshot';
 import { appendPlanetHouseInfoById, } from '../../utils/planetHouseInfo';
@@ -803,14 +804,7 @@ export async function warmPrimaryDirection(chartObj, fields){
 	try{
 		const req = buildPrimaryDirectionRequestPure(chartObj, fields, {});
 		if(!req){ return null; }
-		return await request(`${Constants.ServerRoot}/predict/pd`, {
-			body: JSON.stringify(req),
-			cache: 'no-store',
-			silent: true,
-			// PERF-R9 Ship 7:预热/预取一律零重试(显式声明,不吃任何调用链上的重试默认值)——
-			// 后端重启窗口里 N 个深度预取绝不能变成 N×10 次退避重试风暴。
-			retry: { retries: 0 },
-		});
+		return DirectionBrowserEngine.calculate(req);
 	}catch(e){
 		return null; // 预热失败静默:首点回到冷即付的现状
 	}
@@ -1161,11 +1155,7 @@ class AstroDirectMain extends Component{
 		const seq = ++this.primaryDirectionRequestSeq;
 		let result = null;
 		try{
-			const data = await request(`${Constants.ServerRoot}/predict/pd`, {
-				body: JSON.stringify(req),
-				cache: 'no-store',
-			});
-			result = unwrapPredictiveResponse(data);
+			result = DirectionBrowserEngine.calculate(req);
 		}catch(e){
 			result = null;
 		}
@@ -1173,10 +1163,13 @@ class AstroDirectMain extends Component{
 			return;
 		}
 		this.primaryDirectionInflightKey = '';
+		if(isCalcStatus(result)){
+			try{ message.warning(result.message); }catch(e){ /* SSR/测试环境无 message */ }
+			return;
+		}
 		const pdRows = result && Array.isArray(result.pd) ? result.pd : null;
 		if(!pdRows){
-			// 失败不静默:applied 不动(merge 不跑),按钮保持「重新计算」;可见提示防「假已同步」体感
-			try{ message.warning('主限法计算未完成（服务未响应），请点「重新计算」重试'); }catch(e){ /* SSR/测试环境无 message */ }
+			try{ message.warning('主限法计算未完成，没有可显示的主限表。'); }catch(e){ /* SSR/测试环境无 message */ }
 			return;
 		}
 		this.savePrimaryDirectionRows(chartObj, req, pdRows, {

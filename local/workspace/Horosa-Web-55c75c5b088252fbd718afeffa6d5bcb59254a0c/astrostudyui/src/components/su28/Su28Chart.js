@@ -97,18 +97,18 @@ class Su28Chart {
 			this.houseMap.set(suh.name, suh);
 		}	
 
-		for(let i=0; i<this.chartObj.objects.length; i++){
-			let obj = this.chartObj.objects[i];
+		const objects = Array.isArray(this.chartObj.objects) ? this.chartObj.objects : [];
+		for(let i=0; i<objects.length; i++){
+			let obj = objects[i];
+			const place = (idOk)=>{
+				if(!idOk){ return; }
+				const house = this.houseMap.get(obj.su28);
+				if(house){ house.planets.push(obj); }
+			};
 			if(this.planetDisp){
-				if(this.planetDisp.has(obj.id)){
-					let house = this.houseMap.get(obj.su28);
-					house.planets.push(obj);
-				}	
+				place(this.planetDisp.has(obj.id));
 			}else{
-				if(AstroConst.isTraditionPlanet(obj.id)){
-					let house = this.houseMap.get(obj.su28);
-					house.planets.push(obj);
-				}
+				place(AstroConst.isTraditionPlanet(obj.id));
 			}
 		}
 
@@ -214,7 +214,7 @@ class Su28Chart {
 				height: xy.h,
 				owner: this.svg,
 				su28chart: this,
-				houseObj: this.houseMap.get(name),
+				houseObj: this.houseMap.get(name) || { name: name || '', planets: [] },
 				fields: this.fields,
 				color: color,
 				onTipClick: this.onTipClick,
@@ -267,8 +267,9 @@ class Su28Chart {
 			return this.chartObj.objectMap[objid];
 		}
 		this.chartObj.objectMap = {};
-		for(let i=0; i<this.chartObj.objects.length; i++ ){
-			let obj = this.chartObj.objects[i];
+		const objects = Array.isArray(this.chartObj.objects) ? this.chartObj.objects : [];
+		for(let i=0; i<objects.length; i++ ){
+			let obj = objects[i];
 			this.chartObj.objectMap[obj.id] = obj;
 		}
 		return this.chartObj.objectMap[objid];
@@ -313,19 +314,21 @@ class Su28Chart {
 
 	getAscSign0(){
 		let asc = null;
-		for(let i=0; i<this.chartObj.objects.length; i++){
-			let obj = this.chartObj.objects[i];
+		const objects = Array.isArray(this.chartObj.objects) ? this.chartObj.objects : [];
+		for(let i=0; i<objects.length; i++){
+			let obj = objects[i];
 			if(obj.id === AstroConst.ASC){
 				asc = obj;
 				break;
 			}
 		}
-		if(asc){
+		const signsRA = Array.isArray(this.chartObj.signsRA) ? this.chartObj.signsRA : [];
+		if(asc && signsRA.length){
 			let idx = -1;
 			let ra = asc.ra;
-			let prev = this.chartObj.signsRA[0];
-			for(let i=1; i<this.chartObj.signsRA.length; i++){
-				let nxt = this.chartObj.signsRA[i];
+			let prev = signsRA[0];
+			for(let i=1; i<signsRA.length; i++){
+				let nxt = signsRA[i];
 				if(prev.ra <= ra && ra < nxt.ra){
 					idx = i;
 					break;
@@ -337,7 +340,7 @@ class Su28Chart {
 			}else{
 				idx = idx - 1;
 			}
-			let sigra = this.chartObj.signsRA[idx];
+			let sigra = signsRA[idx];
 			return sigra.id;
 		}
 		return null;

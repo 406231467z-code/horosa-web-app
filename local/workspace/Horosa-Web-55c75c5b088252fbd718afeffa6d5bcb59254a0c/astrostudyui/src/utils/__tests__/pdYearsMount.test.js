@@ -71,42 +71,40 @@ describe('pdYears 挂载 round-trip（透传 /chart 复算 PD）', () => {
 		mockFetchChartCalls.length = 0;
 	});
 
-	it('默认（pdYears=100，全等默认）：/chart 复算请求体 pdYears=100（= 现状默认，字节级一致）', async () => {
-		// 全等默认 → 走默认 buildTechniqueContext 路径；本测无模块缓存 → 默认路径也会按命盘复算 PD，
-		// 其请求体 pdYears 必须 === 100（证明新增 buildFieldObject/fieldParams 透传不改默认行为）。
-		await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 100 });
-		const req = lastPdFetch();
-		expect(req).toBeTruthy();
-		expect(req.pdYears).toBe(100);
+	function expectPdYears(ctx, years){
+		expect(mockFetchChartCalls).toHaveLength(0);
+		expect(ctx.content).toContain('LICENSE_REVIEW_REQUIRED');
+		expect(ctx.content).toContain('provider: browser');
+		expect(ctx.content).toContain(`pdYears: ${years}`);
+		expect(ctx.content).not.toContain('主限法快照(占位)');
+	}
+
+	it('默认（pdYears=100，全等默认）：状态回显 pdYears=100，且不请求 /chart', async () => {
+		const ctx = await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 100 });
+		expectPdYears(ctx, 100);
 	});
 
-	it('pdYears=50：强制重算的 /chart 请求体 pdYears=50（真透传给后端 PD compute）', async () => {
-		await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 50 });
-		const req = lastPdFetch();
-		expect(req).toBeTruthy();
-		expect(req.includePrimaryDirection).toBe(true);
-		expect(req.pdYears).toBe(50);
+	it('pdYears=50：状态回显 50，且不带 includePrimaryDirection 的 /chart', async () => {
+		const ctx = await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 50 });
+		expectPdYears(ctx, 50);
+		expect(lastPdFetch()).toBeFalsy();
 	});
 
-	it('pdYears=120 与 50 → 请求体 pdYears 不同（不同选择产出不同请求，非写死 100）', async () => {
-		await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 50 });
-		const reqA = lastPdFetch();
-		mockFetchChartCalls.length = 0;
-		await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 120 });
-		const reqB = lastPdFetch();
-		expect(reqA.pdYears).toBe(50);
-		expect(reqB.pdYears).toBe(120);
+	it('pdYears=120 与 50 → 回显不同（不同选择产出不同状态，非写死 100）', async () => {
+		const ctxA = await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 50 });
+		const ctxB = await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 120 });
+		expect(ctxA.content).toContain('pdYears: 50');
+		expect(ctxB.content).toContain('pdYears: 120');
+		expect(mockFetchChartCalls).toHaveLength(0);
 	});
 
-	it('pdYears=999 在 3000 上限内 → 原样透传（上限已 360→3000，>360 走多圈复发行）', async () => {
-		await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 999 });
-		const req = lastPdFetch();
-		expect(req.pdYears).toBe(999);
+	it('pdYears=999 在 3000 上限内 → 原样回显', async () => {
+		const ctx = await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 999 });
+		expectPdYears(ctx, 999);
 	});
 
-	it('越界 pdYears=5000 → 夹到 3000（normalizePdYearsValue 兜底，不发非法值给后端）', async () => {
-		await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 5000 });
-		const req = lastPdFetch();
-		expect(req.pdYears).toBe(3000);
+	it('越界 pdYears=5000 → 夹到 3000（normalizePdYearsValue 兜底）', async () => {
+		const ctx = await getAnalysisTechniqueContextWithOptions(SOURCE, 'primarydirect', { pdYears: 5000 });
+		expectPdYears(ctx, 3000);
 	});
 });

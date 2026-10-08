@@ -10,7 +10,7 @@ import GeoCoordModal from '../amap/GeoCoordModal';
 import SuZhanMain from '../suzhan/SuZhanMain';
 import * as Constants from '../../utils/constants';
 import * as AstroConst from '../../constants/AstroConst';
-import request from '../../utils/request';
+import { ephemerisLicenseStatus } from '../../utils/calcStatus';
 import { gcj02ToGps, randomStr } from '../../utils/helper';
 import {convertLatStrToDegree, convertLonStrToDegree, convertLatToStr, convertLonToStr} from '../astro/AstroHelper';
 import { dstAwareZoneAt } from '../../utils/timezone';
@@ -561,36 +561,12 @@ function buildChartRequestParams(params, birth){
 }
 
 async function loadJieqiChart(params, term, birth){
-	const key = getChartCacheKey(params, term, birth);
-	const cached = jieqiChartMem[key];
-	if(cached && cached.chart){
-		return cached.chart;
-	}
-	const dt = splitBirthToDateTime(birth);
-	const reqParams = buildChartRequestParams(params, birth);
-	// WP-C 极速化:silent=不触发全局满屏 Spin 压暗(角标由调用方 requestJieQiCharts 统一管理)
-	const data = await request(`${Constants.ServerRoot}/chart`, {
-		body: JSON.stringify(reqParams),
-		silent: silentTechniquePanelsEnabled(),
-	});
-	const chartObj = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-	if(!chartObj){
-		return null;
-	}
-	if(!chartObj.params){
-		chartObj.params = {};
-	}
-	chartObj.params = {
-		...chartObj.params,
-		...reqParams,
-		birth: `${dt.date} ${dt.time}`,
-		year: params.year,
+	return {
+		...ephemerisLicenseStatus('jieqi-chart'),
+		term: term || '',
+		birth: birth || '',
+		year: params && params.year,
 	};
-	jieqiChartMem[key] = {
-		...(jieqiChartMem[key] || {}),
-		chart: chartObj,
-	};
-	return chartObj;
 }
 
 function normalizeJieqiCompareValue(value){
@@ -1657,6 +1633,21 @@ export class JieQiChartsMain extends Component{
 					<TabPane tab={title+'宿盘'} key={'宿盘'+title}>
 						<div style={{ padding: 12 }}>加载中...</div>
 					</TabPane>
+				);
+				continue;
+			}
+			if(chart.status && !chart.objects){
+				const note = (
+					<div data-status={chart.status} style={{ padding: 12 }}>
+						<div>{chart.message}</div>
+						<div>节气时刻仍由本地节气表给出。这一刻的西洋盘依赖星历。</div>
+					</div>
+				);
+				tabs.push(
+					<TabPane tab={title+'星盘'} key={title}>{note}</TabPane>
+				);
+				tabs.push(
+					<TabPane tab={title+'宿盘'} key={'宿盘'+title}>{note}</TabPane>
 				);
 				continue;
 			}

@@ -78,6 +78,9 @@ class KeChart {
 	}
 
 	drawKes(){
+		if(!this.ke){
+			return;
+		}
 		let ords = this.getKeXY();
 		this.drawKe(ords[0], '一课', this.ke[0]);
 		this.drawKe(ords[1], '二课', this.ke[1]);

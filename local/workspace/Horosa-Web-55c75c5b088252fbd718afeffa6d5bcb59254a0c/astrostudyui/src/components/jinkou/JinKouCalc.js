@@ -1,9 +1,4 @@
 import * as LRConst from '../liureng/LRConst';
-import request from '../../utils/request';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from '../../utils/kentangCache';
-import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
 import {
 
 	JINKOU_SHENSHA_DOC,
@@ -136,6 +131,18 @@ const JinKouYueJiangByJieQi = {
 	'大寒': '子',
 	'立春': '子',
 };
+
+export function yueJiangBranchForJieqi(jieqi){
+	const text = `${jieqi || ''}`;
+	const names = Object.keys(JinKouYueJiangByJieQi);
+	for(let i = 0; i < names.length; i += 1){
+		if(text.indexOf(names[i]) >= 0){
+			return JinKouYueJiangByJieQi[names[i]];
+		}
+	}
+	return '';
+}
+
 // 交节即换口径（A1）：月将随月建六合，于「节」一交即变（立春→亥起，逐节顺退）。
 // 24 节气全列：节起新值、随后中气保持，与中气表同形可直接替换。
 const JinKouYueJiangByJieQi_JiaoJie = {
@@ -2805,56 +2812,7 @@ export function normalizeKinjinkouData(backendPan, fallbackData){
 	};
 }
 
-// horosa_kentang_result_cache_v1 —— 金口诀 /jinkou/pan 直连缓存(LRU 48)。
-// 确定性论证:payload 全由 resolveCalculationDateTime(格式化 'YYYY-MM-DD'/'HH:mm:ss' 与整数)
-// + 地分/月将/占时/时间口径/两个日界开关 + nongli 派生的真太阳时字串构成,无 Date 对象、无随机、
-// 无「现在时刻」依赖;后端 webjinkousrv.py 全文无 random/now(已 grep 核对)→ 同 payload 必同盘。
-// 关 horosa.perf.techniqueResultCache 即逐字回到下面的直连原函数。
-async function fetchJinKouPanRaw(payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('jinkou', 'pan'), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		});
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'jinkou.local.fetch.failed');
-		}
-	}catch(e){
-		rsp = await request(`${ServerRoot}/jinkou/pan`, {
-			body: JSON.stringify(payload),
-			silent: true,
-			timeoutMs: 45000,
-			retry: { retries: 2 },
-		});
-	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
-}
-
-export async function fetchJinKouPan(fields, nongli, options){
-	const opt = options || {};
-	const dt = resolveCalculationDateTime(fields, nongli, opt);
-	if(!dt){
-		return null;
-	}
-	const payload = {
-		...dt,
-		zone: fields && fields.date && fields.date.value ? fields.date.value.zone : '',
-		difen: opt.diFen || '子',
-		yuejiang: opt.yueJiang && opt.yueJiang !== 'auto' ? opt.yueJiang : '',
-		zhanshi: opt.zhanShi && opt.zhanShi !== 'auto' ? opt.zhanShi : '',
-		timeBasis: opt.timeBasis || 'direct',
-		realSunTime: nongli ? (nongli.birth || '') : '',
-		jiedelta: nongli ? (nongli.jiedelta || '') : '',
-		// v2.2.1: 两个全局开关从事盘(起课)fields 透传给后端 /jinkou/pan,后端已读取应用。
-		after23NewDay: (fields && fields.after23NewDay && fields.after23NewDay.value !== undefined) ? fields.after23NewDay.value : defaultAfter23NewDay(),
-		lateZiHourUseNextDay: (fields && fields.lateZiHourUseNextDay && fields.lateZiHourUseNextDay.value !== undefined) ? fields.lateZiHourUseNextDay.value : defaultLateZiHourUseNextDay(),
-	};
-	// v3.5.1 收敛:结果级缓存退役 —— Raw 内部已走上游 utils/kentangCache(三层+在途去重)。
-	return fetchJinKouPanRaw(payload);
+// 金口盘走仓内 buildJinKouData。这里返回 null，assembleJinKouData 在 backendPan 为空时用本地盘。
+export async function fetchJinKouPan(){
+	return null;
 }

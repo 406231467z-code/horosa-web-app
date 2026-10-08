@@ -8,9 +8,8 @@ import { subscribeRemoteNongli, geoPatchFromRec } from '../../utils/divinationTi
 import XQIcon from '../xq-icons';
 import { XQButton as Button, XQTabs as Tabs, XQSideSection } from '../xq-ui';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from '../../utils/kentangCache';
+import { TaixuanBrowserEngine } from '../../utils/taixuanBrowser';
+import { isCalcStatus, formatCalcStatus } from '../../utils/calcStatus';
 import { openKentangCaseDrawer, getKentangSavedCasePayload } from '../../utils/kentangCaseSave';
 import { formatHumanValue } from '../../utils/humanReadableFields';
 import { parseDateParts } from '../../utils/dateStrSafe';
@@ -50,35 +49,11 @@ function defaultSeed(){
 }
 
 async function postTaiXuanRaw(path, payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('taixuan', path), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'taixuan.local.fetch.failed');
-		}
-	}catch(e){
-		const rawResponse = await cachedKentangFetch(`${ServerRoot}/taixuan/${path}`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
+	if(path !== 'pan'){
+		return { status: 'UNSUPPORTED', provider: 'browser', code: 'TAIXUAN_PATH', feature: 'taixuan', message: '浏览器只计算起筮。' };
 	}
-	if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-		throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'taixuan.fetch.failed');
-	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
+	const out = TaixuanBrowserEngine.calculate(payload);
+	return out.status === 'SUCCESS' ? out.result : out;
 }
 
 // v3.5.1 收敛:结果级缓存退役 —— Raw 内部已走上游 utils/kentangCache(seedInBody:
@@ -113,6 +88,9 @@ function buildTaixuanQuanwenBlock(pan){
 }
 
 function buildSnapshotText(pan){
+	if(isCalcStatus(pan)){
+		return formatCalcStatus(pan);
+	}
 	if(!pan){
 		return '暂无太玄数据';
 	}
@@ -464,6 +442,9 @@ class TaiXuanMain extends Component{
 
 	renderCenter(){
 		const pan = this.state.pan;
+		if(isCalcStatus(pan)){
+			return <div className="horosa-huangji-empty">{formatCalcStatus(pan)}</div>;
+		}
 		if(!pan || !pan.taixuan){
 			return <div className="horosa-huangji-empty">暂无太玄数据</div>;
 		}

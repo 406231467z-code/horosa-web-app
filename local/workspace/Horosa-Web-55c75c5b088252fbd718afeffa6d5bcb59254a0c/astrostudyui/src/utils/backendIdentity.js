@@ -175,6 +175,10 @@ if(typeof window !== 'undefined' && IsLocalHostEnv){
 			if(identityCheckDisabled()){
 				return;
 			}
+			// 浏览器盘不靠 Java 身份。启动握手只留给桌面壳。
+			if(!window.__TAURI__ && !window.horosaDesktop){
+				return;
+			}
 			verifyBackendIdentity(ServerRoot, { expectApp: 'horosa-backend' }).then((v)=>{
 				if(!v || !v.ok){
 					const p = renegotiateLocalServerRoot('startup');

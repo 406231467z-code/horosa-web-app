@@ -47,6 +47,12 @@ class SZChart {
 			this.chartObj.fixedStarSu28 === undefined || this.chartObj.fixedStarSu28 === null){
 			return null;
 		}
+		const chart = this.chartObj;
+		if(!Array.isArray(chart.objects)) chart.objects = [];
+		if(!Array.isArray(chart.lots)) chart.lots = [];
+		if(!Array.isArray(chart.houses)) chart.houses = [];
+		if(!Array.isArray(chart.fixedStarSu28)) chart.fixedStarSu28 = [];
+		if(!Array.isArray(chart.signsRA)) chart.signsRA = [];
 		let svgdom = document.getElementById(this.chartId); 
 		if(svgdom === undefined || svgdom === null){
 			return null;

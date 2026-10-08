@@ -8,10 +8,9 @@ import { subscribeRemoteNongli, geoPatchFromRec } from '../../utils/divinationTi
 import XQIcon from '../xq-icons';
 import { XQButton as Button, XQSelect as Select, XQTabs as Tabs, XQSideSection } from '../xq-ui';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { stepPrefetchEnabled, kentangCacheEnabled } from '../../utils/perfFlags';
-import { cachedKentangFetch } from '../../utils/kentangCache';
+import { ShenyiBrowserEngine } from '../../utils/shenyishuBrowser';
+import { isCalcStatus, formatCalcStatus } from '../../utils/calcStatus';
+import { stepPrefetchEnabled } from '../../utils/perfFlags';
 import { openKentangCaseDrawer, getKentangSavedCasePayload } from '../../utils/kentangCaseSave';
 import { formatHumanValue } from '../../utils/humanReadableFields';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
@@ -51,35 +50,11 @@ function parseFieldsDateTime(fields){
 }
 
 async function postShenYiShuRaw(path, payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('shenyishu', path), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'shenyishu.local.fetch.failed');
-		}
-	}catch(e){
-		const rawResponse = await cachedKentangFetch(`${ServerRoot}/shenyishu/${path}`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		}, { retries: 0 });
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
+	if(path !== 'pan'){
+		return { status: 'UNSUPPORTED', provider: 'browser', code: 'SHENYI_PATH', feature: 'shenyishu', message: '浏览器只计算起盘。' };
 	}
-	if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-		throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'shenyishu.fetch.failed');
-	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
+	const out = ShenyiBrowserEngine.calculate(payload);
+	return out.status === 'SUCCESS' ? out.result : out;
 }
 
 // v3.5.1 收敛:结果级缓存退役 —— Raw 内部已走上游 utils/kentangCache(三层+在途去重)。
@@ -92,6 +67,9 @@ function fmtValue(value){
 }
 
 function buildSnapshotText(pan){
+	if(isCalcStatus(pan)){
+		return formatCalcStatus(pan);
+	}
 	if(!pan){
 		return '暂无神易数数据';
 	}
@@ -310,7 +288,7 @@ class ShenYiShuMain extends Component{
 	// 用户点「起盘」即缓存命中 ≈ 瞬间。失败静默;开关关=零行为。
 	prefetchDraftPan(){
 		try{
-			if(!stepPrefetchEnabled() || !kentangCacheEnabled()){ return; }
+			if(!stepPrefetchEnabled()){ return; }
 			if(this.prefetchDraftTimer){ clearTimeout(this.prefetchDraftTimer); }
 			this.prefetchDraftTimer = setTimeout(()=>{
 				this.prefetchDraftTimer = null;
@@ -392,7 +370,7 @@ class ShenYiShuMain extends Component{
 			};
 			return [{
 				name: 'shenyishu',
-				path: '/shenyishu/pan',
+				path: 'browser',
 				run: ()=> postShenYiShu('pan', payload).catch(()=>{ /* 预取失败静默 */ }),
 			}];
 		}catch(e){
@@ -535,6 +513,9 @@ class ShenYiShuMain extends Component{
 
 	renderCenter(){
 		const pan = this.state.pan;
+		if(isCalcStatus(pan)){
+			return <div className="horosa-huangji-empty">{formatCalcStatus(pan)}</div>;
+		}
 		if(!pan || !pan.shenyishu){
 			return <div className="horosa-huangji-empty">暂无神易数数据</div>;
 		}

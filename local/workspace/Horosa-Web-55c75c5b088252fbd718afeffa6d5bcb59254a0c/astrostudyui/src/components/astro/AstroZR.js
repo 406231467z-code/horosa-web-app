@@ -11,7 +11,7 @@ import * as Constants from '../../utils/constants';
 import { randomStr, } from '../../utils/helper';
 import { saveModuleAISnapshot, } from '../../utils/moduleAiSnapshot';
 import { buildCurrentMomentLines, buildMethodNoteLines, } from '../../utils/astroAiSnapshot';
-import { fetchChart } from '../../services/astro';
+import { calculateChart } from '../../services/astrologyCalculationService';
 import styles from '../../css/styles.less';
 import { XQSelect as Select } from '../xq-ui';
 import UpdatingBadge from '../common/UpdatingBadge';
@@ -538,7 +538,7 @@ class AstroZR extends Component{
 		this._wsSig = sig;
 		// fetchChart 回的是信封 {ResultCode, Result, headers};真正盘对象在 Result(本命盘 this.props.value 亦是已解包的 Result)。
 		// 必须解包 rsp[ResultKey] 再取 .chart——直接读 rsp.chart 恒 undefined 会静默回退本命盘(本命非整宫 → 宫线不落座界)。
-		fetchChart(wsParams).then((rsp)=>{
+		calculateChart(wsParams).then((rsp)=>{
 			const result = rsp && rsp[Constants.ResultKey];
 			if(this.unmounted || !result || !result.chart || result.err){ return; }
 			this.setState({ wsChartObj: result });

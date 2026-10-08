@@ -1,8 +1,11 @@
 import DateTime from '../components/comp/DateTime';
-import request from './request';
 import { fetchLiurengGods } from './liurengGodsLocal';
 import * as Constants from './constants';
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from './dayBoundary';
+import { DirectionBrowserEngine } from './directionBrowser';
+import { formatCalcStatus, unsupportedStatus, isCalcStatus } from './calcStatus';
+import request from './request';
+import { calculateChart } from '../services/astrologyCalculationService';
 import { applyAIExportSectionFilterToSnapshot, splitContentSections, exportSettingKeyForSnapshotModule, applyPlanetInfoFilterByContext } from './aiExport';
 import {
 	getTechniqueSettingsSchema,
@@ -48,7 +51,7 @@ import { listLocalCharts } from './localcharts';
 import { safeParseJson, normalizeTags, extractSnapshotText, extractCaseSnapshotText } from './aiAnalysisSources';
 export { listAnalysisSources } from './aiAnalysisSources';
 import { loadModuleAISnapshot, saveModuleAISnapshot } from './moduleAiSnapshot';
-import { fetchChart } from '../services/astro';
+import { SignZiList } from '../components/liureng/LRConst';
 import { AI_ANALYSIS_STORES, getStoreRecord, putStoreRecord } from './aiAnalysisStore';
 import { getStore } from './storageutil';
 import { DIVINATION_CASE_SETTING_KEYS } from './divinationCaseSave';
@@ -65,7 +68,7 @@ import {
 import { fetchTaiyiPan, buildTaiyiSnapshotText } from '../components/taiyi/TaiYiCalc';
 import { applyTaiyiSchool, isDefaultSchool, DEFAULT_TAIYI_SCHOOL } from '../components/taiyi/core/taiyiSchool';
 import { buildTongSheFaModel, buildTongSheFaSnapshot } from '../components/tongshefa/TongSheFaMain';
-import { buildJinKouData } from '../components/jinkou/JinKouCalc';
+import { buildJinKouData, yueJiangBranchForJieqi } from '../components/jinkou/JinKouCalc';
 import { resolveJinKouDiFen } from '../components/jinkou/JinKouState';
 import { buildLiuRengSnapshotText } from '../components/lrzhan/LiuRengMain';
 import { buildJinKouSnapshotText, deriveBenMingFromRunYear as deriveJinkouBenMing, deriveXuSuiFromRunYear as deriveJinkouXuSui } from '../components/jinkou/JinKouMain';
@@ -102,13 +105,6 @@ import { buildGuolaoSnapshotForFields } from '../components/guolao/GuoLaoChartMa
 import { buildSuzhanSnapshotText } from '../components/suzhan/SuZhanMain';
 import { SZChart as SZChartDefaults } from '../components/suzhan/SZConst';
 import { buildGermanySnapshotForFields } from '../components/germany/AstroMidpoint';
-// [B6] 合盘快照构建器动态化:静态 import 会把 AstroRelative 整组件锚进饿链(本文件被 eager 主组件引用)
-// → 首屏白携带;两处消费均在 async 路径,await import 零语义差(与合盘页 lazy 同 chunk 复用)。
-async function loadBuildRelativeSnapshotText(){
-	const m = await import(/* webpackChunkName: "relative-main" */ '../components/astro/AstroRelative');
-	return m.buildRelativeSnapshotText;
-}
-import { buildPredictiveSnapshotText } from './predictiveAiSnapshot';
 import { runHorary } from '../divination/horary/horaryEngine';
 import { horaryJudgeOpts } from '../divination/horary/horarySchools';
 import { judgeLayerOverrides } from './judgeLayerOverrides';
@@ -897,16 +893,15 @@ async function regenerateLiurengSnapshot(record, options, runyear){
 	// 若缺 objects 则补一份 /chart（含太阳座与昼夜）。
 	let chartObj = result.liureng;
 	if(!chartObj.objects || !chartObj.objects.length){
-		try{
-			const p = result.params || {};
-			const chartParams = { ...p, date: ('' + (p.date || '')).replace(/-/g, '/'), hsys: 0, zodiacal: 0, cid: null };
-			const co = await request(`${Constants.ServerRoot}/chart`, { body: JSON.stringify(chartParams), silent: true });
-			const r = co && co[Constants.ResultKey] ? co[Constants.ResultKey] : null;
-			const inner = r && r.chart ? r.chart : r;
-			if(inner && Array.isArray(inner.objects)){
-				chartObj = { ...result.liureng, objects: inner.objects, isDiurnal: inner.isDiurnal !== undefined ? inner.isDiurnal : result.liureng.isDiurnal };
-			}
-		}catch(e){ /* 取不到则退回 result.liureng */ }
+		const jieqi = chartObj.nongli && (chartObj.nongli.jieqi || chartObj.nongli.jiedelta || '');
+		const branch = yueJiangBranchForJieqi(jieqi);
+		const idx = SignZiList.indexOf(branch);
+		if(idx >= 0 && AstroConst.LIST_SIGNS[idx]){
+			chartObj = {
+				...result.liureng,
+				objects: [{ id: AstroConst.SUN, sign: AstroConst.LIST_SIGNS[idx] }],
+			};
+		}
 	}
 	return buildLiuRengSnapshotText(
 		result.params,
@@ -1002,7 +997,7 @@ async function regenerateQimenSnapshot(record, payload){
 	const qsOpt = payload && payload.qimen && typeof payload.qimen === 'object' ? payload.qimen : payload;
 	const params = buildCaseSnapshotParams(record, qsOpt && qsOpt.options && typeof qsOpt.options === 'object' ? qsOpt.options : qsOpt);
 	const nongli = await fetchPreciseNongli(params);
-	if(!nongli){
+	if(!nongli || nongli.status === 'UNSUPPORTED'){
 		return '';
 	}
 	// 兼容事盘(payload.options/faRelatedPeople)与命盘(payload.qimen.{options,faRelatedPeople})两种结构。
@@ -1029,7 +1024,7 @@ async function regenerateTaiyiSnapshot(record, payload){
 	const tyOpt = payload && typeof payload === 'object' ? (payload.options && typeof payload.options === 'object' ? payload.options : payload) : null;
 	const params = buildCaseSnapshotParams(record, tyOpt);
 	const nongli = await fetchPreciseNongli(params);
-	if(!nongli){
+	if(!nongli || nongli.status === 'UNSUPPORTED'){
 		return '';
 	}
 	const options = {
@@ -1125,39 +1120,10 @@ async function regenerateSanshiUnifiedSnapshot(record, payload){
 	return buildSanshiUnifiedFallbackSnapshot(record, payload || {});
 }
 
-// 无头合盘(synastry):从两张命盘 record 现算关系快照 —— 比较盘(互摄相位/中点/映点)+ 组合盘(复合图)+ 影响盘(双盘叠加)。
-// 供「合盘」技法直接选两张盘生成,无需先在合盘页挂载。后端 /modern/relative(:9999,RSA);任一产品失败优雅跳过。
+// 合盘关系盘依赖西洋星历。星历许可证未放行前不请求 /modern/relative 或 /astroextra/relative。
 export async function buildRelativeSnapshotForRecords(recordA, recordB){
 	if(!recordA || !recordB) return '';
-	const mk = (r)=>{ const [d, t] = `${(r && r.birth) || ''}`.split(' '); return { date: d || '', time: t || '', zone: (r && r.zone) || '', lat: (r && r.lat) || '', lon: (r && r.lon) || '' }; };
-	const fetchOne = async (relativeCode, currentTab)=>{
-		const params = { inner: mk(recordA), outer: mk(recordB), hsys: (recordA && recordA.hsys !== undefined && recordA.hsys !== null) ? recordA.hsys : 1, zodiacal: (recordA && recordA.zodiacal) || 0, siderealAyanamsa: (recordA && recordA.siderealAyanamsa) || '', relative: relativeCode };
-		let data;
-		try { data = await request(`${Constants.ServerRoot}/modern/relative`, { body: JSON.stringify(params), silent: true }); }
-		catch(_){ return ''; }
-		if(!data || data[Constants.ResultKey] === undefined || data[Constants.ResultKey] === null) return '';
-		try { const buildRelativeSnapshotText = await loadBuildRelativeSnapshotText(); return buildRelativeSnapshotText({ currentTab, result: data[Constants.ResultKey], chartA: { record: recordA }, chartB: { record: recordB }, params: { hsys: params.hsys, zodiacal: params.zodiacal } }); }
-		catch(_){ return ''; }
-	};
-	// 关系量化(分数)走独立 /astroextra/relative(返回 {score,highlights,challenges,aspects},非 /modern/relative)。
-	const fetchScore = async ()=>{
-		const params = { inner: mk(recordA), outer: mk(recordB), hsys: (recordA && recordA.hsys !== undefined && recordA.hsys !== null) ? recordA.hsys : 1, zodiacal: (recordA && recordA.zodiacal) || 0, siderealAyanamsa: (recordA && recordA.siderealAyanamsa) || '' };
-		let data;
-		try { data = await request(`${Constants.ServerRoot}/astroextra/relative`, { body: JSON.stringify(params), silent: true }); }
-		catch(_){ return ''; }
-		if(!data || data[Constants.ResultKey] === undefined || data[Constants.ResultKey] === null) return '';
-		try { const buildRelativeSnapshotText = await loadBuildRelativeSnapshotText(); return buildRelativeSnapshotText({ currentTab: 'Score', result: data[Constants.ResultKey], chartA: { record: recordA }, chartB: { record: recordB }, params: { hsys: params.hsys, zodiacal: params.zodiacal } }); }
-		catch(_){ return ''; }
-	};
-	const comp = await fetchOne(0, 'Comp');            // 比较盘:互摄相位/中点相位/映点
-	const composite = await fetchOne(1, 'Composite');  // 组合盘:复合图盘
-	const synastry = await fetchOne(2, 'Synastry');    // 影响盘:双盘叠加
-	const scoreTxt = await fetchScore();               // 关系量化:契合分数+顺畅/张力 top 相位
-	const stripHeader = (txt)=>{ const i = `${txt || ''}`.indexOf('\n['); return i > 0 ? `${txt}`.slice(i + 1) : `${txt || ''}`; }; // 去重复的 [关系起盘信息] 段(仅留首份)
-	const parts = [];
-	if(comp && comp.trim()) parts.push(comp);
-	[composite, synastry, scoreTxt].forEach((t)=>{ if(t && t.trim()) parts.push(parts.length ? stripHeader(t) : t); });
-	return parts.join('\n\n');
+	return '';
 }
 
 function generateCaseTechniqueSnapshot(record, moduleName, payload){
@@ -2001,17 +1967,24 @@ async function buildYizhangjingSnapshotForRecord(record, opts){
 	}
 }
 
-// 取该盘的西洋星盘原始结果（含 predictive 衍生数据，如 firdaria；可选含主限法）。
+// 取该盘的西洋星盘原始结果。生产路径是浏览器 Astronomy Engine。
+// 主限弧长仍是许可证状态，这里不把 includePrimaryDirection 发给 /chart。
 async function fetchChartResultForRecord(record, options = {}){
-	const fields = buildFieldObject(record);
-	const rsp = await fetchChart({
-		...fieldParams(fields),
-		includePrimaryDirection: !!options.includePrimaryDirection,
-	}, {
-		silent: true,
-		timeoutMs: 20000,
-	});
-	return rsp && rsp.Result ? rsp.Result : null;
+	if(options && options.includePrimaryDirection){
+		return null;
+	}
+	try{
+		const fields = buildFieldObject(record);
+		const rsp = await calculateChart({
+			...fieldParams(fields),
+		}, {
+			silent: true,
+			cache: true,
+		});
+		return rsp && rsp.Result ? rsp.Result : null;
+	}catch(e){
+		return null;
+	}
 }
 
 // 卜卦盘 horary：仅凭起课时间+地点起西洋盘(无需人工摇卦),用引擎默认类别 general 出结构化裁决快照。
@@ -2411,13 +2384,7 @@ async function buildPrimaryDirChartSnapshotText(chartObj, opts){
 			direction,
 		};
 		if(reqBody.date && reqBody.datetime){
-			const data = await request(`${Constants.ServerRoot}/predict/pdchart`, {
-				body: JSON.stringify(reqBody),
-				silent: true,
-				timeoutMs: 20000,
-			});
-			const unwrapped = data && data.Result ? data.Result : data;
-			dirChart = unwrapped && !unwrapped.err && unwrapped.chart ? unwrapped : null;
+			dirChart = null;
 		}
 	}catch(e){
 		dirChart = null;
@@ -2426,7 +2393,15 @@ async function buildPrimaryDirChartSnapshotText(chartObj, opts){
 	const dirHouses = dirChart ? safeLines(buildHouseCuspLines, dirChart) : [];
 	if(dirStars.length){ lines.push('星与虚点'); lines.push(...dirStars); }
 	if(dirHouses.length){ lines.push('宫位宫头'); lines.push(...dirHouses); }
-	if(!dirStars.length && !dirHouses.length){ lines.push('无（推导盘获取失败或后端不可用）'); }
+	if(!dirStars.length && !dirHouses.length){ lines.push(formatCalcStatus(DirectionBrowserEngine.calculate({
+		date: params.birth,
+		zone: params.zone,
+		lon: params.lon,
+		lat: params.lat,
+		pdMethod,
+		pdTimeKey,
+		direction,
+	}))); }
 	lines.push('');
 	lines.push('[主限法盘说明]');
 	lines.push('左侧双盘内圈为本命盘，外圈为按当前主限法设置和所选时间推导出的主限法盘位置。');
@@ -2509,20 +2484,10 @@ async function buildPredictivePeriodSnapshot(chartObj, key, opts){
 			params.date = parts[0];
 			params.time = params.time || parts[1] || '';
 		}
-		try{
-			const data = await request(`${Constants.ServerRoot}/predict/${key}`, {
-				body: JSON.stringify(params),
-				timeoutMs: 60000,
-			});
-			const result = data && data[Constants.ResultKey];
-			if(!result){
-				return '';
-			}
-			// [独立复核修] methodKey 必传:漏传时挂载快照缺 [方法说明],与导出侧(组件全部传参)四同步破缺。
-			return buildPredictiveSnapshotText(chartObj, params, result, key) || '';
-		}catch(e){
-			return '';
-		}
+		return [
+			formatCalcStatus(unsupportedStatus(key, 'PREDICTIVE_BROWSER', '该推运没有浏览器算法，不请求 /predict。')),
+			`datetime: ${datetimeForPoint}`,
+		].join('\n');
 	};
 	// P4 区间扫描：datetimeEnd 非空且 scanStep 合法 → 多时点；否则单点（=现状，datetime=optDatetime||now）。
 	const scan = buildDatetimeScanPoints(optDatetime || datetimeStr, o.datetimeEnd, o.scanStep, 'YYYY-MM-DD HH:mm', ()=>datetimeStr);
@@ -2707,12 +2672,18 @@ export async function regenerateChartTechniqueSnapshot(record, key){
 			});
 		}
 		case 'primarydirect': {
-			// 主限法·表格：取含主限法的西洋盘 → 列未来 pdYears 年全部 direction 行。P0 起
-			// 方位法 + 时间换算 + pdYears 经 record.* → buildFieldObject/fieldParams 透传 /chart 复算（用户选了
-			// Placidus/Naibod 等，LLM 上下文也跟着显示）。表格无 datetime（年限范围非单一时刻）。
+			// 主限法·表格：生产弧长依赖 Swiss。浏览器返回许可证状态，不请求 /chart。
+			// pdYears 仍按 1–3000 夹取后回显，齿轮不被静默丢掉，也不发明弧长。
 			const chartObj = await fetchChartResultForRecord(record, { includePrimaryDirection: true });
 			if(!chartObj){
-				return '';
+				const pdYears = normalizePdYearsValue(record && record.pdYears);
+				return `${formatCalcStatus(DirectionBrowserEngine.calculate({
+					date: record && record.birth,
+					zone: record && record.zone,
+					lon: record && record.lon,
+					lat: record && record.lat,
+					pdYears,
+				}))}\npdYears: ${pdYears}`;
 			}
 			// 显式把用户配置的方位法/时间换算/方向类型/顺逆/映点/界回填进快照 params——与 fetchChart
 			// 复算所用 fieldParams 同源(buildFieldObject)，不依赖后端是否把请求参回显进 Result.params。
@@ -2745,19 +2716,17 @@ export async function regenerateChartTechniqueSnapshot(record, key){
 			return buildPrimaryDirectSnapshotText(snapshotChartObj) || '';
 		}
 		case 'primarydirchart': {
-			// 主限法·盘（P5 从表格 fallthrough 拆出）：取本命西洋盘 → 把「所选时刻」换算成主限年龄弧 → 出真盘快照
-			// （[主限法盘设置] 段，含时间选择/推运方法/度数换算/向运方向/当前Arc）。修原盘喂表格的 Bug。
-			// 挂载齿轮可调 时间(datetime,空=此刻)/方位法/度数换算/向运方向 → record.* → opts（缺省=现状）。
-			const chartObj = await fetchChartResultForRecord(record);
-			if(!chartObj){
-				return '';
-			}
-			return (await buildPrimaryDirChartSnapshotText(chartObj, {
-				datetime: record.datetime,
-				pdMethod: record.pdMethod,
-				pdTimeKey: record.pdTimeKey,
-				direction: record.direction,
-			})) || '';
+			// 主限法·盘：弧长依赖 Swiss。浏览器只回许可证状态，不用本命盘发明当前 Arc。
+			return formatCalcStatus(DirectionBrowserEngine.calculate({
+				date: record && record.birth,
+				zone: record && record.zone,
+				lon: record && record.lon,
+				lat: record && record.lat,
+				datetime: record && record.datetime,
+				pdMethod: record && record.pdMethod,
+				pdTimeKey: record && record.pdTimeKey,
+				direction: record && record.direction,
+			}));
 		}
 		case 'profection':
 		case 'solararc':
@@ -3138,21 +3107,21 @@ function liveVoidClassical(){
 // 古典格局派生分析(analyze_chart)按需 fetch — 优雅降级(失败/异常返回 '',不影响 AI 主体)。
 // ~50ms 级(仅极区 heliacal 才慢),只在 AI 实际取数时拉,绝不进每盘预建快照 → 信息tab 不受拖累。
 async function fetchClassicalAnalysisSection(params){
-	// 守 (HIGH-5):缺 date/zone/lat/lon 任一都静默 skip,后端必校验,缺则 4xx 易经 silent 漏到顶栏。
 	if(!params || !params.date || !params.zone || params.lat === undefined || params.lat === null || params.lon === undefined || params.lon === null){
 		return '';
 	}
 	try{
-		// voidClassical 默认 0 → 与 AstroAnalysisLab 同参;后端缺键=本座义=现状,默认用户零回归。
 		const vc = liveVoidClassical();
-		// 恒星轨读全局仓(此前硬编 1° → 用户在星盘设置改恒星轨后,AI 古典段与主盘恒星集漂移)。
-		const reqBody = { _v: 'cls1', ...params, fixedStarOrb: classicalGlobalValue('fixedStarOrb') };   // [SURF] 缓存代次盐
+		const reqBody = { _v: 'cls1', ...params, fixedStarOrb: classicalGlobalValue('fixedStarOrb') };
 		if(vc){ reqBody.voidClassical = true; }
 		const data = await request(`${Constants.ServerRoot}/astroextra/analysis`, {
 			body: JSON.stringify(reqBody),
 			silent: true,
 			timeoutMs: 20000,
 		});
+		if(isCalcStatus(data)){
+			return '';
+		}
 		const analysis = data && data.Result ? data.Result : data;
 		return buildClassicalAnalysisSection(analysis) || '';
 	}catch(e){
@@ -3180,15 +3149,13 @@ async function buildChartContext(source){
 			reusedStoredSnapshot: true,
 		};
 	}else{
-		// 修(HIGH-6):fetchChart 失败时不再 throw(原代码 throw 上传至 AI 主流程 → 红屏「构造命盘上下文失败」)。
-		// 优雅退化:返回空 content + reused-snapshot-style meta,AI 可降级使用既有片段或提示用户。
 		let rsp = null;
 		try{
-			rsp = await fetchChart({ ...params, includePrimaryDirection: false }, { silent: true, timeoutMs: 20000 });
+			rsp = await calculateChart({ ...params }, { silent: true, cache: true });
 		}catch(e){
 			rsp = null;
 		}
-		content = (rsp && rsp.Result) ? `${buildAstroSnapshotContent(rsp.Result, fields, { classicalDerived: true }) || ''}`.trim() : '';   // astrochart 挂载与本命保存链同口径(衍化四段)
+		content = (rsp && rsp.Result) ? `${buildAstroSnapshotContent(rsp.Result, fields, { classicalDerived: true }) || ''}`.trim() : '';
 		meta = {
 			sourceType: 'chart',
 			sourceId: source.id,
@@ -3823,27 +3790,18 @@ function isChartTechnique(key){
 async function regenerateAstroChartSnapshot(record){
 	const fields = buildFieldObject(record);
 	const params = fieldParams(fields);
-	const rsp = await fetchChart({
-		...params,
-		includePrimaryDirection: false,
-	}, {
-		silent: true,
-		timeoutMs: 20000,
-	});
+	const rsp = await calculateChart({ ...params }, { silent: true, cache: true });
 	if(!rsp || !rsp.Result){
 		return '';
 	}
-	let content = `${buildAstroSnapshotContent(rsp.Result, fields, { classicalDerived: true }) || ''}`.trim();   // astrochart 挂载齿轮重算同口径(衍化四段)
-	// [V6-W1] 🔴 与 buildChartContext 同源补齐:默认路径尾部会拼「古典格局派生分析」整段
-	// (护卫/优势相位/相位动态/逐题主星/偶然尊贵/恒星/行星时/埃及历/巴比伦),此前齿轮重算
-	// 路径漏拼 → 一动挂载设置该整段消失(极易被读成「重算失败」)。
+	let content = `${buildAstroSnapshotContent(rsp.Result, fields, { classicalDerived: true }) || ''}`.trim();
 	try{
 		const analysisSection = await fetchClassicalAnalysisSection(params);
 		if(analysisSection){
 			content = `${content}\n\n${analysisSection}`.trim();
 		}
 	}catch(_e){
-		// 派生段失败不阻断主体快照(与默认路径同容错)。
+		// 派生段失败不阻断主体快照。
 	}
 	return content;
 }

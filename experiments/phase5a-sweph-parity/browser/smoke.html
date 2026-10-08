@@ -9,23 +9,33 @@
 	<script type="module">
 		const out = document.getElementById('out');
 		try {
-			const { default: SwissEph } = await import('../../phase4d-sweph-wasm/node_modules/swisseph-wasm/src/swisseph.js');
-			const swe = new SwissEph();
-			const t0 = performance.now();
-			await swe.initSwissEph();
-			const initMs = performance.now() - t0;
-			const jd = 2448057.6041666665;
-			const flags = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
-			const sun = swe.calc_ut(jd, swe.SE_SUN, flags);
-			const houses = swe.houses(jd, 31.233333333333334, 121.46666666666667, 'R');
-			swe.close();
+			const { openEphemeris } = await import('../browserEphemerisAdapter.js');
+			const { nakshatrasForChart, nakshatraFromLon } = await import('../derived/nakshatraBrowser.js');
+			const { fixedStarsCapability } = await import('../derived/fixedStarsCapability.js');
+			const { calculateSu28 } = await import('../derived/su28Browser.js');
+			const { qizhengMansionCapability } = await import('../derived/qizhengMansionCapability.js');
+			const eph = await openEphemeris();
+			const chart = eph.computeChart({
+				year: 1990, month: 6, day: 15, hour: 10, minute: 30, second: 0, zoneOffsetHours: 8,
+				lat: 31.233333333333334, lon: 121.46666666666667, hsysIndex: 2,
+			});
+			await eph.close();
 			const payload = {
 				ok: true,
 				runtime: 'browser',
-				initMs: Number(initMs.toFixed(2)),
-				sunLon: sun[0],
-				asc: houses.ascmc[0],
-				mc: houses.ascmc[1],
+				initMs: eph.initMs,
+				calcMs: chart.calcMs,
+				jd: chart.jd,
+				sun: chart.planets.Sun,
+				asc: chart.houses.asc,
+				mc: chart.houses.mc,
+				wasm: typeof WebAssembly === 'object',
+				nakshatraTropical: nakshatrasForChart({ zodiacal: 'Tropical', objects: { Sun: chart.planets.Sun && { lon: chart.planets.Sun.longitude } } }),
+				nakshatraZero: nakshatraFromLon(0).name,
+				fixedStars: fixedStarsCapability().status,
+				su28Default: calculateSu28({ jd: chart.jd }).status,
+				su28Mode4: calculateSu28({ jd: chart.jd }, 4).status,
+				qizheng: qizhengMansionCapability().status,
 			};
 			out.textContent = JSON.stringify(payload);
 			document.title = 'PHASE5A_SMOKE_OK';

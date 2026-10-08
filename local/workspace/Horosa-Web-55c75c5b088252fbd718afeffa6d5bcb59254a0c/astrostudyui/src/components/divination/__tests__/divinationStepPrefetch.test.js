@@ -17,17 +17,16 @@ jest.mock('../../../utils/stepPrefetch', () => ({
 	}),
 	fireStepSelectPrefetch: jest.fn(),
 }));
-jest.mock('../../../services/astro', () => ({
+jest.mock('../../../services/astrologyCalculationService', () => ({
 	__esModule: true,
-	fetchChart: jest.fn((params, opts) => {
+	calculateChart: jest.fn((params, opts) => {
 		captured.fetches.push({ params, opts });
-		return Promise.resolve({ Result: null });
+		return Promise.resolve({ Result: null, calculationProvider: 'browser' });
 	}),
 }));
 
 import DivinationChartShell from '../DivinationChartShell';
 import { buildChartParams } from '../../../divination/engine/chartRequest';
-import { fetchChart } from '../../../services/astro';
 import DateTime from '../../comp/DateTime';
 
 function makeShell(){

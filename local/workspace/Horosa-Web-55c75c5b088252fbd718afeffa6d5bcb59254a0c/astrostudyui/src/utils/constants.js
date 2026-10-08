@@ -68,9 +68,21 @@ function queryLocalServerRoot(){
 	return null;
 }
 
+function desktopCalcShell(){
+	try{
+		return typeof window !== 'undefined' && (!!window.__TAURI__ || !!window.horosaDesktop);
+	}catch(e){
+		return false;
+	}
+}
+
 function resolveLocalServerRoot(){
+	// 生产浏览器不绑定本机 Java。Jest 与桌面壳仍走 query / 存储 / 页面端口。
+	if(process.env.NODE_ENV !== 'test' && !desktopCalcShell()){
+		return '';
+	}
 	if(typeof window === 'undefined'){
-		return 'http://127.0.0.1:9999';
+		return process.env.NODE_ENV === 'test' ? 'http://127.0.0.1:9999' : '';
 	}
 	const storageKey = LOCAL_ROOT_STORAGE_KEY;
 	const storageModeKey = LOCAL_ROOT_STORAGE_MODE_KEY;
@@ -111,7 +123,7 @@ function resolveLocalServerRoot(){
 	if(isValidServerRootValue(fromStorage)){
 		return fromStorage;
 	}
-	return 'http://127.0.0.1:9999';
+	return process.env.NODE_ENV === 'test' ? 'http://127.0.0.1:9999' : '';
 }
 
 function readLaunchSid(){
@@ -157,6 +169,9 @@ export function localServerRootCandidates(){
 	if(!isLocalHost){
 		return [];
 	}
+	if(process.env.NODE_ENV !== 'test' && !desktopCalcShell()){
+		return [];
+	}
 	const list = [];
 	const push = (val)=>{
 		if(isValidServerRootValue(val)){
@@ -171,8 +186,12 @@ export function localServerRootCandidates(){
 	if(typeof window !== 'undefined'){
 		push(safeStorageGet(window.localStorage, LOCAL_ROOT_STORAGE_KEY));
 	}
-	push(deriveLocalRootFromPagePort());
-	push('http://127.0.0.1:9999');
+	if(desktopCalcShell() || process.env.NODE_ENV === 'test'){
+		push(deriveLocalRootFromPagePort());
+	}
+	if(process.env.NODE_ENV === 'test'){
+		push('http://127.0.0.1:9999');
+	}
 	return list;
 }
 export const MobileServer = 'https://mobileweb.horosa.com';
@@ -195,6 +214,8 @@ export const UserDataKey = 'UserData';
 export const LoginIdKey = 'LoginId';
 export const NeedLoginKey = 'NeedLogin';
 
+// 公开协议盐，不是服务端私密。浏览器把用户令牌、渠道头和正文拼上这段再做 SHA-256。
+// 打开页面的人都能读到它；拿掉会让 signRequest 和线上接口对不上。
 export const SignatureKey = 'FE45AB6E29EF';
 
 export const ClientChannel = '1';

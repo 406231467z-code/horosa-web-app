@@ -1,4 +1,4 @@
-import { resolveChartBazi } from '../BaZi';
+import { resolveChartBazi, baziFromLocal } from '../BaZi';
 
 // 🔴 全年份域金标(前端·细盘大运/流年列补源)。真机症:极端年份(BC/lunar-js 域外)八字细盘
 // 「大运」「流年」两列内容空——core 走 Java /bazi/birth 无 direction,细盘 getCurrentDirection(rec.direction)
@@ -40,5 +40,37 @@ describe('resolveChartBazi · 细盘 direction 补源', () => {
 	test('core 为 null/undefined:优雅返回空对象,绝不抛', () => {
 		expect(resolveChartBazi(null, null)).toEqual({});
 		expect(resolveChartBazi(undefined, directBazi).direction[0].mainDirect.ganzi).toBe('辛巳');
+	});
+});
+
+describe('baziFromLocal · browser calendar', () => {
+	test('reliable years return a local chart with direction', () => {
+		const samples = [
+			{ date: '1900-06-15', time: '10:30:00' },
+			{ date: '1950-06-15', time: '10:30:00' },
+			{ date: '1976-06-15', time: '10:30:00' },
+			{ date: '1990-06-15', time: '10:30:00' },
+			{ date: '1990-06-15', time: '00:00:00' },
+			{ date: '1990-06-15', time: '23:00:00' },
+			{ date: '2000-06-15', time: '10:30:00' },
+			{ date: '2026-07-19', time: '10:30:00' },
+		];
+		for(const params of samples){
+			const got = baziFromLocal(params);
+			expect(got.local).toBe(true);
+			expect(got.status).not.toBe('UNSUPPORTED');
+			expect(got.bazi.fourColumns).toBeTruthy();
+			expect(got.bazi.direction.length).toBeGreaterThan(0);
+		}
+		expect(JSON.stringify(baziFromLocal({ date: '2026-07-19', time: '10:30:00' }))).toContain('丙午');
+	});
+
+	test('dates outside the lunar calendar are unsupported and do not invent pillars', () => {
+		const got = baziFromLocal({ date: '12000-06-15', time: '10:30:00' });
+		expect(got.status).toBe('UNSUPPORTED');
+		expect(got.code).toBe('LUNAR_DOMAIN');
+		expect(got.provider).toBe('browser');
+		expect(got.local).toBe(false);
+		expect(got.bazi).toBeUndefined();
 	});
 });

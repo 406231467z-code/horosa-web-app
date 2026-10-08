@@ -2,7 +2,7 @@ import { history } from 'umi';
 import {getStore, } from '../utils/storageutil';
 import { Modal, } from 'antd';
 import DateTime from '../components/comp/DateTime';
-import * as service from '../services/astro';
+import { calculateChart } from '../services/astrologyCalculationService';
 import {randomStr,} from '../utils/helper';
 import { DefLat, DefLon, DefGpsLat, DefGpsLon, ServerRoot, } from '../utils/constants';
 import { showChartServiceError as showChartServiceErrorRich } from '../components/common/ChartServiceErrorModal';
@@ -573,6 +573,14 @@ function isValidChartResponse(rsp){
 // (dva 的 model parser 不支持 JSX,所以 React 端必须放独立组件文件)。
 // fallback 用经典 Modal.error 防止任何加载/导入异常导致用户拿不到反馈。
 function showChartServiceError(extraDetail){
+	const desktopCalc = typeof window !== 'undefined' && (!!window.__TAURI__ || !!window.horosaDesktop);
+	if(!desktopCalc){
+		Modal.error({
+			title: '排盘失败',
+			content: extraDetail || '本次历算没有完成。请调整时间或参数后重试。',
+		});
+		return;
+	}
 	// 先探活再定弹窗:服务在线但本次计算失败(如参数异常/超出星历数据域)≠「服务未就绪」。
 	// 误报「未就绪」会把用户引向重启/防火墙排查,掩盖真实原因(全年份域工程实测坑)。
 	try {
@@ -729,7 +737,7 @@ function buildStepPrefetchTasks(fieldValues, stepHint, astroState){
 				name: `chart${label}`,
 				path: '/chart',   // R4-B1 运行时白名单契约:无 path 的任务会被 submitStepPrefetch 丢弃
 				// silent+零重试:预取失败静默、绝不退避风暴;结果自动进 chartMem+requestDedupe
-				run: ()=> service.fetchChart(param, { silent: true, retry: { retries: 0 } }),
+				run: ()=> calculateChart(param, { silent: true, retry: { retries: 0 } }),
 			});
 		}
 		let mine = null;
@@ -793,7 +801,7 @@ registerOptionChartTaskBuilder((variantFields, astroState)=>{
 	return {
 		name: 'chart',
 		path: '/chart',
-		run: ()=> service.fetchChart(param, { silent: true, retry: { retries: 0 } }),
+		run: ()=> calculateChart(param, { silent: true, retry: { retries: 0 } }),
 	};
 });
 
@@ -1219,7 +1227,7 @@ export default {
 				}
 				const astroState = yield select((state)=>state.astro);
 				param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-				yield call(service.fetchChart, param, { silent: true, disableLoading: true });
+				yield call(calculateChart, param, { silent: true, disableLoading: true });
 			}catch(e){
 				// speculative only — never surface
 			}
@@ -1241,7 +1249,7 @@ export default {
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(calculateChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;
@@ -1308,7 +1316,7 @@ export default {
 			const param = fieldsToParams(fields);
 			const astroState = yield select((allState)=>allState.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(calculateChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;
@@ -1474,7 +1482,7 @@ export default {
 
 			let rsp;
 			try{
-				rsp = yield call(service.fetchChart, param, requestOptions);
+				rsp = yield call(calculateChart, param, requestOptions);
 			}catch(abortErr){
 				// [R4-B5b] 被新请求 abort 的旧主链:静默退场(新请求自有其成败路径)。
 				// 其它错误维持旧行为原样上抛(request 层早已按 silent 决定 surface 与否)。
@@ -1613,7 +1621,7 @@ export default {
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(calculateChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;

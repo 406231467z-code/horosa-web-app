@@ -321,29 +321,37 @@ describe('五兆穷举压力测试', () => {
 	});
 
 	test('⑥挂载确定性:随机起兆诸式必回落,可复现者原样保留', async () => {
-		// ⚠️ cachedKentangFetch 按请求体缓存:同一 payload 第二次调用直接命中缓存、
-		// 根本不发请求(mock 也就捕不到)。故本例用别处未用过的年份 + 逐次递增的分钟数,
-		// 保证每个 payload 全局唯一(前面几例已把 TIME_SAMPLES 的组合灌满缓存)。
+		const modeOf = (text)=>{
+			const line = `${text || ''}`.split('\n').find((item)=>item.indexOf('起盘方式：') === 0) || '';
+			const label = line.split('：')[1] || '';
+			return {
+				干支起盘: 'ganzhi',
+				日干起盘: 'day',
+				时干起盘: 'hour',
+				分干起盘: 'minute',
+				唐代正法揲筮: 'tang',
+				敦煌校录揲筮: 'dunhuang',
+				以钱代筮: 'qian',
+				直输五兆数: 'zhushu',
+			}[label] || '';
+		};
 		let seq = 0;
 		const grab = async (opts)=>{
 			seq += 1;
 			const fields = mkFields(2077, 3, 3, 3, seq % 60, 0);
-			CAPTURED = [];
-			await buildWuZhaoSnapshotForFields(fields, opts);
-			return CAPTURED.length ? CAPTURED[CAPTURED.length - 1] : null;
+			const before = global.fetch.mock.calls.length;
+			const text = await buildWuZhaoSnapshotForFields(fields, opts);
+			expect(global.fetch.mock.calls.length).toBe(before);
+			return text;
 		};
-		// 随机诸式 → 回落干支
-		expect((await grab({ mode: 'dunhuang' })).mode).toBe('ganzhi');
-		expect((await grab({ mode: 'qian', qianAuto: true })).mode).toBe('ganzhi');
-		expect((await grab({ mode: 'tang', manual: false })).mode).toBe('ganzhi');
-		expect((await grab({ mode: 'day', manual: false })).mode).toBe('ganzhi');
-		// 可复现者原样保留
-		expect((await grab({ mode: 'zhushu', zhaoNums: [1, 2, 3, 4, 5, 1] })).mode).toBe('zhushu');
-		expect((await grab({ mode: 'qian', qianAuto: false, qianThrows: [1, 2, 3, 3, 3, 4] })).mode).toBe('qian');
-		expect((await grab({ mode: 'tang', manual: true })).mode).toBe('tang');
-		// 掷钱定数须逐位透传(非回落成默认)
-		expect((await grab({ mode: 'qian', qianAuto: false, qianThrows: [1, 2, 3, 3, 3, 4] })).qianThrows)
-			.toEqual([1, 2, 3, 3, 3, 4]);
+		expect(modeOf(await grab({ mode: 'dunhuang' }))).toBe('ganzhi');
+		expect(modeOf(await grab({ mode: 'qian', qianAuto: true }))).toBe('ganzhi');
+		expect(modeOf(await grab({ mode: 'tang', manual: false }))).toBe('ganzhi');
+		expect(modeOf(await grab({ mode: 'day', manual: false }))).toBe('ganzhi');
+		expect(modeOf(await grab({ mode: 'zhushu', zhaoNums: [1, 2, 3, 4, 5, 1] }))).toBe('zhushu');
+		expect(modeOf(await grab({ mode: 'qian', qianAuto: false, qianThrows: [1, 2, 3, 3, 3, 4] }))).toBe('qian');
+		expect(modeOf(await grab({ mode: 'tang', manual: true }))).toBe('tang');
+		expect(await grab({ mode: 'qian', qianAuto: false, qianThrows: [1, 2, 3, 3, 3, 4] })).toContain('掷钱：1、2、3、3、3、4');
 	});
 
 	test('⑦汇总:崩溃列表应可枚举(不阻断)', () => {

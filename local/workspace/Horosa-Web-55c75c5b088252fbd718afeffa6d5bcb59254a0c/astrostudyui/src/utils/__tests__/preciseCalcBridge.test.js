@@ -44,7 +44,7 @@ describe('PHASE 4-B jieqi local table', ()=>{
 		expect(seed.大雪.dayGanzhi).toBeTruthy();
 	});
 
-	test('域外年份才请求 /jieqi/year，并保留后端时刻', async()=>{
+	test('域外年份不请求 /jieqi/year，也不编造节气时刻', async()=>{
 		request.mockResolvedValue({
 			Result: {
 				year: 12000,
@@ -57,12 +57,11 @@ describe('PHASE 4-B jieqi local table', ()=>{
 			zone: '+08:00',
 			jieqis: ['大雪'],
 		});
-		expect(request).toHaveBeenCalled();
-		expect(String(request.mock.calls[0][0])).toContain('/jieqi/year');
-		expect(seed.大雪.time).toBe('12000-12-07 13:11:06');
+		expect(request).not.toHaveBeenCalled();
+		expect(seed).toBeFalsy();
 	});
 
-	test('公元前不拿公元表冒充，仍走后端', async()=>{
+	test('公元前不拿公元表冒充，也不请求后端', async()=>{
 		request.mockResolvedValue({
 			Result: {
 				year: 500,
@@ -75,19 +74,25 @@ describe('PHASE 4-B jieqi local table', ()=>{
 			zone: '+08:00',
 			jieqis: ['立春'],
 		});
-		expect(request).toHaveBeenCalled();
-		expect(seed.立春.time).toBe('-0500-02-08 00:00:00');
+		expect(request).not.toHaveBeenCalled();
+		expect(seed).toBeFalsy();
 		const ad500 = buildLocalJieqiYearSeed(500, '+08:00');
-		expect(seed.立春.time).not.toBe(ad500.立春.time);
+		expect(ad500.立春.time).toBeTruthy();
+		expect(seed && seed.立春 && seed.立春.time).not.toBe(ad500.立春.time);
 	});
 
-	test('域外后端无结果时不编造节气表', async()=>{
+	test('域外不编造节气表', async()=>{
 		request.mockResolvedValue(undefined);
 		const year = await fetchPreciseJieqiYear({
 			year: '12000',
 			ad: 1,
 			zone: '+08:00',
 		});
-		expect(year).toBeFalsy();
+		expect(request).not.toHaveBeenCalled();
+		expect(year && year.status).toBe('UNSUPPORTED');
+		expect(year.code).toBe('LUNAR_DOMAIN');
+		expect(year.provider).toBe('browser');
+		expect(year.local).toBe(false);
+		expect(year.jieqi24).toBeUndefined();
 	});
 });

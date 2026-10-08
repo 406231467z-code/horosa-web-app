@@ -51,6 +51,11 @@ jest.mock('../../../utils/request', () => ({
 		return { Result: { chart: JSON.parse(JSON.stringify(mockState.chart)), patterns: [] } };
 	}),
 }));
+jest.mock('../../../utils/ziweiBirthLocal', () => ({
+	fetchZiweiBirth: jest.fn(async () => ({
+		Result: { chart: JSON.parse(JSON.stringify(mockState.chart)), patterns: [] },
+	})),
+}));
 
 import * as ZWConst from '../../../constants/ZWConst';
 import * as ZiWeiHelper from '../ZiWeiHelper';
@@ -84,10 +89,8 @@ describe('紫微挂载 round-trip：四化流派 + 运限', () => {
 		expect(text).toContain('| 6~11 |');          // 首宫大限区间仍逐宫在列
 		expect(text).not.toContain('[运限]');        // 默认不追加运限段
 		expect(text).toContain('四化流派：通用·飞星');   // 规格正名:现状表实为通用/飞星(非北派天相忌)
-		// sihuaSchool / period 不应泄漏到后端请求体（仅前端本地消费）。
-		expect(mockState.lastRequestBody).toBeTruthy();
-		expect(mockState.lastRequestBody.sihuaSchool).toBeUndefined();
-		expect(mockState.lastRequestBody.period).toBeUndefined();
+		// 本地起盘不发 /ziwei/birth。流派和运限仍只在前端消费。
+		expect(mockState.lastRequestBody).toBeFalsy();
 	});
 
 	it('选 sihuaSchool=zhongzhou：四化流派标签变中州派，且用毕还原全局单例', async () => {

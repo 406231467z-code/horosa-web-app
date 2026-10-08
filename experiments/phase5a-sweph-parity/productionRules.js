@@ -25,7 +25,7 @@ const VIRTUAL = new Set([
 	'Dark Moon', 'Purple Clouds', 'North Node', 'South Node', 'Pars Fortuna', 'Syzygy',
 	'MC', 'IC', 'Asc', 'Desc',
 ]);
-const MAJOR = [0, 60, 90, 120, 180];
+export const MAJOR = [0, 60, 90, 120, 180];
 const ASP_LIST = [0, 60, 90, 120, 180, 45];
 const EXACT_ORB = 0.3;
 const HOUSE_OFFSET = -5;
@@ -43,7 +43,7 @@ export function closest(a, b) {
 	return d <= 180 ? d : d - 360;
 }
 
-function signOf(lon) {
+export function signOf(lon) {
 	return SIGNS[Math.floor(norm(lon) / 30) % 12];
 }
 
@@ -170,8 +170,13 @@ export function fillLots(bodies, diurnal, ids) {
 	return out;
 }
 
-function orbOf(id) {
+export function orbOf(id) {
 	return Object.prototype.hasOwnProperty.call(ORB, id) ? ORB[id] : 0;
+}
+
+/** flatlib aspects._aspectDict. starter is obj1; no active/passive swap. */
+export function rawAspect(starter, target, aspList) {
+	return aspectDict(starter, target, aspList);
 }
 
 function isPlanet(obj) {

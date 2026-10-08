@@ -1,6 +1,6 @@
 import React from 'react';
 import { Popover, Button, Space, message } from 'antd';
-import { subscribeServiceStatus, markServiceOnline, markServiceOffline } from '../../utils/serviceStatus';
+import { subscribeServiceStatus, markServiceOnline, markServiceOffline, isDesktopCalcShell } from '../../utils/serviceStatus';
 import { ServerRoot } from '../../utils/constants';
 import { verifyBackendIdentity, renegotiateLocalServerRoot } from '../../utils/backendIdentity';
 import { invokeLightServiceRestart } from '../../utils/serviceRecovery';
@@ -34,7 +34,7 @@ export default function BackendStatusDot() {
 
   // 首次主动探测
   React.useEffect(() => {
-    if (!ServerRoot) { setProbed(true); return undefined; }
+    if (!isDesktopCalcShell() || !ServerRoot) { setProbed(true); return undefined; }
     let cancelled = false;
     const probe = async () => {
       try {
@@ -131,7 +131,7 @@ export default function BackendStatusDot() {
     });
   };
 
-  if (!ServerRoot) return null;
+  if (!isDesktopCalcShell() || !ServerRoot) return null;
 
   let color = '#52c41a';
   let label = '后端在线';

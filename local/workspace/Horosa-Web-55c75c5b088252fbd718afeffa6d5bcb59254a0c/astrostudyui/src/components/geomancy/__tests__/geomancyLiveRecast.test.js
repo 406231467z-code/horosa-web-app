@@ -12,9 +12,14 @@ jest.mock('../../../utils/moduleAiSnapshot', () => ({
 }));
 // 拦后端:把每次真正发出的请求体记下来 —— 判据落在"送进请求体的值"上,而非组件内部状态。
 jest.mock('../../../utils/kentangCache', () => ({
-	cachedKentangFetch: jest.fn(async (url, init) => {
-		global.__calls.push(JSON.parse(init.body));
-		return { text: async () => JSON.stringify({ ResultCode: 0, Result: global.__nextResult }) };
+	cachedKentangFetch: jest.fn(async () => {
+		throw new Error('geomancy must not call Kentang');
+	}),
+}));
+jest.mock('../../../utils/geomancyBrowser', () => ({
+	computeGeomancyReading: jest.fn((payload) => {
+		global.__calls.push(payload);
+		return global.__nextResult;
 	}),
 }));
 

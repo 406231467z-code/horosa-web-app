@@ -7,9 +7,17 @@
 // 触发重算 → 尾条 /chart 请求体该键 === 拨的值。不进请求体的键(显示层/快照层消费)必须在
 // NOT_IN_BODY 豁免表带理由,并退而断言拨值确实触发了重算请求(拨了没反应=死开关,照红)。
 const mockFetchChartCalls = [];
+const mockBrowserChartCalls = [];
 jest.mock('../../services/astro', () => ({
 	fetchChart: jest.fn(async (values) => {
 		mockFetchChartCalls.push(values);
+		return { Result: null };
+	}),
+}));
+jest.mock('../../services/astrologyCalculationService', () => ({
+	ASTROLOGY_BROWSER_ENABLED: true,
+	calculateChart: jest.fn(async (values) => {
+		mockBrowserChartCalls.push(values);
 		return {
 			Result: {
 				chart: { objects: [], stars: [] },
@@ -112,7 +120,7 @@ function pickNonBaseline(field){
 }
 
 function lastChartFetch(){
-	return mockFetchChartCalls.length ? mockFetchChartCalls[mockFetchChartCalls.length - 1] : null;
+	return mockBrowserChartCalls.length ? mockBrowserChartCalls[mockBrowserChartCalls.length - 1] : null;
 }
 
 describe('[V6-W3 闸2] astrochart 全齿轮拨非现状值 → /chart 请求体逐键差分', ()=>{
@@ -121,6 +129,7 @@ describe('[V6-W3 闸2] astrochart 全齿轮拨非现状值 → /chart 请求体�
 
 	beforeEach(()=>{
 		mockFetchChartCalls.length = 0;
+		mockBrowserChartCalls.length = 0;
 	});
 
 	it('schema 在位且齿轮非空(闸自体健康)', ()=>{
@@ -136,8 +145,9 @@ describe('[V6-W3 闸2] astrochart 全齿轮拨非现状值 → /chart 请求体�
 		it(`🔴 拨 ${name}=${JSON.stringify(value)} → ${exempt ? '触发重算(豁免:不进请求体)' : `请求体 ${bodyKey} 出现差分`}`, async ()=>{
 			const ctx = await getAnalysisTechniqueContextWithOptions(SOURCE, 'astrochart', { [name]: value, ...(COMBO_KEYS[name] || {}) });
 			expect(ctx).toBeTruthy();
+			expect(mockFetchChartCalls).toHaveLength(0);
 			const req = lastChartFetch();
-			// 拨非现状值必须触发重算请求 —— 「拨了没反应」= prune 误剪/merge 蒸发,即死开关。
+			// 拨非现状值必须进入浏览器排盘参数 —— 「拨了没反应」= prune 误剪/merge 蒸发,即死开关。
 			expect(req).toBeTruthy();
 			if(!exempt){
 				// 字节级差分:请求体该键 === 拨的值(条件透传键拨非默认后必然出现)。
@@ -156,6 +166,7 @@ describe('[V6-W3 闸2] astrochart 全齿轮拨非现状值 → /chart 请求体�
 		const ctx = await getAnalysisTechniqueContextWithOptions(src, 'astrochart', { hsys: 1 });
 		expect(ctx).toBeTruthy();
 		expect(ctx.meta && ctx.meta.mountOverride).toBe(true);
+		expect(mockFetchChartCalls).toHaveLength(0);
 		const req = lastChartFetch();
 		expect(req).toBeTruthy();
 		expect(`${req.hsys}`).toBe('1');
@@ -166,6 +177,7 @@ describe('[V6-W3 闸2] astrochart 全齿轮拨非现状值 → /chart 请求体�
 		const ctx = await getAnalysisTechniqueContextWithOptions(src, 'astrochart', { hsys: 0 });
 		expect(ctx).toBeTruthy();
 		expect(ctx.meta && ctx.meta.mountOverride).toBe(true);
+		expect(mockFetchChartCalls).toHaveLength(0);
 		const req = lastChartFetch();
 		expect(req).toBeTruthy();
 		expect(`${req.hsys}`).toBe('0');

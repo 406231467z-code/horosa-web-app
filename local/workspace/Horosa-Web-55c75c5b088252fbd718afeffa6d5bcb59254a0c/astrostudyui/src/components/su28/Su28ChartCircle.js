@@ -96,18 +96,18 @@ class Su28ChartCircle {
 			this.houseMap.set(suh.name, suh);
 		}	
 
-		for(let i=0; i<this.chartObj.objects.length; i++){
-			let obj = this.chartObj.objects[i];
+		const objects = Array.isArray(this.chartObj.objects) ? this.chartObj.objects : [];
+		for(let i=0; i<objects.length; i++){
+			let obj = objects[i];
+			const place = (idOk)=>{
+				if(!idOk){ return; }
+				const house = this.houseMap.get(obj.su28);
+				if(house){ house.planets.push(obj); }
+			};
 			if(this.planetDisp){
-				if(this.planetDisp.has(obj.id)){
-					let house = this.houseMap.get(obj.su28);
-					house.planets.push(obj);
-				}	
+				place(this.planetDisp.has(obj.id));
 			}else{
-				if(AstroConst.isTraditionPlanet(obj.id)){
-					let house = this.houseMap.get(obj.su28);
-					house.planets.push(obj);
-				}
+				place(AstroConst.isTraditionPlanet(obj.id));
 			}
 		}
 
@@ -134,8 +134,9 @@ class Su28ChartCircle {
 			return this.objectMap.get(objid);
 		}
 
-		for(let i=0; i<this.chartObj.objects.length; i++ ){
-			let obj = this.chartObj.objects[i];
+		const objects = Array.isArray(this.chartObj.objects) ? this.chartObj.objects : [];
+		for(let i=0; i<objects.length; i++ ){
+			let obj = objects[i];
 			this.objectMap.set(obj.id, obj);
 		}
 		if(this.chartObj.lots){
