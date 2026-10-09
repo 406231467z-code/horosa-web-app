@@ -435,3 +435,21 @@
 		}
 	}
 }
+
+	@media (max-width: 1100px) {
+		:root {
+			--horosa-app-header-height: 96px;
+		}
+	}
+
+	@media (max-width: 760px) {
+		/* With the two-row mobile header, reserve a real first row for the chart
+		   and let the lower action dock follow content instead of collapsing. */
+		.horosa-workspace-shell .horosa-astro-redesign-layout {
+			grid-template-rows: minmax(320px, auto) auto !important;
+		}
+
+		.horosa-workspace-shell .horosa-astro-no-bottom-dock .horosa-astro-redesign-layout {
+			grid-template-rows: minmax(320px, auto) !important;
+		}
+	}
