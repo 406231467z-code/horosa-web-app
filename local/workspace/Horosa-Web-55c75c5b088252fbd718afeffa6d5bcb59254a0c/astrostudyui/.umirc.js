@@ -5,6 +5,12 @@ export default {
 	// This affects only the dev-server bind address; production build output is unchanged.
 	devServer: {
 		host: '0.0.0.0',
+		// Do not let mobile browsers reuse an old runtime/chunk pair after a dev restart.
+		headers: {
+			'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+			Pragma: 'no-cache',
+			Expires: '0',
+		},
 	},
 	publicPath: buildForFile ? './' : process.env.NODE_ENV === 'development' ? '/' : '/static/',
 	outputPath: buildForFile ? 'dist-file' : 'dist',
