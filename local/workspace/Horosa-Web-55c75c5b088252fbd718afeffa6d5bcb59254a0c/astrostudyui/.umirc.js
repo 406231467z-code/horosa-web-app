@@ -6,7 +6,7 @@ export default {
 	devServer: {
 		host: '0.0.0.0',
 	},
-	publicPath: buildForFile ? './' : '/static/',
+	publicPath: buildForFile ? './' : process.env.NODE_ENV === 'development' ? '/' : '/static/',
 	outputPath: buildForFile ? 'dist-file' : 'dist',
 	history: buildForFile ? { type: 'hash' } : undefined,
 	hash: true,
