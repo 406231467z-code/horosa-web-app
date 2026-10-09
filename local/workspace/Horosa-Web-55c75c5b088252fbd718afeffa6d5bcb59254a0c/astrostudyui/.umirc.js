@@ -1,6 +1,11 @@
 const buildForFile = process.env.BUILD_FOR_FILE === '1';
 
 export default {
+	// Allow phones/tablets on the same LAN to fetch the dev HTML and async JS/CSS chunks.
+	// This affects only the dev-server bind address; production build output is unchanged.
+	devServer: {
+		host: '0.0.0.0',
+	},
 	publicPath: buildForFile ? './' : '/static/',
 	outputPath: buildForFile ? 'dist-file' : 'dist',
 	history: buildForFile ? { type: 'hash' } : undefined,
