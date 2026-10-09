@@ -453,3 +453,32 @@
 			grid-template-rows: minmax(320px, auto) !important;
 		}
 	}
+
+
+/* Give legacy three-panel chart grids fluid tracks before the phone breakpoint.
+ * Some auxiliary charts carry more-specific !important column floors (245/520/300px),
+ * so they must be explicitly overridden as well as the generic grid class.
+ */
+:global {
+	@media (min-width: 901px) and (max-width: 1100px) {
+		.horosa-workspace-shell .horosa-astro-redesign-grid,
+		.horosa-workspace-shell .horosa-astro-no-bottom-dock .horosa-astro-redesign-grid,
+		.horosa-workspace-shell .horosa-auxchart-layout .horosa-astro-no-bottom-dock .horosa-astro-redesign-grid,
+		.horosa-workspace-shell .horosa-zeri-host .horosa-astro-no-bottom-dock .horosa-astro-redesign-grid {
+			grid-template-columns: minmax(220px, 24%) minmax(0, 1fr) minmax(250px, 30%) !important;
+			min-width: 0 !important;
+			max-width: 100%;
+		}
+	}
+
+	@media (max-width: 900px) {
+		.horosa-workspace-shell .horosa-astro-redesign-grid,
+		.horosa-workspace-shell .horosa-astro-no-bottom-dock .horosa-astro-redesign-grid,
+		.horosa-workspace-shell .horosa-auxchart-layout .horosa-astro-no-bottom-dock .horosa-astro-redesign-grid,
+		.horosa-workspace-shell .horosa-zeri-host .horosa-astro-no-bottom-dock .horosa-astro-redesign-grid {
+			grid-template-columns: minmax(0, 1fr) !important;
+			min-width: 0 !important;
+			max-width: 100%;
+		}
+	}
+}
