@@ -838,3 +838,211 @@
     flex: 0 0 auto;
   }
 }
+
+
+/* Responsive header layout overrides
+ * Wide screens keep the 3-column command center. At tablet widths we compress
+ * the brand area; phones use two deliberate rows so the module picker never
+ * floats over the action buttons. The action strip stays swipeable when needed.
+ */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .userbox.astroUserbox {
+    grid-template-columns: minmax(190px, 230px) minmax(0, 1fr) minmax(126px, 160px) !important;
+    gap: 8px !important;
+    padding: 0 12px !important;
+  }
+
+  .userbox.astroUserbox .astroBrand {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .userbox.astroUserbox .astroBrandText {
+    display: none !important;
+  }
+
+  .userbox.astroUserbox .astroCurrentModule {
+    min-width: 0;
+    max-width: 176px;
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 15px;
+  }
+
+  .userbox.astroUserbox .astroCommandCenter {
+    gap: 8px;
+    padding-right: 0;
+  }
+
+  .userbox.astroUserbox .astroHeaderCommand {
+    padding: 0 2px !important;
+    font-size: 13px;
+  }
+
+  .userbox.astroUserbox .astroUtilityBar {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 760px) {
+  .userbox.astroUserbox {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: 44px 44px !important;
+    grid-template-areas:
+      'brand utilities'
+      'module commands';
+    align-content: center;
+    align-items: center;
+    gap: 0 8px !important;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    padding: 4px 8px !important;
+    overflow: hidden;
+  }
+
+  .userbox.astroUserbox .astroBrand {
+    grid-area: brand;
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .userbox.astroUserbox .astroBrandButton {
+    flex: 0 0 34px;
+    width: 34px;
+    min-width: 34px;
+    height: 38px;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+  }
+
+  .userbox.astroUserbox .astroBrandMark {
+    width: 30px;
+    height: 30px;
+    font-size: 24px;
+  }
+
+  .userbox.astroUserbox .astroBrandText {
+    display: none !important;
+  }
+
+  .userbox.astroUserbox .astroNewChartGroup {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: 100%;
+    height: 34px;
+  }
+
+  .userbox.astroUserbox .astroPrimaryCommand {
+    min-width: 72px;
+    height: 34px !important;
+    padding: 0 8px !important;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .userbox.astroUserbox .astroSplitButton {
+    flex: 0 0 28px;
+    width: 28px;
+    min-width: 28px;
+    height: 34px !important;
+  }
+
+  .userbox.astroUserbox .astroUtilityBar {
+    grid-area: utilities;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .userbox.astroUserbox .astroRoundButton {
+    flex: 0 0 32px;
+    width: 32px;
+    min-width: 32px;
+    height: 32px !important;
+    padding: 0 !important;
+    font-size: 18px;
+  }
+
+  .userbox.astroUserbox .astroHeaderDivider {
+    flex: 0 0 1px;
+    height: 22px;
+    margin: 0 1px;
+  }
+
+  .userbox.astroUserbox .astroAccount {
+    flex: 0 0 32px;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  .userbox.astroUserbox .astroCurrentModule {
+    grid-area: module;
+    position: relative;
+    top: auto;
+    left: auto;
+    z-index: 1;
+    justify-self: start;
+    align-self: center;
+    transform: none;
+    height: 36px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0 8px;
+    gap: 4px;
+    overflow: hidden;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .userbox.astroUserbox .astroCurrentModule :global(.xq-icon:first-child) {
+    flex: 0 0 auto;
+    font-size: 15px;
+  }
+
+  .userbox.astroUserbox .astroCurrentModule :global(.xq-icon:last-child) {
+    flex: 0 0 auto;
+    font-size: 11px;
+  }
+
+  .userbox.astroUserbox .astroCommandCenter {
+    grid-area: commands;
+    display: flex;
+    justify-content: flex-start;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 36px;
+    padding: 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .userbox.astroUserbox .astroCommandCenter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .userbox.astroUserbox .astroHeaderCommand {
+    flex: 0 0 auto;
+    height: 34px !important;
+    padding: 0 7px !important;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
