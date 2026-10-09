@@ -129,3 +129,309 @@
 		}
 	}
 }
+
+
+/* Responsive layout hardening
+ * Keep the desktop workbench, but remove legacy min-width floors that forced
+ * phone browsers to lay out a 920-1080px canvas and then clip it.
+ * All rules are layout-only; chart calculations and action handlers are untouched.
+ */
+:global {
+	.horosa-workspace-shell,
+	.horosa-workspace-shell *,
+	.horosa-workspace-shell *::before,
+	.horosa-workspace-shell *::after {
+		box-sizing: border-box;
+	}
+
+	.horosa-workspace-shell .ant-row,
+	.horosa-workspace-shell .ant-col,
+	.horosa-workspace-shell .ant-form-item-control,
+	.horosa-workspace-shell .ant-form-item-control-input,
+	.horosa-workspace-shell .ant-form-item-control-input-content,
+	.horosa-workspace-shell .ant-tabs,
+	.horosa-workspace-shell .ant-tabs-content-holder,
+	.horosa-workspace-shell .ant-tabs-content,
+	.horosa-workspace-shell .ant-tabs-tabpane,
+	.horosa-workspace-shell .ant-card,
+	.horosa-workspace-shell .ant-card-body,
+	.horosa-workspace-shell .ant-modal-content,
+	.horosa-workspace-shell .ant-drawer-content {
+		min-width: 0;
+	}
+
+	.horosa-workspace-shell .ant-table-wrapper,
+	.horosa-workspace-shell .ant-table,
+	.horosa-workspace-shell .ant-table-container {
+		max-width: 100%;
+		min-width: 0;
+	}
+
+	.ant-modal-root .ant-modal {
+		max-width: calc(100vw - 24px);
+	}
+
+	.ant-drawer,
+	.ant-drawer-content-wrapper {
+		max-width: 100vw;
+	}
+
+	@media (max-width: 1100px) {
+		/* The old fixed 720px chart column + fixed side panel exceeded small laptops. */
+		.horosa-workspace-shell .horosa-astro-layout {
+			grid-template-columns: minmax(0, 1fr) minmax(250px, 32%) !important;
+			min-width: 0 !important;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .horosa-chart-body {
+			grid-template-columns: minmax(170px, 24%) minmax(0, 1fr) !important;
+			min-width: 0 !important;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .horosa-astro-redesign,
+		.horosa-workspace-shell [class*='redesign-grid'],
+		.horosa-workspace-shell .horosa-bazi-layout,
+		.horosa-workspace-shell .horosa-ziwei-layout,
+		.horosa-workspace-shell .horosa-relative-page {
+			min-width: 0 !important;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .horosa-chart-stage,
+		.horosa-workspace-shell .horosa-bazi-chart-panel,
+		.horosa-workspace-shell .horosa-ziwei-chart-panel,
+		.horosa-workspace-shell .horosa-inspector-panel,
+		.horosa-workspace-shell .horosa-bazi-inspector-panel,
+		.horosa-workspace-shell .horosa-ziwei-inspector-panel {
+			min-width: 0;
+			max-width: 100%;
+		}
+	}
+
+	@media (max-width: 900px) {
+		/* Tablet portrait / narrow desktop: stack work areas instead of squeezing them. */
+		.horosa-workspace-shell .horosa-astro-layout,
+		.horosa-workspace-shell .horosa-bazi-layout,
+		.horosa-workspace-shell .horosa-ziwei-layout,
+		.horosa-workspace-shell .horosa-chart-body,
+		.horosa-workspace-shell [class*='redesign-grid'] {
+			grid-template-columns: minmax(0, 1fr) !important;
+			min-width: 0 !important;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .horosa-astro-workbench {
+			grid-template-rows: minmax(320px, auto) auto;
+			height: auto;
+			min-width: 0;
+		}
+	}
+
+	@media (max-width: 760px) {
+		:root {
+			--horosa-app-header-height: 96px;
+		}
+
+		/* The root shell remains viewport-bound; active panes own vertical scrolling. */
+		.horosa-workspace-shell #mainContent,
+		.horosa-workspace-shell #mainContent > div,
+		.horosa-workspace-shell #mainContent > div > div {
+			min-width: 0 !important;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .mainRootTabs,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder > .ant-tabs-content,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane-active {
+			width: 100% !important;
+			max-width: 100%;
+			min-width: 0 !important;
+			overflow-x: hidden !important;
+		}
+
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder > .ant-tabs-content,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane-active {
+			overflow-y: auto !important;
+			-webkit-overflow-scrolling: touch;
+			overscroll-behavior-y: contain;
+		}
+
+		/* Remove the legacy 920px / 1080px floors. Never scale the whole UI down. */
+		.horosa-workspace-shell .horosa-astro-redesign,
+		.horosa-workspace-shell .horosa-astro-redesign-layout,
+		.horosa-workspace-shell .horosa-astro-layout,
+		.horosa-workspace-shell .horosa-bazi-layout,
+		.horosa-workspace-shell .horosa-ziwei-layout,
+		.horosa-workspace-shell .horosa-chart-body,
+		.horosa-workspace-shell .horosa-astro-workbench,
+		.horosa-workspace-shell .horosa-relative-page,
+		.horosa-workspace-shell [class*='redesign-grid'] {
+			width: 100% !important;
+			max-width: 100% !important;
+			min-width: 0 !important;
+		}
+
+		.horosa-workspace-shell .horosa-astro-page,
+		.horosa-workspace-shell .horosa-bazi-page,
+		.horosa-workspace-shell .horosa-ziwei-page,
+		.horosa-workspace-shell .horosa-guolao-page,
+		.horosa-workspace-shell .horosa-india-chart-main,
+		.horosa-workspace-shell .horosa-direction-page,
+		.horosa-workspace-shell .horosa-auxchart-page,
+		.horosa-workspace-shell .horosa-sanshi-page,
+		.horosa-workspace-shell .horosa-liureng-page,
+		.horosa-workspace-shell .horosa-dunjia-page,
+		.horosa-workspace-shell .horosa-guazhan-page,
+		.horosa-workspace-shell .horosa-taiyi-page,
+		.horosa-workspace-shell .horosa-jieqi-page,
+		.horosa-workspace-shell .horosa-cnyibu-page,
+		.horosa-workspace-shell .horosa-aianalysis-page {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0 !important;
+			box-sizing: border-box;
+		}
+
+		.horosa-workspace-shell .horosa-astro-redesign,
+		.horosa-workspace-shell .horosa-astro-redesign-layout,
+		.horosa-workspace-shell [class*='redesign-grid'] {
+			height: auto !important;
+			min-height: 100%;
+		}
+
+		.horosa-workspace-shell .horosa-astro-redesign-grid,
+		.horosa-workspace-shell .horosa-ziwei-redesign .horosa-ziwei-redesign-grid,
+		.horosa-workspace-shell .horosa-bazi-redesign .horosa-bazi-redesign-grid,
+		.horosa-workspace-shell .horosa-guolao-redesign .horosa-guolao-redesign-grid,
+		.horosa-workspace-shell .horosa-india-redesign .horosa-india-redesign-grid,
+		.horosa-workspace-shell .horosa-liureng-redesign .horosa-liureng-redesign-grid,
+		.horosa-workspace-shell .horosa-dunjia-redesign .horosa-dunjia-redesign-grid,
+		.horosa-workspace-shell .horosa-taiyi-redesign .horosa-taiyi-redesign-grid,
+		.horosa-workspace-shell .horosa-guazhan-redesign .horosa-guazhan-redesign-grid,
+		.horosa-workspace-shell .horosa-sanshi-redesign .horosa-sanshi-redesign-grid {
+			grid-template-columns: minmax(0, 1fr) !important;
+			grid-auto-rows: max-content;
+			align-content: start;
+			height: auto !important;
+			min-height: 100%;
+			overflow: visible !important;
+		}
+
+		.horosa-workspace-shell .horosa-astro-layout,
+		.horosa-workspace-shell .horosa-bazi-layout,
+		.horosa-workspace-shell .horosa-ziwei-layout,
+		.horosa-workspace-shell .horosa-chart-body {
+			grid-template-columns: minmax(0, 1fr) !important;
+			grid-auto-rows: max-content;
+			height: auto !important;
+			min-height: 100%;
+			gap: 8px;
+		}
+
+		.horosa-workspace-shell .horosa-astro-workbench {
+			grid-template-rows: minmax(320px, auto) auto;
+			height: auto !important;
+			min-height: 0;
+		}
+
+		.horosa-workspace-shell .horosa-astro-context-panel,
+		.horosa-workspace-shell .horosa-interpretation-panel,
+		.horosa-workspace-shell .horosa-inspector-panel,
+		.horosa-workspace-shell .horosa-bazi-inspector-panel,
+		.horosa-workspace-shell .horosa-ziwei-inspector-panel,
+		.horosa-workspace-shell .horosa-astro-input-panel,
+		.horosa-workspace-shell .horosa-bazi-input-panel,
+		.horosa-workspace-shell .horosa-ziwei-input-panel {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0 !important;
+		}
+
+		.horosa-workspace-shell .horosa-chart-stage,
+		.horosa-workspace-shell .horosa-bazi-chart-panel,
+		.horosa-workspace-shell .horosa-ziwei-chart-panel,
+		.horosa-workspace-shell .horosa-ziwei-chart-viewport,
+		.horosa-workspace-shell .horosa-guolao-redesign .horosa-guolao-chart-panel,
+		.horosa-workspace-shell .horosa-liureng-redesign .horosa-liureng-chart-panel,
+		.horosa-workspace-shell .horosa-liureng-chart-host {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0 !important;
+			min-height: 300px;
+		}
+
+		/* Controls and long-form content wrap instead of painting over adjacent fields. */
+		.horosa-workspace-shell .ant-form-item,
+		.horosa-workspace-shell .ant-form-item-control,
+		.horosa-workspace-shell .ant-form-item-control-input-content {
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .ant-form-item-control-input-content > .ant-select,
+		.horosa-workspace-shell .ant-form-item-control-input-content > .ant-input,
+		.horosa-workspace-shell .ant-form-item-control-input-content > .ant-input-number,
+		.horosa-workspace-shell .ant-form-item-control-input-content > .ant-picker {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .ant-space {
+			max-width: 100%;
+			flex-wrap: wrap;
+		}
+
+		.horosa-workspace-shell .ant-table-content,
+		.horosa-workspace-shell .ant-table-body {
+			overflow-x: auto !important;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		.horosa-workspace-shell .ant-table-cell {
+			overflow-wrap: anywhere;
+		}
+
+		.horosa-workspace-shell .ant-tabs-nav-wrap {
+			max-width: 100%;
+		}
+
+		.ant-modal-root .ant-modal {
+			max-width: calc(100vw - 16px);
+			margin: 8px auto;
+		}
+
+		.ant-modal-wrap {
+			padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+		}
+
+		.ant-drawer-content-wrapper {
+			width: 100% !important;
+			max-width: 100vw !important;
+		}
+
+		.horosa-workspace-shell .amap-container {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .horosa-bottom-quick-dock,
+		.horosa-workspace-shell .horosa-bottom-quick-actions {
+			max-width: 100%;
+			min-width: 0;
+		}
+	}
+
+	@media (max-width: 360px) {
+		.horosa-workspace-shell .horosa-chart-stage,
+		.horosa-workspace-shell .horosa-bazi-chart-panel,
+		.horosa-workspace-shell .horosa-ziwei-chart-panel,
+		.horosa-workspace-shell .horosa-ziwei-chart-viewport {
+			min-height: 260px;
+		}
+	}
+}
