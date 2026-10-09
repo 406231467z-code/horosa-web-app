@@ -1,0 +1,312 @@
+{
+  "/chart": {
+    "sourceFiles": 123,
+    "testFiles": 52,
+    "sample": [
+      "src\\components\\aianalysis\\AIAnalysisMain.js",
+      "src\\components\\astro\\AstroChart.js",
+      "src\\components\\astro\\AstroChartMain.js",
+      "src\\components\\astro\\AstroDirectionForm.js",
+      "src\\components\\astro\\AstroDoubleChart.js",
+      "src\\components\\astro\\AstroDoubleChartMain.js",
+      "src\\components\\astro\\AstroLifespan.js",
+      "src\\components\\astro\\AstroOrbSetting.js"
+    ]
+  },
+  "/predict/pd": {
+    "sourceFiles": 7,
+    "testFiles": 5,
+    "sample": [
+      "src\\components\\astro\\AstroPrimaryDirectionChart.js",
+      "src\\components\\direction\\AstroDirectMain.js",
+      "src\\services\\astroPd3d.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\directionBrowser.js",
+      "src\\utils\\pdMath\\pdHouseCusps.js",
+      "src\\utils\\pdMath\\pdSphereMath.js"
+    ]
+  },
+  "/predict/pdchart": {
+    "sourceFiles": 3,
+    "testFiles": 1,
+    "sample": [
+      "src\\components\\astro\\AstroPrimaryDirectionChart.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\directionBrowser.js"
+    ]
+  },
+  "/predict/pdpoles": {
+    "sourceFiles": 1,
+    "testFiles": 1,
+    "sample": [
+      "src\\utils\\directionBrowser.js"
+    ]
+  },
+  "/india/chart": {
+    "sourceFiles": 2,
+    "testFiles": 3,
+    "sample": [
+      "src\\components\\astro\\IndiaChartMain.js",
+      "src\\utils\\indiaBrowser.js"
+    ]
+  },
+  "/india/rectify": {
+    "sourceFiles": 0,
+    "testFiles": 0,
+    "sample": []
+  },
+  "/wangji": {
+    "sourceFiles": 2,
+    "testFiles": 3,
+    "sample": [
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\stepPrefetch.js"
+    ]
+  },
+  "/taixuan": {
+    "sourceFiles": 5,
+    "testFiles": 7,
+    "sample": [
+      "src\\components\\cnyibu\\CnYiBuMain.js",
+      "src\\components\\taixuan\\TaiXuanMain.js",
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\taixuanBrowser.js"
+    ]
+  },
+  "/jingjue": {
+    "sourceFiles": 7,
+    "testFiles": 7,
+    "sample": [
+      "src\\components\\cnyibu\\CnYiBuMain.js",
+      "src\\components\\jingjue\\JingJueMain.js",
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\jingjueBrowser.js",
+      "src\\utils\\stepPrefetch.js",
+      "src\\utils\\techniqueMountSettings.js"
+    ]
+  },
+  "/shenyishu": {
+    "sourceFiles": 6,
+    "testFiles": 6,
+    "sample": [
+      "src\\components\\cnyibu\\CnYiBuMain.js",
+      "src\\components\\shenyishu\\ShenYiShuMain.js",
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\shenyishuBrowser.js",
+      "src\\utils\\stepPrefetch.js"
+    ]
+  },
+  "/wuzhao": {
+    "sourceFiles": 5,
+    "testFiles": 10,
+    "sample": [
+      "src\\components\\cnyibu\\CnYiBuMain.js",
+      "src\\components\\wuzhao\\WuZhaoMain.js",
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\stepPrefetch.js"
+    ]
+  },
+  "/geomancy": {
+    "sourceFiles": 5,
+    "testFiles": 12,
+    "sample": [
+      "src\\components\\cnyibu\\CnYiBuMain.js",
+      "src\\components\\geomancy\\GeomancyMain.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\geomancyBrowser.js",
+      "src\\utils\\stepPrefetch.js"
+    ]
+  },
+  "/qimen": {
+    "sourceFiles": 5,
+    "testFiles": 6,
+    "sample": [
+      "src\\components\\dunjia\\DunJiaBaGongRules.js",
+      "src\\components\\dunjia\\DunJiaMain.js",
+      "src\\components\\sanshi\\SanShiUnitedMain.js",
+      "src\\utils\\aiExport.js",
+      "src\\utils\\stepPrefetch.js"
+    ]
+  },
+  "/taiyi": {
+    "sourceFiles": 14,
+    "testFiles": 16,
+    "sample": [
+      "src\\components\\sanshi\\core\\TaiYiCore.js",
+      "src\\components\\sanshi\\SanShiUnitedMain.js",
+      "src\\components\\taiyi\\core\\TaiYiCore.js",
+      "src\\components\\taiyi\\core\\taiyiDuanfa.js",
+      "src\\components\\taiyi\\core\\taiyiSchool.js",
+      "src\\components\\taiyi\\TaiyiBoardSvg.js",
+      "src\\components\\taiyi\\TaiYiMain.js",
+      "src\\integrations\\kentang\\serviceRoot.js"
+    ]
+  },
+  "/jinkou": {
+    "sourceFiles": 7,
+    "testFiles": 11,
+    "sample": [
+      "src\\components\\cnyibu\\CnYiBuMain.js",
+      "src\\components\\jinkou\\JinKouCalc.js",
+      "src\\components\\jinkou\\JinKouMain.js",
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\stepPrefetch.js",
+      "src\\utils\\techniqueMountSettings.js"
+    ]
+  },
+  "/liureng": {
+    "sourceFiles": 17,
+    "testFiles": 14,
+    "sample": [
+      "src\\components\\dunjia\\DunJiaCalc.js",
+      "src\\components\\jinkou\\JinKouCalc.js",
+      "src\\components\\jinkou\\JinKouMain.js",
+      "src\\components\\jinkou\\JinKouPanChart.js",
+      "src\\components\\jinkou\\JinKouState.js",
+      "src\\components\\lrzhan\\LiuRengBirthInput.js",
+      "src\\components\\lrzhan\\LiuRengInput.js",
+      "src\\components\\lrzhan\\LiuRengMain.js"
+    ]
+  },
+  "/nongli/time": {
+    "sourceFiles": 6,
+    "testFiles": 3,
+    "sample": [
+      "src\\components\\dunjia\\DunJiaCalc.js",
+      "src\\components\\dunjia\\DunJiaMain.js",
+      "src\\components\\sanshi\\SanShiUnitedMain.js",
+      "src\\components\\taiyi\\TaiYiMain.js",
+      "src\\utils\\dataWarmTasks.js",
+      "src\\utils\\requestDedupe.js"
+    ]
+  },
+  "/ziwei/birth": {
+    "sourceFiles": 9,
+    "testFiles": 7,
+    "sample": [
+      "src\\components\\ziwei\\ZiweiCalc.js",
+      "src\\components\\ziwei\\ZiWeiInput.js",
+      "src\\components\\ziwei\\ZiWeiMain.js",
+      "src\\services\\rules.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\dataWarmTasks.js",
+      "src\\utils\\localcharts.js",
+      "src\\utils\\techniqueChartFree.js"
+    ]
+  },
+  "/bazi/birth": {
+    "sourceFiles": 4,
+    "testFiles": 3,
+    "sample": [
+      "src\\components\\cntradition\\BaZi.js",
+      "src\\utils\\aiAnalysisContext.js",
+      "src\\utils\\requestDedupe.js",
+      "src\\utils\\stepPrefetch.js"
+    ]
+  },
+  ":9999": {
+    "sourceFiles": 8,
+    "testFiles": 13,
+    "sample": [
+      "src\\components\\astro\\AstroRelative.js",
+      "src\\components\\common\\ChartServiceErrorModal.js",
+      "src\\components\\common\\StartupGate.js",
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\models\\rules.js",
+      "src\\utils\\constants.js",
+      "src\\utils\\perfFlags.js",
+      "src\\utils\\serviceStatus.js"
+    ]
+  },
+  ":8899": {
+    "sourceFiles": 8,
+    "testFiles": 13,
+    "sample": [
+      "src\\components\\astro\\AstroRelative.js",
+      "src\\components\\common\\ChartServiceErrorModal.js",
+      "src\\divination\\election\\scoring.js",
+      "src\\divination\\engine\\resultShapes.js",
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\kentangCache.js",
+      "src\\utils\\perfFlags.js",
+      "src\\utils\\serviceStatus.js"
+    ]
+  },
+  ":8892": {
+    "sourceFiles": 0,
+    "testFiles": 1,
+    "sample": []
+  },
+  "localhost": {
+    "sourceFiles": 4,
+    "testFiles": 0,
+    "sample": [
+      "src\\components\\amap\\amapUIHelper.js",
+      "src\\models\\app.js",
+      "src\\utils\\browserCalcGate.js",
+      "src\\utils\\constants.js"
+    ]
+  },
+  "127.0.0.1": {
+    "sourceFiles": 7,
+    "testFiles": 20,
+    "sample": [
+      "src\\components\\amap\\amapUIHelper.js",
+      "src\\models\\app.js",
+      "src\\utils\\aiAnalysisProviders.js",
+      "src\\utils\\browserCalcGate.js",
+      "src\\utils\\constants.js",
+      "src\\utils\\helper.js",
+      "src\\utils\\requestDedupe.js"
+    ]
+  },
+  "ServerRoot": {
+    "sourceFiles": 51,
+    "testFiles": 6,
+    "sample": [
+      "src\\components\\acg\\AstroAcg.js",
+      "src\\components\\astro\\AstroAgePoint.js",
+      "src\\components\\astro\\AstroAnalysisLab.js",
+      "src\\components\\astro\\AstroDistributions.js",
+      "src\\components\\astro\\AstroEgypt.js",
+      "src\\components\\astro\\AstroEphemeris.js",
+      "src\\components\\astro\\AstroExtraReturns.js",
+      "src\\components\\astro\\AstroGivenYear.js"
+    ]
+  },
+  "buildKentangEndpoint": {
+    "sourceFiles": 2,
+    "testFiles": 1,
+    "sample": [
+      "src\\integrations\\kentang\\serviceRoot.js",
+      "src\\utils\\chartFetch.js"
+    ]
+  },
+  "cachedKentangFetch": {
+    "sourceFiles": 2,
+    "testFiles": 4,
+    "sample": [
+      "src\\components\\wuzhao\\WuZhaoMain.js",
+      "src\\utils\\kentangCache.js"
+    ]
+  },
+  "fetchChart": {
+    "sourceFiles": 17,
+    "testFiles": 19,
+    "sample": [
+      "src\\components\\astro\\AstroZR.js",
+      "src\\components\\common\\ChartServiceErrorModal.js",
+      "src\\components\\divination\\DivinationChartShell.js",
+      "src\\components\\guolao\\GuoLaoChartMain.js",
+      "src\\components\\hellenastro\\AstroChart13.js",
+      "src\\components\\sanshi\\SanshiUnitedBoard.js",
+      "src\\components\\user\\ChartList.js",
+      "src\\divination\\election\\workflow.js"
+    ]
+  }
+}

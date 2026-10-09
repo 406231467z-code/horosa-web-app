@@ -1,0 +1,213 @@
+{
+  "label": "WEB-EXPERIMENTAL-RESULT",
+  "oracle": "HISTORICAL-GOLDEN",
+  "rulerSource": "flatlib/dignities/tables.py ESSENTIAL_DIGNITIES + EGYPTIAN_TERMS + CHALDEAN_FACES; perchart.getReceptions strongRecption=true",
+  "rows": [
+    {
+      "field": "receptions.normal",
+      "expected": [
+        {
+          "beneficiary": "Jupiter",
+          "supplier": "Moon",
+          "beneficiaryDignity": [
+            "exalt"
+          ],
+          "supplierRulerShip": [
+            "ruler",
+            "partTrip"
+          ]
+        },
+        {
+          "beneficiary": "Moon",
+          "supplier": "Venus",
+          "beneficiaryDignity": [
+            "partTrip"
+          ],
+          "supplierRulerShip": [
+            "exalt",
+            "dayTrip",
+            "term"
+          ]
+        },
+        {
+          "beneficiary": "Uranus",
+          "supplier": "Mars",
+          "beneficiaryDignity": [],
+          "supplierRulerShip": [
+            "exalt",
+            "partTrip"
+          ]
+        },
+        {
+          "beneficiary": "Neptune",
+          "supplier": "Mars",
+          "beneficiaryDignity": [],
+          "supplierRulerShip": [
+            "exalt",
+            "partTrip",
+            "face"
+          ]
+        },
+        {
+          "beneficiary": "Moon",
+          "supplier": "Jupiter",
+          "beneficiaryDignity": [
+            "partTrip"
+          ],
+          "supplierRulerShip": [
+            "ruler",
+            "face"
+          ]
+        }
+      ],
+      "actual": [
+        {
+          "beneficiary": "Jupiter",
+          "supplier": "Moon",
+          "beneficiaryDignity": [
+            "exalt"
+          ],
+          "supplierRulerShip": [
+            "ruler",
+            "partTrip"
+          ]
+        },
+        {
+          "beneficiary": "Moon",
+          "supplier": "Venus",
+          "beneficiaryDignity": [
+            "partTrip"
+          ],
+          "supplierRulerShip": [
+            "exalt",
+            "dayTrip",
+            "term"
+          ]
+        },
+        {
+          "beneficiary": "Uranus",
+          "supplier": "Mars",
+          "beneficiaryDignity": [],
+          "supplierRulerShip": [
+            "exalt",
+            "partTrip"
+          ]
+        },
+        {
+          "beneficiary": "Neptune",
+          "supplier": "Mars",
+          "beneficiaryDignity": [],
+          "supplierRulerShip": [
+            "exalt",
+            "partTrip",
+            "face"
+          ]
+        },
+        {
+          "beneficiary": "Moon",
+          "supplier": "Jupiter",
+          "beneficiaryDignity": [
+            "partTrip"
+          ],
+          "supplierRulerShip": [
+            "ruler",
+            "face"
+          ]
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "receptions.abnormal",
+      "expected": [],
+      "actual": [],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "mutuals.normal",
+      "expected": [
+        {
+          "planetA": {
+            "id": "Moon",
+            "rulerShip": [
+              "exalt",
+              "nightTrip",
+              "face"
+            ]
+          },
+          "planetB": {
+            "id": "Venus",
+            "rulerShip": [
+              "exalt",
+              "dayTrip",
+              "term"
+            ]
+          }
+        },
+        {
+          "planetA": {
+            "id": "Moon",
+            "rulerShip": [
+              "ruler",
+              "partTrip"
+            ]
+          },
+          "planetB": {
+            "id": "Jupiter",
+            "rulerShip": [
+              "ruler",
+              "face"
+            ]
+          }
+        }
+      ],
+      "actual": [
+        {
+          "planetA": {
+            "id": "Moon",
+            "rulerShip": [
+              "exalt",
+              "nightTrip",
+              "face"
+            ]
+          },
+          "planetB": {
+            "id": "Venus",
+            "rulerShip": [
+              "exalt",
+              "dayTrip",
+              "term"
+            ]
+          }
+        },
+        {
+          "planetA": {
+            "id": "Moon",
+            "rulerShip": [
+              "ruler",
+              "partTrip"
+            ]
+          },
+          "planetB": {
+            "id": "Jupiter",
+            "rulerShip": [
+              "ruler",
+              "face"
+            ]
+          }
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "mutuals.abnormal",
+      "expected": [],
+      "actual": [],
+      "delta": 0,
+      "status": "PASS"
+    }
+  ]
+}

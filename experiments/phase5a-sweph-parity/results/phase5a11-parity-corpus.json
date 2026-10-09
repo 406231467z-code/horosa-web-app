@@ -1,0 +1,171 @@
+{
+  "label": "WEB-EXPERIMENTAL",
+  "oracle": "HISTORICAL-GOLDEN is 1990 only; see phase5a9.providerParity.test.js",
+  "liveGolden": 0,
+  "rows": [
+    {
+      "field": "1900-06-15",
+      "expected": null,
+      "actual": {
+        "jd": 2415185.6041666665,
+        "sun": 83.51298679736742,
+        "asc": 155.84271392562272
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "1950-06-15",
+      "expected": null,
+      "actual": {
+        "jd": 2433447.6041666665,
+        "sun": 83.43161813767965,
+        "asc": 155.746482869478
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "1976-06-15",
+      "expected": null,
+      "actual": {
+        "jd": 2442944.6041666665,
+        "sun": 84.11816777381607,
+        "asc": 156.33964609459417
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "2000-06-15",
+      "expected": null,
+      "actual": {
+        "jd": 2451710.6041666665,
+        "sun": 84.30215913950826,
+        "asc": 156.49117762372018
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "2026-06-15",
+      "expected": null,
+      "actual": {
+        "jd": 2461206.6041666665,
+        "sun": 84.03418020963771,
+        "asc": 156.2466046960132
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "1990-00:00",
+      "expected": null,
+      "actual": {
+        "jd": 2448057.1666666665,
+        "sun": 83.33360129529629,
+        "asc": 351.3784480994145
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "1990-23:59",
+      "expected": null,
+      "actual": {
+        "jd": 2448058.165972222,
+        "sun": 84.28807450387498,
+        "asc": 352.45888448799116
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "explicit-offset-+02",
+      "expected": null,
+      "actual": {
+        "jd": 2448057.8541666665,
+        "sun": 83.99026865766129,
+        "asc": 233.00702910233153
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "high-latitude",
+      "expected": null,
+      "actual": {
+        "jd": 2448057.8958333335,
+        "sun": 84.03006509110604,
+        "asc": 167.42068132516812
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "southern",
+      "expected": null,
+      "actual": {
+        "jd": 2448057.5208333335,
+        "sun": 83.67189080176955,
+        "asc": 138.82462849094895
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "placidus",
+      "expected": null,
+      "actual": {
+        "jd": 2448057.6041666665,
+        "sun": 83.751486350667,
+        "asc": 156.01167440694198
+      },
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "HISTORICAL-GOLDEN contains only 1990-06-15 10:30 +08:00 Regiomontanus",
+      "goldenType": "WEB-EXPERIMENTAL"
+    },
+    {
+      "field": "sidereal-lahiri",
+      "expected": null,
+      "actual": "UNSUPPORTED",
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "classification": "DATA_SOURCE",
+      "reason": "no sidereal historical oracle; Lahiri stays reference-only",
+      "goldenType": "WEB-EXPERIMENTAL"
+    }
+  ]
+}

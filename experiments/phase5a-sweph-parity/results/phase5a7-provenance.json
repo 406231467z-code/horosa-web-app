@@ -1,0 +1,11 @@
+{
+  "label": "DATA-PROVENANCE",
+  "notActual": true,
+  "fixedStars": "CONFIRMED",
+  "su28Modes": 9,
+  "nakshatraEntries": 27,
+  "guoEntries": 27,
+  "paransChart": "ABSENT. POST /chart emits declParallel from perchart.getParallel. It does not emit parans.",
+  "historicalNakshatras": null,
+  "copiedStarLongitudes": false
+}

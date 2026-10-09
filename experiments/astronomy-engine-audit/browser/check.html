@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Astronomy Engine browser check</title>
+</head>
+<body>
+	<pre id="out">starting</pre>
+	<script src="../node_modules/astronomy-engine/astronomy.browser.min.js"></script>
+	<script>
+		const started = performance.now();
+		const when = new Date(Date.UTC(1990, 5, 15, 10, 30, 0));
+		const sun = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body.Sun, when, true));
+		const moon = Astronomy.EclipticGeoMoon(when);
+		const gast = Astronomy.SiderealTime(when);
+		const elapsed = performance.now() - started;
+		const payload = {
+			runtime: 'browser',
+			library: 'astronomy.browser.min.js',
+			nodeApis: false,
+			initMs: 0,
+			calcMs: elapsed,
+			date: '1990-06-15T10:30:00Z',
+			sunLon: sun.elon,
+			moonLon: moon.lon,
+			gastHours: gast,
+		};
+		window.__aeBrowser = payload;
+		document.getElementById('out').textContent = JSON.stringify(payload, null, 2);
+	</script>
+</body>
+</html>

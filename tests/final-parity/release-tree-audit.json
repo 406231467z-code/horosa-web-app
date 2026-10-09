@@ -1,0 +1,35 @@
+{
+  "root": "C:\\Users\\Jiliason\\horosa-web-app",
+  "dirtyCount": 41,
+  "untrackedCount": 1448,
+  "untrackedNodeModules": 0,
+  "summary": {
+    "TEST": 1,
+    "SOURCE": 915,
+    "EXPERIMENT": 40,
+    "GENERATED": 373,
+    "LEGACY": 127,
+    "DOC": 33
+  },
+  "releaseStagingPass": true,
+  "releaseStaging": {
+    "ship": [
+      "release/CLEAN_RELEASE_BUILD/dist-web",
+      "release/CLEAN_RELEASE_BUILD/dist-file",
+      "RELEASE_MANIFEST.json"
+    ],
+    "localOnly": [
+      "dirty tracked SOURCE (commit or stash before publish)",
+      "experiments/",
+      "local/runtime",
+      "tests/final-parity/*.json"
+    ],
+    "exclude": [
+      "experiments/**/node_modules",
+      "local/runtime",
+      "Java/Python/vendor trees",
+      "Electron/NSIS/exe artifacts"
+    ]
+  },
+  "note": ""
+}

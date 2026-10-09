@@ -1,0 +1,500 @@
+{
+  "label": "WEB-EXPERIMENTAL-RESULT",
+  "oracle": "HISTORICAL-GOLDEN",
+  "toleranceDeg": 1,
+  "matrix": [
+    {
+      "body": "Sun",
+      "id": "Sun",
+      "historicalDecl": 23.294632034395157,
+      "browserDecl": 23.294631979137232,
+      "present": true,
+      "delta": 5.5257924458373964e-8,
+      "deltaArcsec": 0.00019892852805014627,
+      "status": "PASS"
+    },
+    {
+      "body": "Moon",
+      "id": "Moon",
+      "historicalDecl": -5.245371139575063,
+      "browserDecl": -5.2453711923135256,
+      "present": true,
+      "delta": 5.273846248599057e-8,
+      "deltaArcsec": 0.00018985846494956604,
+      "status": "PASS"
+    },
+    {
+      "body": "Mercury",
+      "id": "Mercury",
+      "historicalDecl": 19.431087934064283,
+      "browserDecl": 19.43108793502107,
+      "present": true,
+      "delta": 9.567848735514417e-10,
+      "deltaArcsec": 0.00000344442554478519,
+      "status": "PASS"
+    },
+    {
+      "body": "Venus",
+      "id": "Venus",
+      "historicalDecl": 15.405264968691514,
+      "browserDecl": 15.405264947789064,
+      "present": true,
+      "delta": 2.0902449548998447e-8,
+      "deltaArcsec": 0.00007524881837639441,
+      "status": "PASS"
+    },
+    {
+      "body": "Mars",
+      "id": "Mars",
+      "historicalDecl": 2.4333335268602183,
+      "browserDecl": 2.4333334360594985,
+      "present": true,
+      "delta": 9.080071983191829e-8,
+      "deltaArcsec": 0.00032688259139490583,
+      "status": "PASS"
+    },
+    {
+      "body": "Jupiter",
+      "id": "Jupiter",
+      "historicalDecl": 22.69000338781408,
+      "browserDecl": 22.690001704350895,
+      "present": true,
+      "delta": 0.0000016834631857420845,
+      "deltaArcsec": 0.006060467468671504,
+      "status": "PASS"
+    },
+    {
+      "body": "Saturn",
+      "id": "Saturn",
+      "historicalDecl": -21.18594987578942,
+      "browserDecl": -21.18594983969686,
+      "present": true,
+      "delta": 3.6092558275413467e-8,
+      "deltaArcsec": 0.00012993320979148848,
+      "status": "PASS"
+    },
+    {
+      "body": "Uranus",
+      "id": "Uranus",
+      "historicalDecl": -23.512554194632724,
+      "browserDecl": -23.512553663024637,
+      "present": true,
+      "delta": 5.3160808732855e-7,
+      "deltaArcsec": 0.00191378911438278,
+      "status": "PASS"
+    },
+    {
+      "body": "Neptune",
+      "id": "Neptune",
+      "historicalDecl": -21.86265849287962,
+      "browserDecl": -21.862658475517932,
+      "present": true,
+      "delta": 1.736168897537027e-8,
+      "deltaArcsec": 0.00006250208031133297,
+      "status": "PASS"
+    },
+    {
+      "body": "Pluto",
+      "id": "Pluto",
+      "historicalDecl": -1.2520392572775212,
+      "browserDecl": -1.2520345004213689,
+      "present": true,
+      "delta": 0.0000047568561523103625,
+      "deltaArcsec": 0.017124682148317305,
+      "status": "PASS"
+    },
+    {
+      "body": "Node",
+      "id": "North Node",
+      "historicalDecl": -17.818322493753765,
+      "browserDecl": -17.818322493751566,
+      "present": true,
+      "delta": 2.19912976717751e-12,
+      "deltaArcsec": 7.916867161839036e-9,
+      "status": "PASS"
+    },
+    {
+      "body": "Lilith",
+      "id": "Dark Moon",
+      "historicalDecl": -23.810452640204243,
+      "browserDecl": -23.810452640206304,
+      "present": true,
+      "delta": 2.0605739337042905e-12,
+      "deltaArcsec": 7.418066161335446e-9,
+      "status": "PASS"
+    },
+    {
+      "body": "South Node",
+      "id": "South Node",
+      "historicalDecl": -17.818322493753765,
+      "browserDecl": -17.818322493751566,
+      "present": true,
+      "delta": 2.19912976717751e-12,
+      "deltaArcsec": 7.916867161839036e-9,
+      "status": "PASS"
+    },
+    {
+      "body": "Chiron",
+      "id": "Chiron",
+      "historicalDecl": 16.255526065467947,
+      "browserDecl": 16.255507489126366,
+      "present": true,
+      "delta": 0.000018576341581422184,
+      "deltaArcsec": 0.06687482969311986,
+      "status": "PASS"
+    },
+    {
+      "body": "Pholus",
+      "id": "Pholus",
+      "historicalDecl": 13.457632000643821,
+      "browserDecl": 13.457620649263909,
+      "present": true,
+      "delta": 0.00001135137991248314,
+      "deltaArcsec": 0.0408649676849393,
+      "status": "PASS"
+    },
+    {
+      "body": "Ceres",
+      "id": "Ceres",
+      "historicalDecl": 26.761200505967995,
+      "browserDecl": 26.761211191325376,
+      "present": true,
+      "delta": 0.000010685357381134963,
+      "deltaArcsec": 0.03846728657208587,
+      "status": "PASS"
+    },
+    {
+      "body": "Pallas",
+      "id": "Pallas",
+      "historicalDecl": -1.1391589841740621,
+      "browserDecl": -1.1392059893441397,
+      "present": true,
+      "delta": 0.000047005170077607517,
+      "deltaArcsec": 0.16921861227938706,
+      "status": "PASS"
+    },
+    {
+      "body": "Juno",
+      "id": "Juno",
+      "historicalDecl": -0.48777258901826764,
+      "browserDecl": -0.48774746864231083,
+      "present": true,
+      "delta": 0.000025120375956810825,
+      "deltaArcsec": 0.09043335344451897,
+      "status": "PASS"
+    },
+    {
+      "body": "Vesta",
+      "id": "Vesta",
+      "historicalDecl": 7.556551634748993,
+      "browserDecl": 7.55651815012653,
+      "present": true,
+      "delta": 0.00003348462246233197,
+      "deltaArcsec": 0.12054464086439509,
+      "status": "PASS"
+    },
+    {
+      "body": "Intp_Apog",
+      "id": "Intp_Apog",
+      "historicalDecl": -22.730851914000798,
+      "browserDecl": -22.730851912523793,
+      "present": true,
+      "delta": 1.4770051848245203e-9,
+      "deltaArcsec": 0.000005317218665368273,
+      "status": "PASS"
+    },
+    {
+      "body": "Intp_Perg",
+      "id": "Intp_Perg",
+      "historicalDecl": 26.070330043640013,
+      "browserDecl": 26.070330043937602,
+      "present": true,
+      "delta": 2.9758950859104516e-10,
+      "deltaArcsec": 0.0000010713222309277626,
+      "status": "PASS"
+    },
+    {
+      "body": "Syzygy",
+      "id": "Syzygy",
+      "historicalDecl": -26.7911661045268,
+      "browserDecl": -26.791166200122937,
+      "present": true,
+      "delta": 9.559613900478325e-8,
+      "deltaArcsec": 0.0003441461004172197,
+      "status": "PASS"
+    },
+    {
+      "body": "Pars Fortuna",
+      "id": "Pars Fortuna",
+      "historicalDecl": 18.359624764913384,
+      "browserDecl": 18.359624713340725,
+      "present": true,
+      "delta": 5.1572659032217416e-8,
+      "deltaArcsec": 0.0001856615725159827,
+      "status": "PASS"
+    },
+    {
+      "body": "Purple Clouds",
+      "id": "Purple Clouds",
+      "historicalDecl": 21.304757006955647,
+      "browserDecl": 21.304757006955647,
+      "present": true,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "body": "Asc",
+      "id": "Asc",
+      "historicalDecl": 31.233333333333334,
+      "browserDecl": 31.233333333333334,
+      "present": true,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "body": "MC",
+      "id": "MC",
+      "historicalDecl": 38.39523627230405,
+      "browserDecl": 38.39523627230402,
+      "present": true,
+      "delta": 2.842170943040401e-14,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "body": "Desc",
+      "id": "Desc",
+      "historicalDecl": 7.264619564149248,
+      "browserDecl": 7.2646195641492195,
+      "present": true,
+      "delta": 2.842170943040401e-14,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "body": "IC",
+      "id": "IC",
+      "historicalDecl": -3.4521904798664758,
+      "browserDecl": -3.452190479866496,
+      "present": true,
+      "delta": 2.042810365310288e-14,
+      "deltaArcsec": 7.354117315117037e-11,
+      "status": "PASS"
+    }
+  ],
+  "parallel": {
+    "expected": [
+      [
+        "Ceres",
+        "Intp_Perg"
+      ],
+      [
+        "Chiron",
+        "Venus"
+      ],
+      [
+        "Dark Moon",
+        "Intp_Apog",
+        "Uranus"
+      ],
+      [
+        "Desc",
+        "Vesta"
+      ],
+      [
+        "Intp_Apog",
+        "Neptune",
+        "Saturn",
+        "Uranus"
+      ],
+      [
+        "Juno",
+        "Pallas",
+        "Pluto"
+      ],
+      [
+        "Jupiter",
+        "Sun"
+      ],
+      [
+        "North Node",
+        "South Node"
+      ]
+    ],
+    "actual": [
+      [
+        "Ceres",
+        "Intp_Perg"
+      ],
+      [
+        "Chiron",
+        "Venus"
+      ],
+      [
+        "Dark Moon",
+        "Intp_Apog",
+        "Uranus"
+      ],
+      [
+        "Desc",
+        "Vesta"
+      ],
+      [
+        "Intp_Apog",
+        "Neptune",
+        "Saturn",
+        "Uranus"
+      ],
+      [
+        "Juno",
+        "Pallas",
+        "Pluto"
+      ],
+      [
+        "Jupiter",
+        "Sun"
+      ],
+      [
+        "North Node",
+        "South Node"
+      ]
+    ],
+    "status": "PASS"
+  },
+  "contraParallel": {
+    "expected": {
+      "Sun": [
+        "Dark Moon",
+        "Intp_Apog",
+        "Uranus"
+      ],
+      "Jupiter": [
+        "Intp_Apog",
+        "Neptune",
+        "Uranus"
+      ],
+      "Saturn": [
+        "Purple Clouds"
+      ],
+      "Uranus": [
+        "Jupiter",
+        "Sun"
+      ],
+      "Neptune": [
+        "Jupiter",
+        "Purple Clouds"
+      ],
+      "North Node": [
+        "Pars Fortuna"
+      ],
+      "South Node": [
+        "Pars Fortuna"
+      ],
+      "Syzygy": [
+        "Ceres",
+        "Intp_Perg"
+      ],
+      "Pars Fortuna": [
+        "North Node",
+        "South Node"
+      ],
+      "Dark Moon": [
+        "Sun"
+      ],
+      "Purple Clouds": [
+        "Neptune",
+        "Saturn"
+      ],
+      "Ceres": [
+        "Syzygy"
+      ],
+      "Intp_Apog": [
+        "Jupiter",
+        "Sun"
+      ],
+      "Intp_Perg": [
+        "Syzygy"
+      ]
+    },
+    "actual": {
+      "Sun": [
+        "Dark Moon",
+        "Intp_Apog",
+        "Uranus"
+      ],
+      "Jupiter": [
+        "Intp_Apog",
+        "Neptune",
+        "Uranus"
+      ],
+      "Saturn": [
+        "Purple Clouds"
+      ],
+      "Uranus": [
+        "Jupiter",
+        "Sun"
+      ],
+      "Neptune": [
+        "Jupiter",
+        "Purple Clouds"
+      ],
+      "North Node": [
+        "Pars Fortuna"
+      ],
+      "South Node": [
+        "Pars Fortuna"
+      ],
+      "Syzygy": [
+        "Ceres",
+        "Intp_Perg"
+      ],
+      "Pars Fortuna": [
+        "North Node",
+        "South Node"
+      ],
+      "Dark Moon": [
+        "Sun"
+      ],
+      "Purple Clouds": [
+        "Neptune",
+        "Saturn"
+      ],
+      "Ceres": [
+        "Syzygy"
+      ],
+      "Intp_Apog": [
+        "Jupiter",
+        "Sun"
+      ],
+      "Intp_Perg": [
+        "Syzygy"
+      ]
+    },
+    "status": "PASS"
+  },
+  "paransRequiredInputs": [
+    "planet ecliptic longitude",
+    "planet ecliptic latitude (paransLocal defaults missing latitude to 0)",
+    "declination derived inside paransLocal by a fixed obliquity 23.4367, separate from objects[].decl",
+    "geographic latitude",
+    "right ascension and hour angle of the four axes (rise, set, MC, IC)",
+    "fixed-star ecliptic longitude and declination from a star catalog",
+    "orb, default 2° in paransLocal.js"
+  ],
+  "fixedStarRequiredInputs": [
+    "Swiss fixed-star catalog (sefstars) and const.LIST_FIXED_STARS",
+    "chart Julian day as the epoch",
+    "precession applied inside Swiss at that epoch",
+    "zodiac of the chart, including sidereal mode when the chart is sidereal",
+    "star longitude, latitude, right ascension, and declination",
+    "fixedStarSu28: mansion catalog, width table, and the selected su28 mode (ecliptic or equatorial, tropical or sidereal)",
+    "guoStarSect: planet mansion index from that su28 placement, plus guotables"
+  ],
+  "nakshatraRequiredInputs": [
+    "sidereal longitude",
+    "ayanamsa that produced that sidereal longitude",
+    "27-mansion table in astrostudy/nakshatra.py, each span 13°20′"
+  ]
+}

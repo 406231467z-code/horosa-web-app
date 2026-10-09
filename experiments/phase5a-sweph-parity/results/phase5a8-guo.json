@@ -1,0 +1,48 @@
+{
+  "label": "WEB-EXPERIMENTAL-RESULT",
+  "oracle": "HISTORICAL-GOLDEN",
+  "rows": [
+    {
+      "id": "Sun",
+      "expected": "井",
+      "actual": "井",
+      "status": "PASS"
+    },
+    {
+      "id": "Moon",
+      "expected": "壁",
+      "actual": "壁",
+      "status": "PASS"
+    },
+    {
+      "id": "Mercury",
+      "expected": "觜",
+      "actual": "觜",
+      "status": "PASS"
+    },
+    {
+      "id": "Venus",
+      "expected": "毕",
+      "actual": "毕",
+      "status": "PASS"
+    },
+    {
+      "id": "Mars",
+      "expected": "娄",
+      "actual": "娄",
+      "status": "PASS"
+    },
+    {
+      "id": "Jupiter",
+      "expected": "鬼",
+      "actual": "鬼",
+      "status": "PASS"
+    },
+    {
+      "id": "Saturn",
+      "expected": "虚",
+      "actual": "虚",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+Astronomy Engine 2.1.19
+source: https://github.com/cosinekitty/astronomy
+npm: astronomy-engine@2.1.19
+license: MIT
+license file: the npm tarball does not ship a LICENSE file; this copy is the upstream LICENSE at tag v2.1.19
+notice file: upstream does not ship a separate NOTICE
+browser build: node_modules/astronomy-engine/astronomy.browser.min.js
+node build: node_modules/astronomy-engine/astronomy.js
+this directory is an audit only and is not imported by astrostudyui

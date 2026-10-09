@@ -1,0 +1,33 @@
+{
+  "browser": "chrome",
+  "base": "http://127.0.0.1:8010/",
+  "home": {
+    "bad": [],
+    "errors": [],
+    "text": "loading...",
+    "overflow": 0
+  },
+  "removed": [
+    {
+      "route": "/fengshui",
+      "path": "/fengshui",
+      "status": "PARTIAL"
+    },
+    {
+      "route": "/planetarium",
+      "path": "/planetarium",
+      "status": "PARTIAL"
+    },
+    {
+      "route": "/astrochart3d",
+      "path": "/astrochart3d",
+      "status": "PARTIAL"
+    },
+    {
+      "route": "/astrochart-3d",
+      "path": "/astrochart-3d",
+      "status": "PARTIAL"
+    }
+  ],
+  "status": "PASS"
+}

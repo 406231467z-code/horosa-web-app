@@ -1,0 +1,55 @@
+# Runtime binaries (too large for GitHub)
+runtime/
+
+# Build artifacts
+dirty-buildinfo.txt
+build/
+dist/
+
+# Archive files
+*.zip
+*.tar.gz
+*.7z
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Local workspace scratch (diagnostics, probes, screenshots)
+local/workspace/*/astrostudyui/_shots/
+local/workspace/*/astrostudyui/_screenshots.js
+local/workspace/*/astrostudyui/*.zip
+local/workspace/*/astrostudyui/*.log
+local/workspace/*/astrostudyui/*.txt
+local/workspace/*/astrostudyui/*.mjs
+local/workspace/*/astrostudyui/_*.mjs
+local/workspace/*/astrostudyui/_*.js
+local/workspace/*/astrostudyui/*.txt
+
+# local/ root scratch files
+local/*.log
+local/*.txt
+local/*.mjs
+
+# Logs
+log/
+logs/
+
+# Release build directories (may contain large binaries)
+release/CLEAN_RELEASE_BUILD/dist-file/
+release/CLEAN_RELEASE_BUILD/dist-web/

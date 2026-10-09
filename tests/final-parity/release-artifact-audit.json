@@ -1,0 +1,82 @@
+[
+  {
+    "dir": "C:\\Users\\Jiliason\\horosa-web-app\\local\\workspace\\Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c\\astrostudyui\\dist",
+    "exists": true,
+    "fileCount": 427,
+    "totalBytes": 59659120,
+    "totalMiB": 56.9,
+    "forbiddenSample": [
+      "foreground-ground.jpg",
+      "ground-observatory.png",
+      "horizon-panorama.png",
+      "horizon-panorama.pre-seamfix.png"
+    ],
+    "backendUrlSample": [
+      {
+        "file": "guice-main.044b42a2.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "huangji-main.981ff177.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "jingjue-main.2206418c.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "jinkou-main.2c3ef1c0.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "shared-technique.060ce3e8.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "taixuan-main.4b0d0d4a.async.js",
+        "needle": ":9999"
+      }
+    ],
+    "classification": "production-build-output"
+  },
+  {
+    "dir": "C:\\Users\\Jiliason\\horosa-web-app\\local\\workspace\\Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c\\astrostudyui\\dist-file",
+    "exists": true,
+    "fileCount": 351,
+    "totalBytes": 51987088,
+    "totalMiB": 49.6,
+    "forbiddenSample": [
+      "foreground-ground.jpg",
+      "ground-observatory.png",
+      "horizon-panorama.png",
+      "horizon-panorama.pre-seamfix.png"
+    ],
+    "backendUrlSample": [
+      {
+        "file": "guice-main.044b42a2.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "huangji-main.981ff177.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "jingjue-main.2206418c.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "jinkou-main.2c3ef1c0.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "shared-technique.060ce3e8.async.js",
+        "needle": ":9999"
+      },
+      {
+        "file": "taixuan-main.4b0d0d4a.async.js",
+        "needle": ":9999"
+      }
+    ],
+    "classification": "production-build-output"
+  }
+]

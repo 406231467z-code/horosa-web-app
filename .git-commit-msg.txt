@@ -1,0 +1,3 @@
+release: purge legacy Java Python desktop runtime
+
+Remove astrostudysrv, astropy, flatlib-ctrad2, vendor, Windows launchers, prepareruntime, and windows-adaptations from the Web production tree. Update README and backend-only contract tests for browser-only production.

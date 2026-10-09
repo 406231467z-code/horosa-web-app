@@ -1,0 +1,1415 @@
+{
+  "label": "WEB-EXPERIMENTAL-RESULT",
+  "oracle": "HISTORICAL-GOLDEN",
+  "rule": "flatlib/aspects.py _aspectDict + _aspectProperties; perchart.getAspects asp list MAJOR+[45]",
+  "rows": [
+    {
+      "field": "normalAsp.Sun.Applicative.Uranus|180",
+      "expected": 14.42911415515806,
+      "actual": 14.429115221887514,
+      "delta": 0.0000010667294532140659,
+      "deltaArcsec": 0.003840226031570637,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Sun.Separative.Mars|60",
+      "expected": 12.99484701434318,
+      "actual": 12.994846964343424,
+      "delta": 4.9999755447061034e-8,
+      "deltaArcsec": 0.00017999911960941972,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Sun.None.Moon|90",
+      "expected": 13.654950601648011,
+      "actual": 13.65495080312229,
+      "delta": 2.0147427903793869e-7,
+      "deltaArcsec": 0.0007253074045365793,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Applicative.Venus|60",
+      "expected": 8.215639722419837,
+      "actual": 8.215639908565834,
+      "delta": 1.8614599639477092e-7,
+      "deltaArcsec": 0.0006701255870211753,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Applicative.Jupiter|120",
+      "expected": 5.707240945944136,
+      "actual": 5.707241281490695,
+      "delta": 3.3554655942680256e-7,
+      "deltaArcsec": 0.0012079676139364892,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Applicative.Neptune|60",
+      "expected": 3.630431382156644,
+      "actual": 3.630431436541926,
+      "delta": 5.438528205559123e-8,
+      "deltaArcsec": 0.00019578701540012844,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Applicative.Pluto|120",
+      "expected": 5.312987166573123,
+      "actual": 5.312983530291177,
+      "delta": 0.0000036362819457735895,
+      "deltaArcsec": 0.013090615004784922,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Separative.Mercury|90",
+      "expected": 5.081466386738953,
+      "actual": 5.0814661971949135,
+      "delta": 1.8954403913085116e-7,
+      "deltaArcsec": 0.0006823585408710642,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Separative.Saturn|45",
+      "expected": 1.0414705407209226,
+      "actual": 1.041470288591654,
+      "delta": 2.5212926857420825e-7,
+      "deltaArcsec": 0.0009076653668671497,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Separative.Uranus|60",
+      "expected": 1.9159352431939283,
+      "actual": 1.915933974990196,
+      "delta": 0.0000012682037322520046,
+      "deltaArcsec": 0.004565533436107216,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Obvious.Saturn|45",
+      "expected": 1.0414705407209226,
+      "actual": 1.041470288591654,
+      "delta": 2.5212926857420825e-7,
+      "deltaArcsec": 0.0009076653668671497,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Moon.Obvious.Uranus|60",
+      "expected": 1.9159352431939283,
+      "actual": 1.915933974990196,
+      "delta": 0.0000012682037322520046,
+      "deltaArcsec": 0.004565533436107216,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mercury.Applicative.Mars|60",
+      "expected": 5.741569974043728,
+      "actual": 5.74157003597378,
+      "delta": 6.193005219756742e-8,
+      "deltaArcsec": 0.0002229481879112427,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mercury.None.Moon|90",
+      "expected": 5.081466386738953,
+      "actual": 5.0814661971949135,
+      "delta": 1.8954403913085116e-7,
+      "deltaArcsec": 0.0006823585408710642,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Venus.Applicative.Saturn|120",
+      "expected": 5.742889736859269,
+      "actual": 5.7428898028424555,
+      "delta": 6.598318691430904e-8,
+      "deltaArcsec": 0.00023753947289151256,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Venus.Separative.Jupiter|60",
+      "expected": 2.508398776475687,
+      "actual": 2.5083986270751097,
+      "delta": 1.4940057724288636e-7,
+      "deltaArcsec": 0.0005378420780743909,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Venus.Separative.Neptune|120",
+      "expected": 4.585208340263165,
+      "actual": 4.585208472023851,
+      "delta": 1.3176068591747025e-7,
+      "deltaArcsec": 0.0004743384693028929,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Venus.Separative.Pluto|180",
+      "expected": 2.902652555846686,
+      "actual": 2.902656378274628,
+      "delta": 0.0000038224279421683605,
+      "deltaArcsec": 0.013760740591806098,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Venus.Obvious.Jupiter|60",
+      "expected": 2.508398776475687,
+      "actual": 2.5083986270751097,
+      "delta": 1.4940057724288636e-7,
+      "deltaArcsec": 0.0005378420780743909,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Venus.Obvious.Pluto|180",
+      "expected": 2.902652555846686,
+      "actual": 2.902656378274628,
+      "delta": 0.0000038224279421683605,
+      "deltaArcsec": 0.013760740591806098,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mars.Applicative.Jupiter|90",
+      "expected": 5.0471373586393184,
+      "actual": 5.047137442711858,
+      "delta": 8.407253915265755e-8,
+      "deltaArcsec": 0.0003026611409495672,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mars.Applicative.Neptune|90",
+      "expected": 2.970327794851869,
+      "actual": 2.9703275977631165,
+      "delta": 1.970887524294085e-7,
+      "deltaArcsec": 0.0007095195087458706,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mars.Separative.Uranus|90",
+      "expected": 2.576038830498703,
+      "actual": 2.5760378137690623,
+      "delta": 0.000001016729640923586,
+      "deltaArcsec": 0.0036602267073249095,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mars.None.Mercury|60",
+      "expected": 5.741569974043728,
+      "actual": 5.74157003597378,
+      "delta": 6.193005219756742e-8,
+      "deltaArcsec": 0.0002229481879112427,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mars.Obvious.Neptune|90",
+      "expected": 2.970327794851869,
+      "actual": 2.9703275977631165,
+      "delta": 1.970887524294085e-7,
+      "deltaArcsec": 0.0007095195087458706,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Mars.Obvious.Uranus|90",
+      "expected": 2.576038830498703,
+      "actual": 2.5760378137690623,
+      "delta": 0.000001016729640923586,
+      "deltaArcsec": 0.0036602267073249095,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.Applicative.Saturn|180",
+      "expected": 8.251288513334941,
+      "actual": 8.251288429917622,
+      "delta": 8.341731927430374e-8,
+      "deltaArcsec": 0.00030030234938749345,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.Separative.Uranus|180",
+      "expected": 7.623176189138064,
+      "actual": 7.623175256480863,
+      "delta": 9.326572012469114e-7,
+      "deltaArcsec": 0.003357565924488881,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.Separative.Neptune|180",
+      "expected": 2.076809563787492,
+      "actual": 2.076809844948798,
+      "delta": 2.8116130579292076e-7,
+      "deltaArcsec": 0.0010121807008545147,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.Separative.Pluto|120",
+      "expected": 0.3942537793709988,
+      "actual": 0.3942577511995182,
+      "delta": 0.000003971828519411247,
+      "deltaArcsec": 0.014298582669880489,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.None.Moon|120",
+      "expected": 5.707240945944136,
+      "actual": 5.707241281490695,
+      "delta": 3.3554655942680256e-7,
+      "deltaArcsec": 0.0012079676139364892,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.None.Venus|60",
+      "expected": 2.508398776475687,
+      "actual": 2.5083986270751097,
+      "delta": 1.4940057724288636e-7,
+      "deltaArcsec": 0.0005378420780743909,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.None.Mars|90",
+      "expected": 5.0471373586393184,
+      "actual": 5.047137442711858,
+      "delta": 8.407253915265755e-8,
+      "deltaArcsec": 0.0003026611409495672,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.Obvious.Venus|60",
+      "expected": 2.508398776475687,
+      "actual": 2.5083986270751097,
+      "delta": 1.4940057724288636e-7,
+      "deltaArcsec": 0.0005378420780743909,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.Obvious.Neptune|180",
+      "expected": 2.076809563787492,
+      "actual": 2.076809844948798,
+      "delta": 2.8116130579292076e-7,
+      "deltaArcsec": 0.0010121807008545147,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Jupiter.Obvious.Pluto|120",
+      "expected": 0.3942537793709988,
+      "actual": 0.3942577511995182,
+      "delta": 0.000003971828519411247,
+      "deltaArcsec": 0.014298582669880489,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Saturn.Applicative.Venus|120",
+      "expected": 5.742889736859269,
+      "actual": 5.7428898028424555,
+      "delta": 6.598318691430904e-8,
+      "deltaArcsec": 0.00023753947289151256,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Saturn.Applicative.Jupiter|180",
+      "expected": 8.251288513334941,
+      "actual": 8.251288429917622,
+      "delta": 8.341731927430374e-8,
+      "deltaArcsec": 0.00030030234938749345,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Saturn.Applicative.Pluto|60",
+      "expected": 8.645542292705954,
+      "actual": 8.645546181117197,
+      "delta": 0.000003888411242769507,
+      "deltaArcsec": 0.013998280473970226,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Saturn.Separative.Moon|45",
+      "expected": 1.0414705407209226,
+      "actual": 1.041470288591654,
+      "delta": 2.5212926857420825e-7,
+      "deltaArcsec": 0.0009076653668671497,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Saturn.Obvious.Moon|45",
+      "expected": 1.0414705407209226,
+      "actual": 1.041470288591654,
+      "delta": 2.5212926857420825e-7,
+      "deltaArcsec": 0.0009076653668671497,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Uranus.Separative.Moon|60",
+      "expected": 1.9159352431939283,
+      "actual": 1.915933974990196,
+      "delta": 0.0000012682037322520046,
+      "deltaArcsec": 0.004565533436107216,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Uranus.Separative.Mars|90",
+      "expected": 2.576038830498703,
+      "actual": 2.5760378137690623,
+      "delta": 0.000001016729640923586,
+      "deltaArcsec": 0.0036602267073249095,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Uranus.Obvious.Moon|60",
+      "expected": 1.9159352431939283,
+      "actual": 1.915933974990196,
+      "delta": 0.0000012682037322520046,
+      "deltaArcsec": 0.004565533436107216,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Uranus.Obvious.Mars|90",
+      "expected": 2.576038830498703,
+      "actual": 2.5760378137690623,
+      "delta": 0.000001016729640923586,
+      "deltaArcsec": 0.0036602267073249095,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Applicative.Moon|60",
+      "expected": 3.630431382156644,
+      "actual": 3.630431436541926,
+      "delta": 5.438528205559123e-8,
+      "deltaArcsec": 0.00019578701540012844,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Applicative.Mars|90",
+      "expected": 2.970327794851869,
+      "actual": 2.9703275977631165,
+      "delta": 1.970887524294085e-7,
+      "deltaArcsec": 0.0007095195087458706,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Separative.Venus|120",
+      "expected": 4.585208340263165,
+      "actual": 4.585208472023851,
+      "delta": 1.3176068591747025e-7,
+      "deltaArcsec": 0.0004743384693028929,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Separative.Jupiter|180",
+      "expected": 2.076809563787492,
+      "actual": 2.076809844948798,
+      "delta": 2.8116130579292076e-7,
+      "deltaArcsec": 0.0010121807008545147,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Separative.Pluto|60",
+      "expected": 1.6825557844164791,
+      "actual": 1.6825520937492229,
+      "delta": 0.00000369066725625089,
+      "deltaArcsec": 0.013286402122503205,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Obvious.Mars|90",
+      "expected": 2.970327794851869,
+      "actual": 2.9703275977631165,
+      "delta": 1.970887524294085e-7,
+      "deltaArcsec": 0.0007095195087458706,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Obvious.Jupiter|180",
+      "expected": 2.076809563787492,
+      "actual": 2.076809844948798,
+      "delta": 2.8116130579292076e-7,
+      "deltaArcsec": 0.0010121807008545147,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Neptune.Obvious.Pluto|60",
+      "expected": 1.6825557844164791,
+      "actual": 1.6825520937492229,
+      "delta": 0.00000369066725625089,
+      "deltaArcsec": 0.013286402122503205,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Pluto.Separative.Venus|180",
+      "expected": 2.902652555846686,
+      "actual": 2.902656378274628,
+      "delta": 0.0000038224279421683605,
+      "deltaArcsec": 0.013760740591806098,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Pluto.Separative.Jupiter|120",
+      "expected": 0.3942537793709988,
+      "actual": 0.3942577511995182,
+      "delta": 0.000003971828519411247,
+      "deltaArcsec": 0.014298582669880489,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Pluto.None.Neptune|60",
+      "expected": 1.6825557844164791,
+      "actual": 1.6825520937492229,
+      "delta": 0.00000369066725625089,
+      "deltaArcsec": 0.013286402122503205,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Pluto.Obvious.Neptune|60",
+      "expected": 1.6825557844164791,
+      "actual": 1.6825520937492229,
+      "delta": 0.00000369066725625089,
+      "deltaArcsec": 0.013286402122503205,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Pluto.Obvious.Venus|180",
+      "expected": 2.902652555846686,
+      "actual": 2.902656378274628,
+      "delta": 0.0000038224279421683605,
+      "deltaArcsec": 0.013760740591806098,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Pluto.Obvious.Jupiter|120",
+      "expected": 0.3942537793709988,
+      "actual": 0.3942577511995182,
+      "delta": 0.000003971828519411247,
+      "deltaArcsec": 0.014298582669880489,
+      "status": "PASS"
+    },
+    {
+      "field": "normalAsp.Chiron",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.Pholus",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.Ceres",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.Pallas",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.Juno",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.Vesta",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.Intp_Apog",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.Intp_Perg",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.MoonSun",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.SaturnMars",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    },
+    {
+      "field": "normalAsp.JupiterVenus",
+      "expected": "historical starter",
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING",
+      "reason": "starter is not in the experimental chart JSON"
+    }
+  ],
+  "signRows": [
+    {
+      "field": "signAsp.Sun",
+      "expected": [
+        {
+          "asp": 0,
+          "id": "Mercury"
+        },
+        {
+          "asp": 60,
+          "id": "Mars"
+        },
+        {
+          "asp": 90,
+          "id": "Moon"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 0,
+          "id": "Mercury"
+        },
+        {
+          "asp": 60,
+          "id": "Mars"
+        },
+        {
+          "asp": 90,
+          "id": "Moon"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Moon",
+      "expected": [
+        {
+          "asp": 60,
+          "id": "Venus"
+        },
+        {
+          "asp": 60,
+          "id": "Saturn"
+        },
+        {
+          "asp": 60,
+          "id": "Uranus"
+        },
+        {
+          "asp": 60,
+          "id": "Neptune"
+        },
+        {
+          "asp": 90,
+          "id": "Sun"
+        },
+        {
+          "asp": 90,
+          "id": "Mercury"
+        },
+        {
+          "asp": 120,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 120,
+          "id": "Pluto"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 60,
+          "id": "Venus"
+        },
+        {
+          "asp": 60,
+          "id": "Saturn"
+        },
+        {
+          "asp": 60,
+          "id": "Uranus"
+        },
+        {
+          "asp": 60,
+          "id": "Neptune"
+        },
+        {
+          "asp": 90,
+          "id": "Sun"
+        },
+        {
+          "asp": 90,
+          "id": "Mercury"
+        },
+        {
+          "asp": 120,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 120,
+          "id": "Pluto"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Mercury",
+      "expected": [
+        {
+          "asp": 0,
+          "id": "Sun"
+        },
+        {
+          "asp": 60,
+          "id": "Mars"
+        },
+        {
+          "asp": 90,
+          "id": "Moon"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 0,
+          "id": "Sun"
+        },
+        {
+          "asp": 60,
+          "id": "Mars"
+        },
+        {
+          "asp": 90,
+          "id": "Moon"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Venus",
+      "expected": [
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 120,
+          "id": "Saturn"
+        },
+        {
+          "asp": 120,
+          "id": "Uranus"
+        },
+        {
+          "asp": 120,
+          "id": "Neptune"
+        },
+        {
+          "asp": 180,
+          "id": "Pluto"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 120,
+          "id": "Saturn"
+        },
+        {
+          "asp": 120,
+          "id": "Uranus"
+        },
+        {
+          "asp": 120,
+          "id": "Neptune"
+        },
+        {
+          "asp": 180,
+          "id": "Pluto"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Mars",
+      "expected": [
+        {
+          "asp": 60,
+          "id": "Sun"
+        },
+        {
+          "asp": 60,
+          "id": "Mercury"
+        },
+        {
+          "asp": 90,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 90,
+          "id": "Saturn"
+        },
+        {
+          "asp": 90,
+          "id": "Uranus"
+        },
+        {
+          "asp": 90,
+          "id": "Neptune"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 60,
+          "id": "Sun"
+        },
+        {
+          "asp": 60,
+          "id": "Mercury"
+        },
+        {
+          "asp": 90,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 90,
+          "id": "Saturn"
+        },
+        {
+          "asp": 90,
+          "id": "Uranus"
+        },
+        {
+          "asp": 90,
+          "id": "Neptune"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Jupiter",
+      "expected": [
+        {
+          "asp": 60,
+          "id": "Venus"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Moon"
+        },
+        {
+          "asp": 120,
+          "id": "Pluto"
+        },
+        {
+          "asp": 180,
+          "id": "Saturn"
+        },
+        {
+          "asp": 180,
+          "id": "Uranus"
+        },
+        {
+          "asp": 180,
+          "id": "Neptune"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 60,
+          "id": "Venus"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Moon"
+        },
+        {
+          "asp": 120,
+          "id": "Pluto"
+        },
+        {
+          "asp": 180,
+          "id": "Saturn"
+        },
+        {
+          "asp": 180,
+          "id": "Uranus"
+        },
+        {
+          "asp": 180,
+          "id": "Neptune"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Saturn",
+      "expected": [
+        {
+          "asp": 0,
+          "id": "Uranus"
+        },
+        {
+          "asp": 0,
+          "id": "Neptune"
+        },
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Pluto"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Venus"
+        },
+        {
+          "asp": 180,
+          "id": "Jupiter"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 0,
+          "id": "Uranus"
+        },
+        {
+          "asp": 0,
+          "id": "Neptune"
+        },
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Pluto"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Venus"
+        },
+        {
+          "asp": 180,
+          "id": "Jupiter"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Uranus",
+      "expected": [
+        {
+          "asp": 0,
+          "id": "Saturn"
+        },
+        {
+          "asp": 0,
+          "id": "Neptune"
+        },
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Pluto"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Venus"
+        },
+        {
+          "asp": 180,
+          "id": "Jupiter"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 0,
+          "id": "Saturn"
+        },
+        {
+          "asp": 0,
+          "id": "Neptune"
+        },
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Pluto"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Venus"
+        },
+        {
+          "asp": 180,
+          "id": "Jupiter"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Neptune",
+      "expected": [
+        {
+          "asp": 0,
+          "id": "Saturn"
+        },
+        {
+          "asp": 0,
+          "id": "Uranus"
+        },
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Pluto"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Venus"
+        },
+        {
+          "asp": 180,
+          "id": "Jupiter"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 0,
+          "id": "Saturn"
+        },
+        {
+          "asp": 0,
+          "id": "Uranus"
+        },
+        {
+          "asp": 60,
+          "id": "Moon"
+        },
+        {
+          "asp": 60,
+          "id": "Pluto"
+        },
+        {
+          "asp": 90,
+          "id": "Mars"
+        },
+        {
+          "asp": 120,
+          "id": "Venus"
+        },
+        {
+          "asp": 180,
+          "id": "Jupiter"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "signAsp.Pluto",
+      "expected": [
+        {
+          "asp": 60,
+          "id": "Saturn"
+        },
+        {
+          "asp": 60,
+          "id": "Uranus"
+        },
+        {
+          "asp": 60,
+          "id": "Neptune"
+        },
+        {
+          "asp": 120,
+          "id": "Moon"
+        },
+        {
+          "asp": 120,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 180,
+          "id": "Venus"
+        }
+      ],
+      "actual": [
+        {
+          "asp": 60,
+          "id": "Saturn"
+        },
+        {
+          "asp": 60,
+          "id": "Uranus"
+        },
+        {
+          "asp": 60,
+          "id": "Neptune"
+        },
+        {
+          "asp": 120,
+          "id": "Moon"
+        },
+        {
+          "asp": 120,
+          "id": "Jupiter"
+        },
+        {
+          "asp": 180,
+          "id": "Venus"
+        }
+      ],
+      "delta": 0,
+      "status": "PASS"
+    }
+  ],
+  "immRows": [
+    {
+      "field": "immediateAsp.Sun.0",
+      "expected": {
+        "id": "Mars",
+        "asp": 60,
+        "orb": 12.99484701434318
+      },
+      "actual": {
+        "id": "Mars",
+        "asp": 60,
+        "orb": 12.994846964343424
+      },
+      "delta": 4.9999755447061034e-8,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Sun.1",
+      "expected": {
+        "id": "Uranus",
+        "asp": 180,
+        "orb": 14.42911415515806
+      },
+      "actual": {
+        "id": "Uranus",
+        "asp": 180,
+        "orb": 14.429115221887514
+      },
+      "delta": 0.0000010667294532140659,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Moon.0",
+      "expected": {
+        "id": "Uranus",
+        "asp": 60,
+        "orb": 1.9159352431939283
+      },
+      "actual": {
+        "id": "Uranus",
+        "asp": 60,
+        "orb": 1.915933974990196
+      },
+      "delta": 0.0000012682037322520046,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Moon.1",
+      "expected": {
+        "id": "Neptune",
+        "asp": 60,
+        "orb": 3.630431382156644
+      },
+      "actual": {
+        "id": "Neptune",
+        "asp": 60,
+        "orb": 3.630431436541926
+      },
+      "delta": 5.438528205559123e-8,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Venus.0",
+      "expected": {
+        "id": "Jupiter",
+        "asp": 60,
+        "orb": 2.508398776475687
+      },
+      "actual": {
+        "id": "Jupiter",
+        "asp": 60,
+        "orb": 2.5083986270751097
+      },
+      "delta": 1.4940057724288636e-7,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Venus.1",
+      "expected": {
+        "id": "Saturn",
+        "asp": 120,
+        "orb": 5.742889736859269
+      },
+      "actual": {
+        "id": "Saturn",
+        "asp": 120,
+        "orb": 5.7428898028424555
+      },
+      "delta": 6.598318691430904e-8,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Mars.0",
+      "expected": {
+        "id": "Uranus",
+        "asp": 90,
+        "orb": 2.576038830498703
+      },
+      "actual": {
+        "id": "Uranus",
+        "asp": 90,
+        "orb": 2.5760378137690623
+      },
+      "delta": 0.000001016729640923586,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Mars.1",
+      "expected": {
+        "id": "Neptune",
+        "asp": 90,
+        "orb": 2.970327794851869
+      },
+      "actual": {
+        "id": "Neptune",
+        "asp": 90,
+        "orb": 2.9703275977631165
+      },
+      "delta": 1.970887524294085e-7,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Jupiter.0",
+      "expected": {
+        "id": "Pluto",
+        "asp": 120,
+        "orb": 0.3942537793709988
+      },
+      "actual": {
+        "id": "Pluto",
+        "asp": 120,
+        "orb": 0.3942577511995182
+      },
+      "delta": 0.000003971828519411247,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Jupiter.1",
+      "expected": {
+        "id": "Saturn",
+        "asp": 180,
+        "orb": 8.251288513334941
+      },
+      "actual": {
+        "id": "Saturn",
+        "asp": 180,
+        "orb": 8.251288429917622
+      },
+      "delta": 8.341731927430374e-8,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Neptune.0",
+      "expected": {
+        "id": "Pluto",
+        "asp": 60,
+        "orb": 1.6825557844164791
+      },
+      "actual": {
+        "id": "Pluto",
+        "asp": 60,
+        "orb": 1.6825520937492229
+      },
+      "delta": 0.00000369066725625089,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Neptune.1",
+      "expected": {
+        "id": "Mars",
+        "asp": 90,
+        "orb": 2.970327794851869
+      },
+      "actual": {
+        "id": "Mars",
+        "asp": 90,
+        "orb": 2.9703275977631165
+      },
+      "delta": 1.970887524294085e-7,
+      "status": "PASS",
+      "failureClass": "ORB_RULE"
+    },
+    {
+      "field": "immediateAsp.Chiron",
+      "expected": [
+        {
+          "id": "Pluto",
+          "asp": 120,
+          "orb": 0.6109525122257935
+        },
+        {
+          "id": "Jupiter",
+          "asp": 0,
+          "orb": 0.21669873285479468
+        }
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "PLANET_MAPPING"
+    }
+  ],
+  "smoke": {
+    "1900": {
+      "jd": 2415021,
+      "sun": 280.663287864133,
+      "asc": 139.13440503752867,
+      "mc": 44.61299940570131,
+      "house1": 139.13440503752867,
+      "aspectStarter": "Sun",
+      "aspectCount": 4,
+      "parity": "NOT_COMPARABLE"
+    },
+    "1950": {
+      "jd": 2433283,
+      "sun": 280.5143874340105,
+      "asc": 139.03847704659285,
+      "mc": 44.498237659513386,
+      "house1": 139.03847704659285,
+      "aspectStarter": "Sun",
+      "aspectCount": 4,
+      "parity": "NOT_COMPARABLE"
+    },
+    "1976": {
+      "jd": 2442779,
+      "sun": 280.2011705054721,
+      "asc": 138.79485017601488,
+      "mc": 44.206619765809066,
+      "house1": 138.79485017601488,
+      "aspectStarter": "Sun",
+      "aspectCount": 6,
+      "parity": "NOT_COMPARABLE"
+    },
+    "2000": {
+      "jd": 2451545,
+      "sun": 280.3689186985535,
+      "asc": 138.94371621506394,
+      "mc": 44.38472810817192,
+      "house1": 138.94371621506394,
+      "aspectStarter": "Sun",
+      "aspectCount": 7,
+      "parity": "NOT_COMPARABLE"
+    },
+    "2026": {
+      "jd": 2461042,
+      "sun": 281.07802031284865,
+      "asc": 139.53060926859962,
+      "mc": 45.085973182233005,
+      "house1": 139.53060926859962,
+      "aspectStarter": "Sun",
+      "aspectCount": 8,
+      "parity": "NOT_COMPARABLE"
+    }
+  }
+}

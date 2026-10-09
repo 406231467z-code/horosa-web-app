@@ -1,0 +1,687 @@
+{
+  "label": "EXPERIMENTAL",
+  "legacyReference": "HISTORICAL-GOLDEN",
+  "rows": [
+    {
+      "field": "objects.Sun.lon",
+      "historical": 83.75148635610559,
+      "browser": 83.751486350667,
+      "delta": 5.438593575490813e-9,
+      "deltaArcsec": 0.000019578936871766928,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Sun.lat",
+      "historical": 0.00010779948809563099,
+      "browser": 0.00010774442533114215,
+      "delta": 5.506276448883599e-8,
+      "deltaArcsec": 0.00019822595215980955,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Sun.lonspeed",
+      "historical": 0.9551426912952471,
+      "browser": 0.9551426920696479,
+      "delta": 7.744007657350949e-10,
+      "deltaArcsec": 0.0000027878427566463415,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Sun.decl",
+      "historical": 23.294632034395157,
+      "browser": 23.294631979137232,
+      "delta": 5.5257924458373964e-8,
+      "deltaArcsec": 0.00019892852805014627,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Sun.retrograde",
+      "historical": false,
+      "browser": false,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Moon.lon",
+      "historical": 340.0965357544576,
+      "browser": 340.0965355475447,
+      "delta": 2.0691288682428421e-7,
+      "deltaArcsec": 0.0007448863925674232,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Moon.lat",
+      "historical": 2.7399114136532323,
+      "browser": 2.739911440516042,
+      "delta": 2.6862809754391037e-8,
+      "deltaArcsec": 0.00009670611511580773,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Moon.lonspeed",
+      "historical": 13.223769326337802,
+      "browser": 13.223769324729618,
+      "delta": 1.6081838083437106e-9,
+      "deltaArcsec": 0.000005789461710037358,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Moon.decl",
+      "historical": -5.245371139575063,
+      "browser": -5.2453711923135256,
+      "delta": 5.273846248599057e-8,
+      "deltaArcsec": 0.00018985846494956604,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Moon.retrograde",
+      "historical": false,
+      "browser": false,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mercury.lon",
+      "historical": 65.01506936771867,
+      "browser": 65.01506935034979,
+      "delta": 1.7368876115142484e-8,
+      "deltaArcsec": 0.00006252795401451294,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mercury.lat",
+      "historical": -1.7335509280636858,
+      "browser": -1.7335509239476528,
+      "delta": 4.116033069934133e-9,
+      "deltaArcsec": 0.000014817719051762879,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mercury.lonspeed",
+      "historical": 1.6977681983120456,
+      "browser": 1.697768205185461,
+      "delta": 6.873415392405491e-9,
+      "deltaArcsec": 0.000024744295412659767,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mercury.decl",
+      "historical": 19.431087934064283,
+      "browser": 19.43108793502107,
+      "delta": 9.567848735514417e-10,
+      "deltaArcsec": 0.00000344442554478519,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mercury.retrograde",
+      "historical": false,
+      "browser": false,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Venus.lon",
+      "historical": 48.3121754768774,
+      "browser": 48.31217545611053,
+      "delta": 2.0766869113231223e-8,
+      "deltaArcsec": 0.0000747607288076324,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Venus.lat",
+      "historical": -1.9530334964948766,
+      "browser": -1.953033512308558,
+      "delta": 1.5813681475407293e-8,
+      "deltaArcsec": 0.000056929253311466255,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Venus.lonspeed",
+      "historical": 1.175623336464801,
+      "browser": 1.1756233394938,
+      "delta": 3.028999051579717e-9,
+      "deltaArcsec": 0.000010904396585686982,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Venus.decl",
+      "historical": 15.405264968691514,
+      "browser": 15.405264947789064,
+      "delta": 2.0902449548998447e-8,
+      "deltaArcsec": 0.00007524881837639441,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Venus.retrograde",
+      "historical": false,
+      "browser": false,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mars.lon",
+      "historical": 10.75663934176239,
+      "browser": 10.756639386323547,
+      "delta": 4.45611565424997e-8,
+      "deltaArcsec": 0.00016042016355299893,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mars.lat",
+      "historical": -1.983010246423067,
+      "browser": -1.9830103640155805,
+      "delta": 1.1759251350440536e-7,
+      "deltaArcsec": 0.0004233330486158593,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mars.lonspeed",
+      "historical": 0.7193894722647898,
+      "browser": 0.7193894743917146,
+      "delta": 2.1269248584587785e-9,
+      "deltaArcsec": 0.000007656929490451603,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mars.decl",
+      "historical": 2.4333335268602183,
+      "browser": 2.4333334360594985,
+      "delta": 9.080071983191829e-8,
+      "deltaArcsec": 0.00032688259139490583,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Mars.retrograde",
+      "historical": false,
+      "browser": false,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Jupiter.lon",
+      "historical": 105.80377670040171,
+      "browser": 105.8037768290354,
+      "delta": 1.2863368681337306e-7,
+      "deltaArcsec": 0.000463081272528143,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Jupiter.lat",
+      "historical": 0.18507647000784136,
+      "browser": 0.18507479002632315,
+      "delta": 0.0000016799815182044764,
+      "deltaArcsec": 0.006047933465536115,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Jupiter.lonspeed",
+      "historical": 0.21641881191717038,
+      "browser": 0.21641881615660508,
+      "delta": 4.2394346921881265e-9,
+      "deltaArcsec": 0.000015261964891877255,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Jupiter.decl",
+      "historical": 22.69000338781408,
+      "browser": 22.690001704350895,
+      "delta": 0.0000016834631857420845,
+      "deltaArcsec": 0.006060467468671504,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Jupiter.retrograde",
+      "historical": false,
+      "browser": false,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Saturn.lon",
+      "historical": 294.05506521373667,
+      "browser": 294.05506525895305,
+      "delta": 4.521638174992404e-8,
+      "deltaArcsec": 0.00016277897429972654,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Saturn.lat",
+      "historical": 0.11711332253393968,
+      "browser": 0.11711335119967335,
+      "delta": 2.8665733675659055e-8,
+      "deltaArcsec": 0.0001031966412323726,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Saturn.lonspeed",
+      "historical": -0.05823102834207577,
+      "browser": -0.058231023197764666,
+      "delta": 5.144311102101007e-9,
+      "deltaArcsec": 0.000018519519967563625,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Saturn.decl",
+      "historical": -21.18594987578942,
+      "browser": -21.18594983969686,
+      "delta": 3.6092558275413467e-8,
+      "deltaArcsec": 0.00012993320979148848,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Saturn.retrograde",
+      "historical": true,
+      "browser": true,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Uranus.lon",
+      "historical": 278.18060051126366,
+      "browser": 278.1806015725545,
+      "delta": 0.0000010612908454277203,
+      "deltaArcsec": 0.0038206470435397932,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Uranus.lat",
+      "historical": -0.32369422139469844,
+      "browser": -0.3236937544115642,
+      "delta": 4.6698313421744686e-7,
+      "deltaArcsec": 0.0016811392831828087,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Uranus.lonspeed",
+      "historical": -0.03882903059550271,
+      "browser": -0.03882902900941085,
+      "delta": 1.5860918620158593e-9,
+      "deltaArcsec": 0.000005709930703257093,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Uranus.decl",
+      "historical": -23.512554194632724,
+      "browser": -23.512553663024637,
+      "delta": 5.3160808732855e-7,
+      "deltaArcsec": 0.00191378911438278,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Uranus.retrograde",
+      "historical": true,
+      "browser": true,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Neptune.lon",
+      "historical": 283.72696713661423,
+      "browser": 283.72696698408663,
+      "delta": 1.5252760476869298e-7,
+      "deltaArcsec": 0.0005490993771672947,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Neptune.lat",
+      "historical": 0.8762218664763998,
+      "browser": 0.8762218995222636,
+      "delta": 3.304586382313346e-8,
+      "deltaArcsec": 0.00011896510976328045,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Neptune.lonspeed",
+      "historical": -0.024942938848052505,
+      "browser": -0.024942939879022543,
+      "delta": 1.0309700385069398e-9,
+      "deltaArcsec": 0.0000037114921386249833,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Neptune.decl",
+      "historical": -21.86265849287962,
+      "browser": -21.862658475517932,
+      "delta": 1.736168897537027e-8,
+      "deltaArcsec": 0.00006250208031133297,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Neptune.retrograde",
+      "historical": true,
+      "browser": true,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Pluto.lon",
+      "historical": 225.4095229210307,
+      "browser": 225.40951907783588,
+      "delta": 0.000003843194832597874,
+      "deltaArcsec": 0.013835501397352346,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Pluto.lat",
+      "historical": 15.8563469409355,
+      "browser": 15.856350819449593,
+      "delta": 0.000003878514093003105,
+      "deltaArcsec": 0.013962650734811177,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Pluto.lonspeed",
+      "historical": -0.020325207887016146,
+      "browser": -0.020325177025073304,
+      "delta": 3.086194284157573e-8,
+      "deltaArcsec": 0.00011110299422967262,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Pluto.decl",
+      "historical": -1.2520392572775212,
+      "browser": -1.2520345004213689,
+      "delta": 0.0000047568561523103625,
+      "deltaArcsec": 0.017124682148317305,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Pluto.retrograde",
+      "historical": true,
+      "browser": true,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.North Node.lon",
+      "historical": 309.71885064672216,
+      "browser": 309.7188506467304,
+      "delta": 8.242295734817162e-12,
+      "deltaArcsec": 2.9672264645341784e-8,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.North Node.lat",
+      "historical": 0,
+      "browser": 0,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.North Node.lonspeed",
+      "historical": -0.052967253313373396,
+      "browser": -0.05296722846354694,
+      "delta": 2.4849826453510193e-8,
+      "deltaArcsec": 0.0000894593752326367,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.North Node.decl",
+      "historical": -17.818322493753765,
+      "browser": -17.818322493751566,
+      "delta": 2.19912976717751e-12,
+      "deltaArcsec": 7.916867161839036e-9,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.North Node.retrograde",
+      "historical": true,
+      "browser": true,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Dark Moon.lon",
+      "historical": 234.90701023432925,
+      "browser": 234.9070102343375,
+      "delta": 8.242295734817162e-12,
+      "deltaArcsec": 2.9672264645341784e-8,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Dark Moon.lat",
+      "historical": -4.966586165319357,
+      "browser": -4.9665861653193595,
+      "delta": 2.6645352591003757e-15,
+      "deltaArcsec": 9.592326932761353e-12,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Dark Moon.lonspeed",
+      "historical": 0.11196377824772503,
+      "browser": 0.11196379470823165,
+      "delta": 1.6460506610527226e-8,
+      "deltaArcsec": 0.00005925782379789801,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Dark Moon.decl",
+      "historical": -23.810452640204243,
+      "browser": -23.810452640206304,
+      "delta": 2.0605739337042905e-12,
+      "deltaArcsec": 7.418066161335446e-9,
+      "status": "PASS"
+    },
+    {
+      "field": "objects.Dark Moon.retrograde",
+      "historical": false,
+      "browser": false,
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "ascmc.Asc.lon",
+      "historical": 156.011674406942,
+      "browser": 156.01167440694198,
+      "delta": 2.842170943040401e-14,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "ascmc.MC.lon",
+      "historical": 64.07947909689123,
+      "browser": 64.07947909689118,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "ascmc.Desc.lon",
+      "historical": 336.011674406942,
+      "browser": 336.011674406942,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "ascmc.IC.lon",
+      "historical": 244.07947909689125,
+      "browser": 244.0794790968912,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House1.lon",
+      "historical": 156.011674406942,
+      "browser": 156.01167440694198,
+      "delta": 2.842170943040401e-14,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House2.lon",
+      "historical": 181.8537070240794,
+      "browser": 181.85370702407934,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House3.lon",
+      "historical": 210.60894209907622,
+      "browser": 210.60894209907616,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House4.lon",
+      "historical": 244.07947909689125,
+      "browser": 244.0794790968912,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House5.lon",
+      "historical": 278.7633461755206,
+      "browser": 278.7633461755205,
+      "delta": 1.1368683772161603e-13,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House6.lon",
+      "historical": 309.4151965868448,
+      "browser": 309.4151965868447,
+      "delta": 1.1368683772161603e-13,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House7.lon",
+      "historical": 336.011674406942,
+      "browser": 336.011674406942,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House8.lon",
+      "historical": 1.8537070240794264,
+      "browser": 1.8537070240793128,
+      "delta": 1.1368683772161603e-13,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House9.lon",
+      "historical": 30.608942099076216,
+      "browser": 30.60894209907616,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House10.lon",
+      "historical": 64.07947909689123,
+      "browser": 64.07947909689118,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House11.lon",
+      "historical": 98.76334617552058,
+      "browser": 98.76334617552051,
+      "delta": 7.105427357601002e-14,
+      "deltaArcsec": 2.5579538487363607e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "houses.cusps.House12.lon",
+      "historical": 129.41519658684476,
+      "browser": 129.4151965868447,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    }
+  ],
+  "placidus": {
+    "system": "Placidus",
+    "asc": 156.01167440694198,
+    "mc": 64.07947909689118,
+    "parity": "NOT_COMPARABLE"
+  },
+  "sidereal": {
+    "status": "REFERENCE-ONLY",
+    "jd": 2448057.6041666665,
+    "ayanamsa": "lahiri",
+    "sun": {
+      "id": "Sun",
+      "lon": 60.02419797582765,
+      "lat": 0.0001077444253333603,
+      "lonspeed": 0.9551179067674447,
+      "decl": 23.292959596844526,
+      "retrograde": false
+    },
+    "moon": {
+      "id": "Moon",
+      "lon": 316.3692471727054,
+      "lat": 2.739911440516042,
+      "lonspeed": 13.223744750136067,
+      "decl": -5.246206171711437,
+      "retrograde": false
+    },
+    "asc": 132.28438603210265,
+    "mc": 40.35219072205184
+  },
+  "smoke": {
+    "1900": {
+      "jd": 2415021,
+      "sun": 280.663287864133,
+      "moon": 279.6163787577918,
+      "asc": 139.13440503752867,
+      "mc": 44.61299940570131,
+      "houses": "Placidus",
+      "status": "SMOKE"
+    },
+    "1950": {
+      "jd": 2433283,
+      "sun": 280.5143874340105,
+      "moon": 67.5445264815119,
+      "asc": 139.03847704659285,
+      "mc": 44.498237659513386,
+      "houses": "Placidus",
+      "status": "SMOKE"
+    },
+    "1976": {
+      "jd": 2442779,
+      "sun": 280.2011705054721,
+      "moon": 278.8275893590663,
+      "asc": 138.79485017601488,
+      "mc": 44.206619765809066,
+      "houses": "Placidus",
+      "status": "SMOKE"
+    },
+    "1990": {
+      "jd": 2447893,
+      "sun": 280.81426076715053,
+      "moon": 333.2676545335762,
+      "asc": 139.29957983568235,
+      "mc": 44.81021997362487,
+      "houses": "Placidus",
+      "status": "PARITY-PASS on the June chart only; this January row is SMOKE"
+    },
+    "2000": {
+      "jd": 2451545,
+      "sun": 280.3689186985535,
+      "moon": 223.3237512189197,
+      "asc": 138.94371621506394,
+      "mc": 44.38472810817192,
+      "houses": "Placidus",
+      "status": "SMOKE"
+    },
+    "2026": {
+      "jd": 2461042,
+      "sun": 281.07802031284865,
+      "moon": 74.22525137788301,
+      "asc": 139.53060926859962,
+      "mc": 45.085973182233005,
+      "houses": "Placidus",
+      "status": "SMOKE"
+    }
+  }
+}

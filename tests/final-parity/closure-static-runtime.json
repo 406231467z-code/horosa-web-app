@@ -1,0 +1,50 @@
+{
+  "origin": "http://127.0.0.1:8012/",
+  "spaFallback": true,
+  "home": {
+    "path": "/",
+    "hash": "",
+    "homeUi": true,
+    "bad": [],
+    "err": []
+  },
+  "removed": [
+    {
+      "route": "/fengshui",
+      "path": "/",
+      "hash": "",
+      "homeUi": true,
+      "bad": [],
+      "err": [],
+      "pass": true
+    },
+    {
+      "route": "/planetarium",
+      "path": "/",
+      "hash": "",
+      "homeUi": true,
+      "bad": [],
+      "err": [],
+      "pass": true
+    },
+    {
+      "route": "/astrochart3d",
+      "path": "/",
+      "hash": "",
+      "homeUi": true,
+      "bad": [],
+      "err": [],
+      "pass": true
+    },
+    {
+      "route": "/astrochart-3d",
+      "path": "/",
+      "hash": "",
+      "homeUi": true,
+      "bad": [],
+      "err": [],
+      "pass": true
+    }
+  ],
+  "status": "PASS"
+}

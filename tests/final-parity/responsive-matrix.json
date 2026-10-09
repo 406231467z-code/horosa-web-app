@@ -1,0 +1,226 @@
+{
+  "browser": "edge",
+  "exe": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "report": [
+    {
+      "viewport": "320x568",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "568x320",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "360x800",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "800x360",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "375x812",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "812x375",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "390x844",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "844x390",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "430x932",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "932x430",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "768x1024",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "1024x768",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "1024x768",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "768x1024",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "1280x720",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "720x1280",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "1366x768",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "768x1366",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "1440x900",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "900x1440",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "1920x1080",
+      "orientation": "landscape",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    },
+    {
+      "viewport": "1080x1920",
+      "orientation": "portrait",
+      "pages": 24,
+      "overflow": [],
+      "crash": [],
+      "bad": [],
+      "errors": [],
+      "tiny": 0
+    }
+  ]
+}

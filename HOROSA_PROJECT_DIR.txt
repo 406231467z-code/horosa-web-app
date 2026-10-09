@@ -1,0 +1,3 @@
+﻿# Horosa current project pointer
+# Relative child folder name or absolute path
+C:\Users\Jiliason\horosa-web-app\local\workspace\Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c

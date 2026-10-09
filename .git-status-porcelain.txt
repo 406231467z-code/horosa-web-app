@@ -1,0 +1,245 @@
+﻿ M experiments/phase5a-sweph-parity/browser/smoke.html
+ M experiments/phase5a-sweph-parity/derived.mjs
+ M experiments/phase5a-sweph-parity/package.json
+ D experiments/phase5a-sweph-parity/productionRules.mjs
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/.umirc.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/package-lock.json
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/package.json
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/AstroAnalysisLab.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/AstroPrenatalSyzygy.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/AstroPrimaryDirection.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/AstroPrimaryDirectionChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/AstroProgChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/AstroZR.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/IndiaChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/astro/IndiaChartMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/babylon/BabylonMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/cntradition/BaZi.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/cntradition/__tests__/resolveChartBazi.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/common/BackendStatusDot.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/common/ChartServiceErrorModal.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/common/ServiceStatusBanner.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/common/StartupGate.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/common/__tests__/phase4aCalcServiceRequired.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/direction/AstroDirectMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/divination/DivinationChartShell.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/divination/__tests__/divinationStepPrefetch.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/dunjia/DunJiaCalc.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/dunjia/DunJiaMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/dunjia/QimenXiangDoc.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/dunjia/__tests__/QimenXiangDoc.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/election/ElectionMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/geomancy/GeomancyMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/geomancy/__tests__/geomancyLiveRecast.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/germany/AstroMidpoint.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/germany/UranianDialMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/germany/UranianGraphicEphemeris.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/germany/UranianHouseFrames.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/guolao/GuoLaoChartMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/huangji/HuangJiMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/jieqi/JieQiChartsMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/jingjue/JingJueMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/jinkou/JinKouCalc.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/jinkou/JinKouMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/jinkou/JinKouPanChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/kinastro/KinAstroMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/kinastro/__tests__/cetianSnapshotOptions.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/liureng/KeChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/liureng/LRCommChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/liureng/LRConst.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/lrzhan/LiuRengMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/sanshi/SanShiUnitedMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/sanshi/__tests__/SanShiUnitedMain.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/sanshi/__tests__/sanshiStepFluency.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/shenyishu/ShenYiShuMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/shenyishu/__tests__/shenyishuStress.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/su28/HouseSu.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/su28/HouseSu0.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/su28/Su28Chart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/su28/Su28ChartCircle.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/suzhan/SZChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/suzhan/SuZhanMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/szsign/SZSignChart.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/szsign/SZSignChartCircle.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/taixuan/TaiXuanMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/taiyi/TaiYiCalc.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/wuzhao/WuZhaoMain.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/wuzhao/__tests__/wuzhaoStress.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/ziwei/__tests__/ziweiMountSnapshot.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/components/ziwei/__tests__/ziweiV2FactEquivalence.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/divination/election/returnCharts.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/divination/mundane/momentPipeline.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/models/app.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/models/astro.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/models/rules.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/services/astroPd3d.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/services/qizheng.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/aiAnalysisContext.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/aiExportRoundtrip.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/baziStress.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/constants.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/mountRequestDiff.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/pdYearsMount.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/phase4cZiweiLiureng.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/preciseCalcBridge.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/predictiveScanRange.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/primaryDirChartMount.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/techniquePerfBudget.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/yizhangjingReportTable.test.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/aiAnalysisContext.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/babylonAiSnapshot.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/backendIdentity.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/baziLunarLocal.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/chartFetch.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/constants.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/dataWarmTasks.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/divinationTimeDraft.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/liurengGodsLocal.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/preciseCalcBridge.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/request.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/serviceStatus.js
+ M local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/ziweiBirthLocal.js
+?? .git-status-porcelain.txt
+?? HOROSA_PROJECT_DIR.txt
+?? docs/CLEAN_RELEASE_BUILD.md
+?? docs/FINAL_ALGORITHM_PARITY.md
+?? docs/FINAL_BACKEND_DEPENDENCY_AUDIT.md
+?? docs/FINAL_BUG_FIX_LOG.md
+?? docs/FINAL_FEATURE_MATRIX.md
+?? docs/FINAL_LEGACY_PURGE_AUDIT.md
+?? docs/FINAL_LICENSE_GATE.md
+?? docs/FINAL_RELEASE_CLOSURE_PRE_GATE.md
+?? docs/FINAL_RESPONSIVE_AUDIT.md
+?? docs/FINAL_WEB_ARCHITECTURE.md
+?? docs/PHASE5A1R2_ARTIFACT_RECOVERY.md
+?? docs/PHASE5A2_WEB_ENGINE.md
+?? docs/PHASE5A3_BROWSER_EPHEMERIS.md
+?? docs/PHASE5A4_BROWSER_CHART.md
+?? docs/PHASE5A5_DERIVED.md
+?? docs/PHASE5A6_INPUTS.md
+?? docs/PHASE5A7_PROVENANCE.md
+?? docs/PHASE5A8_MANSIONS.md
+?? docs/STATIC_HOSTING_SPA.md
+?? experiments/.gitignore
+?? experiments/astronomy-engine-audit/
+?? experiments/phase5a-sweph-parity/LICENSE_GATE.md
+?? experiments/phase5a-sweph-parity/browserChartBuilder.js
+?? experiments/phase5a-sweph-parity/browserEphemerisAdapter.js
+?? experiments/phase5a-sweph-parity/data/
+?? experiments/phase5a-sweph-parity/derived/
+?? experiments/phase5a-sweph-parity/integration/
+?? experiments/phase5a-sweph-parity/phase5a3.sweph.browser.test.js
+?? experiments/phase5a-sweph-parity/phase5a4.browserChartBuilder.test.js
+?? experiments/phase5a-sweph-parity/phase5a5.aspects.test.js
+?? experiments/phase5a-sweph-parity/phase5a5.declParallel.test.js
+?? experiments/phase5a-sweph-parity/phase5a5.lots.test.js
+?? experiments/phase5a-sweph-parity/phase5a5.reception.test.js
+?? experiments/phase5a-sweph-parity/phase5a6.declParallel.complete.test.js
+?? experiments/phase5a-sweph-parity/phase5a6.syzygy.test.js
+?? experiments/phase5a-sweph-parity/phase5a7.provenance.test.js
+?? experiments/phase5a-sweph-parity/productionRules.js
+?? experiments/phase5a-sweph-parity/results/phase5a11-parity-corpus.json
+?? experiments/phase5a-sweph-parity/results/phase5a3-1990.json
+?? experiments/phase5a-sweph-parity/results/phase5a4-1990.json
+?? experiments/phase5a-sweph-parity/results/phase5a5-1990-aspects.json
+?? experiments/phase5a-sweph-parity/results/phase5a5-1990-declparallel.json
+?? experiments/phase5a-sweph-parity/results/phase5a5-1990-lots.json
+?? experiments/phase5a-sweph-parity/results/phase5a5-1990-reception.json
+?? experiments/phase5a-sweph-parity/results/phase5a6-1990-declination.json
+?? experiments/phase5a-sweph-parity/results/phase5a6-1990-syzygy.json
+?? experiments/phase5a-sweph-parity/results/phase5a7-provenance.json
+?? experiments/phase5a-sweph-parity/results/phase5a8-guo.json
+?? experiments/phase5a-sweph-parity/results/phase5a8-su28.json
+?? experiments/phase5a-sweph-parity/schemas/
+?? experiments/phase5a-sweph-parity/tests/
+?? local/boundless-mvn-install.log
+?? local/cmds.txt
+?? local/nodelist.txt
+?? local/phase4g-shell-probe.txt
+?? local/proc-cpu.txt
+?? local/runtime/
+?? local/shell-probe.txt
+?? local/tasklist.txt
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/acg/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/geomancy/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/germany/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/guostarsect/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/india/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/jieqi/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/modern/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/xuanshi/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/xuanshi/data/editorial.sqlite-shm
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/astrostudy/xuanshi/data/editorial.sqlite-wal
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/websrv/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astropy/websrv/kentang/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui.zip
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/dist-file/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/dist/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/node_modules/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/.umi/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/services/__tests__/browserAstronomyProduction.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/services/__tests__/productionDefaultProviderNoLegacyFetch.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/services/astrologyCalculationService.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/services/astronomy/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/browserCalcGate.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/cnyibuBrowserParity.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/directionBrowserParity.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/finalChartCrudRoundtrip.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/finalCrossViewportIdentity.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/finalParityClosure.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/finalParityCorpus.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/finalPerfExtended.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/finalPerfSmoke.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/geomancyCalendarParity.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/huangjiBrowserParity.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/__tests__/indiaBrowserParity.test.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/browserCalcGate.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/calcStatus.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/calendarProvider.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/directionBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/geomancyBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/geomancyFigures.slim.json
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/huangjiBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/huangjiGuaCodes.json
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/huangjiHistory.json
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/indiaBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/jingjueBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/pythonRandom.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/shenyishuBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/taixuanBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/taixuanDict.slim.json
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/src/utils/wuzhaoBrowser.js
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/tests/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/flatlib-ctrad2/flatlib/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/flatlib-ctrad2/flatlib/dignities/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/flatlib-ctrad2/flatlib/ephem/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/flatlib-ctrad2/flatlib/predictives/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/flatlib-ctrad2/flatlib/protocols/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/flatlib-ctrad2/flatlib/tools/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/jingjue/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/beiji/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/chinstar/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/chunzi/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/fendjing/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/laos/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/laos/data/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/nanji/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/qizheng/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/shaozi/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinastro/astro/tieban/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinjinkou/kinjinkou/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinjinkou/kinjinkou/jinkoujue/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinjinkou/kinjinkou/utils/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinjinkou/kinjinkou/wannianli/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinqimen/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kintaiyi/src/kintaiyi/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinwangji/kinwangji/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/kinwuzhao/__pycache__/
+?? local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/vendor/taixuanshifa/__pycache__/
+?? release/
+?? runtime/
+?? scripts/
+?? tests/

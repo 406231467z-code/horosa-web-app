@@ -1,0 +1,838 @@
+{
+  "source": "browser-sweph-experiment",
+  "label": "HISTORICAL-GOLDEN",
+  "testEnvironment": "node",
+  "package": "swisseph-wasm@0.1.0",
+  "flags": "SEFLG_SWIEPH | SEFLG_SPEED",
+  "declination": "SEFLG_EQUATORIAL second calc_ut, index 1",
+  "toleranceDeg": 0.0002777777777777778,
+  "initMs": 33.703,
+  "calcMs": 6.939099999999996,
+  "jd": 2448057.6041666665,
+  "jdFromCalendar": 2448057.6041666665,
+  "sidereal": {
+    "status": "NOT_COMPARABLE",
+    "reason": "historical chart zodiacal is Tropical and siderealAyanamsa is empty",
+    "ayanamsaUtLahiriDefault": 24.60692835648132
+  },
+  "houses": {
+    "regiomontanus": "Regiomontanus",
+    "placidus": "COMPUTED letter P; this golden is Regiomontanus, so Placidus cusps are NOT_COMPARABLE",
+    "placidusAsc": 156.01167440694198,
+    "placidusMc": 64.07947909689118
+  },
+  "dates": {
+    "midnight": 2448057.1666666665,
+    "beforeMidnight": 2448058.165972222,
+    "nextMidnight": 2448058.1666666665,
+    "zonePlus9": 2448057.5625
+  },
+  "ephemerisRangeProbe": [
+    {
+      "year": 1700,
+      "jd": 2341973,
+      "sunLongitude": 281.2247765141684,
+      "finite": true
+    },
+    {
+      "year": 1800,
+      "jd": 2378497,
+      "sunLongitude": 280.93914579515194,
+      "finite": true
+    },
+    {
+      "year": 1900,
+      "jd": 2415021,
+      "sunLongitude": 280.663287864133,
+      "finite": true
+    },
+    {
+      "year": 1950,
+      "jd": 2433283,
+      "sunLongitude": 280.5143874340105,
+      "finite": true
+    },
+    {
+      "year": 1976,
+      "jd": 2442779,
+      "sunLongitude": 280.2011705054721,
+      "finite": true
+    },
+    {
+      "year": 1990,
+      "jd": 2447893,
+      "sunLongitude": 280.81426076715053,
+      "finite": true
+    },
+    {
+      "year": 2000,
+      "jd": 2451545,
+      "sunLongitude": 280.3689186985535,
+      "finite": true
+    },
+    {
+      "year": 2026,
+      "jd": 2461042,
+      "sunLongitude": 281.07802031284865,
+      "finite": true
+    },
+    {
+      "year": 2400,
+      "jd": 2597642,
+      "sunLongitude": 280.28965344786775,
+      "finite": true
+    },
+    {
+      "year": 2500,
+      "jd": 2634167,
+      "sunLongitude": 281.0269890106662,
+      "finite": true
+    }
+  ],
+  "ephemerisDocumentedRange": "swisseph-wasm README: bundled se1 approximately 1800-2400. Years outside that window are EPHEMERIS_DATA_RANGE_GAP even if calc_ut returns a number.",
+  "dst": "Adapter uses the caller zone offset. This golden stores +08:00. No DST rules database.",
+  "rows": [
+    {
+      "field": "Sun.longitude",
+      "historical": 83.75148635610559,
+      "browser": 83.751486350667,
+      "delta": 5.438593575490813e-9,
+      "deltaArcsec": 0.000019578936871766928,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Sun.latitude",
+      "historical": 0.00010779948809563099,
+      "browser": 0.00010774442533114215,
+      "delta": 5.506276448883599e-8,
+      "deltaArcsec": 0.00019822595215980955,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Sun.speed",
+      "historical": 0.9551426912952471,
+      "browser": 0.9551426920696479,
+      "delta": 7.744007657350949e-10,
+      "deltaArcsec": 0.0000027878427566463415,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Sun.declination",
+      "historical": 23.294632034395157,
+      "browser": 23.294631979137232,
+      "delta": 5.5257924458373964e-8,
+      "deltaArcsec": 0.00019892852805014627,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Sun.retrograde",
+      "historical": false,
+      "browser": false,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Moon.longitude",
+      "historical": 340.0965357544576,
+      "browser": 340.0965355475447,
+      "delta": 2.0691288682428421e-7,
+      "deltaArcsec": 0.0007448863925674232,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Moon.latitude",
+      "historical": 2.7399114136532323,
+      "browser": 2.739911440516042,
+      "delta": 2.6862809754391037e-8,
+      "deltaArcsec": 0.00009670611511580773,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Moon.speed",
+      "historical": 13.223769326337802,
+      "browser": 13.223769324729618,
+      "delta": 1.6081838083437106e-9,
+      "deltaArcsec": 0.000005789461710037358,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Moon.declination",
+      "historical": -5.245371139575063,
+      "browser": -5.2453711923135256,
+      "delta": 5.273846248599057e-8,
+      "deltaArcsec": 0.00018985846494956604,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Moon.retrograde",
+      "historical": false,
+      "browser": false,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mercury.longitude",
+      "historical": 65.01506936771867,
+      "browser": 65.01506935034979,
+      "delta": 1.7368876115142484e-8,
+      "deltaArcsec": 0.00006252795401451294,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mercury.latitude",
+      "historical": -1.7335509280636858,
+      "browser": -1.7335509239476528,
+      "delta": 4.116033069934133e-9,
+      "deltaArcsec": 0.000014817719051762879,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mercury.speed",
+      "historical": 1.6977681983120456,
+      "browser": 1.697768205185461,
+      "delta": 6.873415392405491e-9,
+      "deltaArcsec": 0.000024744295412659767,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mercury.declination",
+      "historical": 19.431087934064283,
+      "browser": 19.43108793502107,
+      "delta": 9.567848735514417e-10,
+      "deltaArcsec": 0.00000344442554478519,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mercury.retrograde",
+      "historical": false,
+      "browser": false,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Venus.longitude",
+      "historical": 48.3121754768774,
+      "browser": 48.31217545611053,
+      "delta": 2.0766869113231223e-8,
+      "deltaArcsec": 0.0000747607288076324,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Venus.latitude",
+      "historical": -1.9530334964948766,
+      "browser": -1.953033512308558,
+      "delta": 1.5813681475407293e-8,
+      "deltaArcsec": 0.000056929253311466255,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Venus.speed",
+      "historical": 1.175623336464801,
+      "browser": 1.1756233394938,
+      "delta": 3.028999051579717e-9,
+      "deltaArcsec": 0.000010904396585686982,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Venus.declination",
+      "historical": 15.405264968691514,
+      "browser": 15.405264947789064,
+      "delta": 2.0902449548998447e-8,
+      "deltaArcsec": 0.00007524881837639441,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Venus.retrograde",
+      "historical": false,
+      "browser": false,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mars.longitude",
+      "historical": 10.75663934176239,
+      "browser": 10.756639386323547,
+      "delta": 4.45611565424997e-8,
+      "deltaArcsec": 0.00016042016355299893,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mars.latitude",
+      "historical": -1.983010246423067,
+      "browser": -1.9830103640155805,
+      "delta": 1.1759251350440536e-7,
+      "deltaArcsec": 0.0004233330486158593,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mars.speed",
+      "historical": 0.7193894722647898,
+      "browser": 0.7193894743917146,
+      "delta": 2.1269248584587785e-9,
+      "deltaArcsec": 0.000007656929490451603,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mars.declination",
+      "historical": 2.4333335268602183,
+      "browser": 2.4333334360594985,
+      "delta": 9.080071983191829e-8,
+      "deltaArcsec": 0.00032688259139490583,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Mars.retrograde",
+      "historical": false,
+      "browser": false,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Jupiter.longitude",
+      "historical": 105.80377670040171,
+      "browser": 105.8037768290354,
+      "delta": 1.2863368681337306e-7,
+      "deltaArcsec": 0.000463081272528143,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Jupiter.latitude",
+      "historical": 0.18507647000784136,
+      "browser": 0.18507479002632315,
+      "delta": 0.0000016799815182044764,
+      "deltaArcsec": 0.006047933465536115,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Jupiter.speed",
+      "historical": 0.21641881191717038,
+      "browser": 0.21641881615660508,
+      "delta": 4.2394346921881265e-9,
+      "deltaArcsec": 0.000015261964891877255,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Jupiter.declination",
+      "historical": 22.69000338781408,
+      "browser": 22.690001704350895,
+      "delta": 0.0000016834631857420845,
+      "deltaArcsec": 0.006060467468671504,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Jupiter.retrograde",
+      "historical": false,
+      "browser": false,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Saturn.longitude",
+      "historical": 294.05506521373667,
+      "browser": 294.05506525895305,
+      "delta": 4.521638174992404e-8,
+      "deltaArcsec": 0.00016277897429972654,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Saturn.latitude",
+      "historical": 0.11711332253393968,
+      "browser": 0.11711335119967335,
+      "delta": 2.8665733675659055e-8,
+      "deltaArcsec": 0.0001031966412323726,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Saturn.speed",
+      "historical": -0.05823102834207577,
+      "browser": -0.058231023197764666,
+      "delta": 5.144311102101007e-9,
+      "deltaArcsec": 0.000018519519967563625,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Saturn.declination",
+      "historical": -21.18594987578942,
+      "browser": -21.18594983969686,
+      "delta": 3.6092558275413467e-8,
+      "deltaArcsec": 0.00012993320979148848,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Saturn.retrograde",
+      "historical": true,
+      "browser": true,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Uranus.longitude",
+      "historical": 278.18060051126366,
+      "browser": 278.1806015725545,
+      "delta": 0.0000010612908454277203,
+      "deltaArcsec": 0.0038206470435397932,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Uranus.latitude",
+      "historical": -0.32369422139469844,
+      "browser": -0.3236937544115642,
+      "delta": 4.6698313421744686e-7,
+      "deltaArcsec": 0.0016811392831828087,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Uranus.speed",
+      "historical": -0.03882903059550271,
+      "browser": -0.03882902900941085,
+      "delta": 1.5860918620158593e-9,
+      "deltaArcsec": 0.000005709930703257093,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Uranus.declination",
+      "historical": -23.512554194632724,
+      "browser": -23.512553663024637,
+      "delta": 5.3160808732855e-7,
+      "deltaArcsec": 0.00191378911438278,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Uranus.retrograde",
+      "historical": true,
+      "browser": true,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Neptune.longitude",
+      "historical": 283.72696713661423,
+      "browser": 283.72696698408663,
+      "delta": 1.5252760476869298e-7,
+      "deltaArcsec": 0.0005490993771672947,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Neptune.latitude",
+      "historical": 0.8762218664763998,
+      "browser": 0.8762218995222636,
+      "delta": 3.304586382313346e-8,
+      "deltaArcsec": 0.00011896510976328045,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Neptune.speed",
+      "historical": -0.024942938848052505,
+      "browser": -0.024942939879022543,
+      "delta": 1.0309700385069398e-9,
+      "deltaArcsec": 0.0000037114921386249833,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Neptune.declination",
+      "historical": -21.86265849287962,
+      "browser": -21.862658475517932,
+      "delta": 1.736168897537027e-8,
+      "deltaArcsec": 0.00006250208031133297,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Neptune.retrograde",
+      "historical": true,
+      "browser": true,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Pluto.longitude",
+      "historical": 225.4095229210307,
+      "browser": 225.40951907783588,
+      "delta": 0.000003843194832597874,
+      "deltaArcsec": 0.013835501397352346,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Pluto.latitude",
+      "historical": 15.8563469409355,
+      "browser": 15.856350819449593,
+      "delta": 0.000003878514093003105,
+      "deltaArcsec": 0.013962650734811177,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Pluto.speed",
+      "historical": -0.020325207887016146,
+      "browser": -0.020325177025073304,
+      "delta": 3.086194284157573e-8,
+      "deltaArcsec": 0.00011110299422967262,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Pluto.declination",
+      "historical": -1.2520392572775212,
+      "browser": -1.2520345004213689,
+      "delta": 0.0000047568561523103625,
+      "deltaArcsec": 0.017124682148317305,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Pluto.retrograde",
+      "historical": true,
+      "browser": true,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "North Node.longitude",
+      "historical": 309.71885064672216,
+      "browser": 309.7188506467304,
+      "delta": 8.242295734817162e-12,
+      "deltaArcsec": 2.9672264645341784e-8,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "North Node.latitude",
+      "historical": 0,
+      "browser": 0,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "North Node.speed",
+      "historical": -0.052967253313373396,
+      "browser": -0.05296722846354694,
+      "delta": 2.4849826453510193e-8,
+      "deltaArcsec": 0.0000894593752326367,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "North Node.declination",
+      "historical": -17.818322493753765,
+      "browser": -17.818322493751566,
+      "delta": 2.19912976717751e-12,
+      "deltaArcsec": 7.916867161839036e-9,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "North Node.retrograde",
+      "historical": true,
+      "browser": true,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Dark Moon.longitude",
+      "historical": 234.90701023432925,
+      "browser": 234.9070102343375,
+      "delta": 8.242295734817162e-12,
+      "deltaArcsec": 2.9672264645341784e-8,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Dark Moon.latitude",
+      "historical": -4.966586165319357,
+      "browser": -4.9665861653193595,
+      "delta": 2.6645352591003757e-15,
+      "deltaArcsec": 9.592326932761353e-12,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Dark Moon.speed",
+      "historical": 0.11196377824772503,
+      "browser": 0.11196379470823165,
+      "delta": 1.6460506610527226e-8,
+      "deltaArcsec": 0.00005925782379789801,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Dark Moon.declination",
+      "historical": -23.810452640204243,
+      "browser": -23.810452640206304,
+      "delta": 2.0605739337042905e-12,
+      "deltaArcsec": 7.418066161335446e-9,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "Dark Moon.retrograde",
+      "historical": false,
+      "browser": false,
+      "status": "PASS",
+      "cause": null
+    },
+    {
+      "field": "ASC",
+      "historical": 156.011674406942,
+      "browser": 156.01167440694198,
+      "delta": 2.842170943040401e-14,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "MC",
+      "historical": 64.07947909689123,
+      "browser": 64.07947909689118,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "DSC",
+      "historical": 336.011674406942,
+      "browser": 336.011674406942,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "IC",
+      "historical": 244.07947909689125,
+      "browser": 244.0794790968912,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House1.cusp",
+      "historical": 156.011674406942,
+      "browser": 156.01167440694198,
+      "delta": 2.842170943040401e-14,
+      "deltaArcsec": 1.0231815394945443e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House2.cusp",
+      "historical": 181.8537070240794,
+      "browser": 181.85370702407934,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House3.cusp",
+      "historical": 210.60894209907622,
+      "browser": 210.60894209907616,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House4.cusp",
+      "historical": 244.07947909689125,
+      "browser": 244.0794790968912,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House5.cusp",
+      "historical": 278.7633461755206,
+      "browser": 278.7633461755205,
+      "delta": 1.1368683772161603e-13,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House6.cusp",
+      "historical": 309.4151965868448,
+      "browser": 309.4151965868447,
+      "delta": 1.1368683772161603e-13,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House7.cusp",
+      "historical": 336.011674406942,
+      "browser": 336.011674406942,
+      "delta": 0,
+      "deltaArcsec": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "House8.cusp",
+      "historical": 1.8537070240794264,
+      "browser": 1.8537070240793128,
+      "delta": 1.1368683772161603e-13,
+      "deltaArcsec": 4.092726157978177e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House9.cusp",
+      "historical": 30.608942099076216,
+      "browser": 30.60894209907616,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House10.cusp",
+      "historical": 64.07947909689123,
+      "browser": 64.07947909689118,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House11.cusp",
+      "historical": 98.76334617552058,
+      "browser": 98.76334617552051,
+      "delta": 7.105427357601002e-14,
+      "deltaArcsec": 2.5579538487363607e-10,
+      "status": "PASS"
+    },
+    {
+      "field": "House12.cusp",
+      "historical": 129.41519658684476,
+      "browser": 129.4151965868447,
+      "delta": 5.684341886080802e-14,
+      "deltaArcsec": 2.0463630789890885e-10,
+      "status": "PASS"
+    }
+  ],
+  "planets": {
+    "Sun": {
+      "longitude": 83.751486350667,
+      "latitude": 0.00010774442533114215,
+      "distance": 1.0157259639227016,
+      "speed": 0.9551426920696479,
+      "declination": 23.294631979137232,
+      "retrograde": false
+    },
+    "Moon": {
+      "longitude": 340.0965355475447,
+      "latitude": 2.739911440516042,
+      "distance": 0.0025558850623184407,
+      "speed": 13.223769324729618,
+      "declination": -5.2453711923135256,
+      "retrograde": false
+    },
+    "Mercury": {
+      "longitude": 65.01506935034979,
+      "latitude": -1.7335509239476528,
+      "distance": 1.1032210516596286,
+      "speed": 1.697768205185461,
+      "declination": 19.43108793502107,
+      "retrograde": false
+    },
+    "Venus": {
+      "longitude": 48.31217545611053,
+      "latitude": -1.953033512308558,
+      "distance": 1.2521400250005617,
+      "speed": 1.1756233394938,
+      "declination": 15.405264947789064,
+      "retrograde": false
+    },
+    "Mars": {
+      "longitude": 10.756639386323547,
+      "latitude": -1.9830103640155805,
+      "distance": 1.281270029518292,
+      "speed": 0.7193894743917146,
+      "declination": 2.4333334360594985,
+      "retrograde": false
+    },
+    "Jupiter": {
+      "longitude": 105.8037768290354,
+      "latitude": 0.18507479002632315,
+      "distance": 6.138121910882927,
+      "speed": 0.21641881615660508,
+      "declination": 22.690001704350895,
+      "retrograde": false
+    },
+    "Saturn": {
+      "longitude": 294.05506525895305,
+      "latitude": 0.11711335119967335,
+      "distance": 9.123078178669829,
+      "speed": -0.058231023197764666,
+      "declination": -21.18594983969686,
+      "retrograde": true
+    },
+    "Uranus": {
+      "longitude": 278.1806015725545,
+      "latitude": -0.3236937544115642,
+      "distance": 18.42413491710156,
+      "speed": -0.03882902900941085,
+      "declination": -23.512553663024637,
+      "retrograde": true
+    },
+    "Neptune": {
+      "longitude": 283.72696698408663,
+      "latitude": 0.8762218995222636,
+      "distance": 29.25008599247956,
+      "speed": -0.024942939879022543,
+      "declination": -21.862658475517932,
+      "retrograde": true
+    },
+    "Pluto": {
+      "longitude": 225.40951907783588,
+      "latitude": 15.856350819449593,
+      "distance": 28.885418043241245,
+      "speed": -0.020325177025073304,
+      "declination": -1.2520345004213689,
+      "retrograde": true
+    },
+    "North Node": {
+      "longitude": 309.7188506467304,
+      "latitude": 0,
+      "distance": 0.0025695552897999903,
+      "speed": -0.05296722846354694,
+      "declination": -17.818322493751566,
+      "retrograde": true
+    },
+    "Dark Moon": {
+      "longitude": 234.9070102343375,
+      "latitude": -4.9665861653193595,
+      "distance": 0.0027106251317225464,
+      "speed": 0.11196379470823165,
+      "declination": -23.810452640206304,
+      "retrograde": false
+    }
+  }
+}

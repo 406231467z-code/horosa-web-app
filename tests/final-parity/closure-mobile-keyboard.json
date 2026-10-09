@@ -1,0 +1,169 @@
+{
+  "base": "http://127.0.0.1:8010/",
+  "dist": "C:\\Users\\Jiliason\\horosa-web-app\\local\\workspace\\Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c\\astrostudyui\\dist",
+  "report": [
+    {
+      "viewport": "390x844",
+      "issues": [
+        {
+          "severity": "medium",
+          "file": "layouts/index + workspace shell",
+          "selector": ".horosa-workspace-shell .ant-picker-input input",
+          "viewport": "390x844",
+          "behavior": "no visible Ant Design picker input on home"
+        }
+      ],
+      "errors": [],
+      "steps": [
+        {
+          "step": "home",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "BODY",
+          "clipped": true,
+          "vvHeight": 439
+        },
+        {
+          "step": "after-location",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "INPUT",
+          "activeType": "search",
+          "clipped": false,
+          "vvHeight": 439
+        },
+        {
+          "step": "after-submit",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "INPUT",
+          "activeType": "search",
+          "clipped": false,
+          "vvHeight": 439
+        },
+        {
+          "step": "ai-focus",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "TEXTAREA",
+          "activeType": "textarea",
+          "clipped": false,
+          "vvHeight": 439
+        }
+      ],
+      "badNet": [],
+      "maxOverflow": 0,
+      "pass": true,
+      "status": "PASS"
+    },
+    {
+      "viewport": "375x812",
+      "issues": [
+        {
+          "severity": "medium",
+          "file": "layouts/index + workspace shell",
+          "selector": ".horosa-workspace-shell .ant-picker-input input",
+          "viewport": "375x812",
+          "behavior": "no visible Ant Design picker input on home"
+        }
+      ],
+      "errors": [],
+      "steps": [
+        {
+          "step": "home",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "BODY",
+          "clipped": true,
+          "vvHeight": 422
+        },
+        {
+          "step": "after-location",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "INPUT",
+          "activeType": "search",
+          "clipped": false,
+          "vvHeight": 422
+        },
+        {
+          "step": "after-submit",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "INPUT",
+          "activeType": "search",
+          "clipped": false,
+          "vvHeight": 422
+        },
+        {
+          "step": "ai-focus",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "TEXTAREA",
+          "activeType": "textarea",
+          "clipped": false,
+          "vvHeight": 422
+        }
+      ],
+      "badNet": [],
+      "maxOverflow": 0,
+      "pass": true,
+      "status": "PASS"
+    },
+    {
+      "viewport": "360x800",
+      "issues": [
+        {
+          "severity": "medium",
+          "file": "layouts/index + workspace shell",
+          "selector": ".horosa-workspace-shell .ant-picker-input input",
+          "viewport": "360x800",
+          "behavior": "no visible Ant Design picker input on home"
+        }
+      ],
+      "errors": [],
+      "steps": [
+        {
+          "step": "home",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "BODY",
+          "clipped": true,
+          "vvHeight": 416
+        },
+        {
+          "step": "after-location",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "INPUT",
+          "activeType": "search",
+          "clipped": false,
+          "vvHeight": 416
+        },
+        {
+          "step": "after-submit",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "INPUT",
+          "activeType": "search",
+          "clipped": false,
+          "vvHeight": 416
+        },
+        {
+          "step": "ai-focus",
+          "overflow": 0,
+          "scrollY": 0,
+          "activeTag": "TEXTAREA",
+          "activeType": "textarea",
+          "clipped": false,
+          "vvHeight": 416
+        }
+      ],
+      "badNet": [],
+      "maxOverflow": 0,
+      "pass": true,
+      "status": "PASS"
+    }
+  ],
+  "status": "PASS"
+}

@@ -1,0 +1,274 @@
+{
+  "label": "WEB-EXPERIMENTAL-RESULT",
+  "oracle": "HISTORICAL-GOLDEN",
+  "formulaSource": "flatlib/tools/arabicparts.py FORMULAS, day/night via chart.isDiurnal, zodiac wrap (c+b-a) mod 360",
+  "diurnal": true,
+  "rows": [
+    {
+      "field": "lots.Pars Spirit",
+      "expected": 259.66662500859,
+      "actual": 259.66662521006424,
+      "delta": 2.0147422219451983e-7,
+      "deltaArcsec": 0.0007253071999002714,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Faith",
+      "expected": 240.93020802020308,
+      "actual": 240.93020820974706,
+      "delta": 1.895439822874323e-7,
+      "deltaArcsec": 0.0006823583362347563,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Substance",
+      "expected": 289.553205954144,
+      "actual": 289.5532059749107,
+      "delta": 2.0766719899256714e-8,
+      "deltaArcsec": 0.00007476019163732417,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Wedding [Male]",
+      "expected": 270.2687846700827,
+      "actual": 270.26878460409944,
+      "delta": 6.598327217943734e-8,
+      "deltaArcsec": 0.0002375397798459744,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Wedding [Female]",
+      "expected": 41.7545641438013,
+      "actual": 41.75456420978452,
+      "delta": 6.598321533601847e-8,
+      "deltaArcsec": 0.0002375395752096665,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Sons",
+      "expected": 344.26296292027695,
+      "actual": 344.26296283685963,
+      "delta": 8.341731927430374e-8,
+      "deltaArcsec": 0.00030030234938749345,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Father",
+      "expected": 6.315253264573073,
+      "actual": 6.3152533152280625,
+      "delta": 5.065498953626957e-8,
+      "deltaArcsec": 0.00018235796233057044,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Mother",
+      "expected": 87.79603468452217,
+      "actual": 87.79603449837617,
+      "delta": 1.8614599639477092e-7,
+      "deltaArcsec": 0.0006701255870211753,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Brothers",
+      "expected": 327.76038589360707,
+      "actual": 327.7603859770243,
+      "delta": 8.341726243088488e-8,
+      "deltaArcsec": 0.00030030214475118555,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Diseases",
+      "expected": 232.71324853496773,
+      "actual": 232.71324853431247,
+      "delta": 6.552625109179644e-10,
+      "deltaArcsec": 0.000002358945039304672,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Death",
+      "expected": 315.8122364833585,
+      "actual": 315.81223673548766,
+      "delta": 2.5212915488737053e-7,
+      "deltaArcsec": 0.0009076649575945339,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Travel",
+      "expected": 138.30844102914082,
+      "actual": 138.30844104990763,
+      "delta": 2.0766805164385005e-8,
+      "deltaArcsec": 0.00007476049859178602,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Friends",
+      "expected": 240.93020802020308,
+      "actual": 240.93020820974706,
+      "delta": 1.895439822874323e-7,
+      "deltaArcsec": 0.0006823583362347563,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Enemies",
+      "expected": 201.6753846376812,
+      "actual": 201.67538464311974,
+      "delta": 5.438550942926668e-9,
+      "deltaArcsec": 0.000019578783394536003,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Saturn",
+      "expected": 274.31333299849933,
+      "actual": 274.3133327518086,
+      "delta": 2.466907176312816e-7,
+      "deltaArcsec": 0.0008880865834726137,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Jupiter",
+      "expected": 2.148826098753716,
+      "actual": 2.148826025913081,
+      "delta": 7.284063485712977e-8,
+      "deltaArcsec": 0.0002622262854856672,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Mars",
+      "expected": 197.61175887047364,
+      "actual": 197.61175862443815,
+      "delta": 2.4603548354207305e-7,
+      "deltaArcsec": 0.000885727740751463,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Venus",
+      "expected": 304.6572248752294,
+      "actual": 304.65722465298825,
+      "delta": 2.2224116946745198e-7,
+      "deltaArcsec": 0.0008000682100828271,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Mercury",
+      "expected": 143.35332884451736,
+      "actual": 143.35332866041188,
+      "delta": 1.841054881879245e-7,
+      "deltaArcsec": 0.0006627797574765282,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Horsemanship",
+      "expected": 202.05314494766293,
+      "actual": 202.05314469553366,
+      "delta": 2.5212926857420825e-7,
+      "deltaArcsec": 0.0009076653668671497,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Life",
+      "expected": 238.70701859007983,
+      "actual": "MISSING_INPUT",
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "LOT_FORMULA",
+      "reason": "Syzygy is not on the browser chart"
+    },
+    {
+      "field": "lots.Pars Radix",
+      "expected": 73.31633022380419,
+      "actual": "MISSING_INPUT",
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "failureClass": "LOT_FORMULA",
+      "reason": "Syzygy is not on the browser chart"
+    },
+    {
+      "field": "lots.Pars Eros",
+      "expected": 7.366123938654624,
+      "actual": 7.366124160895708,
+      "delta": 2.222410842023237e-7,
+      "deltaArcsec": 0.0008000679031283653,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Necessity",
+      "expected": 143.35332884451736,
+      "actual": 143.35332866041188,
+      "delta": 1.841054881879245e-7,
+      "deltaArcsec": 0.0006627797574765282,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Courage",
+      "expected": 197.61175887047364,
+      "actual": 197.61175862443815,
+      "delta": 2.4603548354207305e-7,
+      "deltaArcsec": 0.000885727740751463,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Victory",
+      "expected": 309.8745227151303,
+      "actual": 309.8745227879708,
+      "delta": 7.284052117029205e-8,
+      "deltaArcsec": 0.0002622258762130514,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Nemesis",
+      "expected": 274.31333299849933,
+      "actual": 274.3133327518086,
+      "delta": 2.466907176312816e-7,
+      "deltaArcsec": 0.0008880865834726137,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Basis",
+      "expected": 308.701773203646,
+      "actual": 308.7017728006974,
+      "delta": 4.0294855807587737e-7,
+      "deltaArcsec": 0.0014506148090731585,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Exaltation",
+      "expected": 91.26018805083642,
+      "actual": 91.26018805627496,
+      "delta": 5.4385367320719524e-9,
+      "deltaArcsec": 0.00001957873223545903,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Sons Valens",
+      "expected": 115.22296707425896,
+      "actual": 115.22296692825637,
+      "delta": 1.4600259135022498e-7,
+      "deltaArcsec": 0.0005256093288608099,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Daughters",
+      "expected": 98.5200731834177,
+      "actual": 98.52007303401712,
+      "delta": 1.4940057724288636e-7,
+      "deltaArcsec": 0.0005378420780743909,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Praxis",
+      "expected": 101.75324438098573,
+      "actual": 101.75324444291573,
+      "delta": 6.192999535414856e-8,
+      "deltaArcsec": 0.0002229479832749348,
+      "status": "PASS"
+    },
+    {
+      "field": "lots.Pars Wedding Dorothean",
+      "expected": 120.57236352771382,
+      "actual": 120.57236351238555,
+      "delta": 1.5328268432313052e-8,
+      "deltaArcsec": 0.00005518176635632699,
+      "status": "PASS"
+    }
+  ]
+}

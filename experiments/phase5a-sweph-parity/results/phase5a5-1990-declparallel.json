@@ -1,0 +1,331 @@
+{
+  "label": "WEB-EXPERIMENTAL-RESULT",
+  "oracle": "HISTORICAL-GOLDEN",
+  "toleranceSource": "perchart.getParallel literal threshold delta <= 1 degree",
+  "rows": [
+    {
+      "field": "declParallel.parallel",
+      "expected": [
+        [
+          "Ceres",
+          "Intp_Perg"
+        ],
+        [
+          "Chiron",
+          "Venus"
+        ],
+        [
+          "Dark Moon",
+          "Intp_Apog",
+          "Uranus"
+        ],
+        [
+          "Desc",
+          "Vesta"
+        ],
+        [
+          "Intp_Apog",
+          "Neptune",
+          "Saturn",
+          "Uranus"
+        ],
+        [
+          "Juno",
+          "Pallas",
+          "Pluto"
+        ],
+        [
+          "Jupiter",
+          "Sun"
+        ],
+        [
+          "North Node",
+          "South Node"
+        ]
+      ],
+      "actual": [
+        [
+          "Ceres",
+          "Intp_Perg"
+        ],
+        [
+          "Chiron",
+          "Venus"
+        ],
+        [
+          "Dark Moon",
+          "Intp_Apog",
+          "Uranus"
+        ],
+        [
+          "Desc",
+          "Vesta"
+        ],
+        [
+          "Intp_Apog",
+          "Neptune",
+          "Saturn",
+          "Uranus"
+        ],
+        [
+          "Juno",
+          "Pallas",
+          "Pluto"
+        ],
+        [
+          "Jupiter",
+          "Sun"
+        ],
+        [
+          "North Node",
+          "South Node"
+        ]
+      ],
+      "delta": 0,
+      "status": "PASS",
+      "failureClass": "DECLINATION"
+    },
+    {
+      "field": "declParallel.contraParallel",
+      "expected": {
+        "Sun": [
+          "Dark Moon",
+          "Intp_Apog",
+          "Uranus"
+        ],
+        "Jupiter": [
+          "Intp_Apog",
+          "Neptune",
+          "Uranus"
+        ],
+        "Saturn": [
+          "Purple Clouds"
+        ],
+        "Uranus": [
+          "Jupiter",
+          "Sun"
+        ],
+        "Neptune": [
+          "Jupiter",
+          "Purple Clouds"
+        ],
+        "North Node": [
+          "Pars Fortuna"
+        ],
+        "South Node": [
+          "Pars Fortuna"
+        ],
+        "Syzygy": [
+          "Ceres",
+          "Intp_Perg"
+        ],
+        "Pars Fortuna": [
+          "North Node",
+          "South Node"
+        ],
+        "Dark Moon": [
+          "Sun"
+        ],
+        "Purple Clouds": [
+          "Neptune",
+          "Saturn"
+        ],
+        "Ceres": [
+          "Syzygy"
+        ],
+        "Intp_Apog": [
+          "Jupiter",
+          "Sun"
+        ],
+        "Intp_Perg": [
+          "Syzygy"
+        ]
+      },
+      "actual": {
+        "Sun": [
+          "Dark Moon",
+          "Intp_Apog",
+          "Uranus"
+        ],
+        "Jupiter": [
+          "Intp_Apog",
+          "Neptune",
+          "Uranus"
+        ],
+        "Saturn": [
+          "Purple Clouds"
+        ],
+        "Uranus": [
+          "Jupiter",
+          "Sun"
+        ],
+        "Neptune": [
+          "Jupiter",
+          "Purple Clouds"
+        ],
+        "North Node": [
+          "Pars Fortuna"
+        ],
+        "South Node": [
+          "Pars Fortuna"
+        ],
+        "Syzygy": [
+          "Ceres",
+          "Intp_Perg"
+        ],
+        "Pars Fortuna": [
+          "North Node",
+          "South Node"
+        ],
+        "Dark Moon": [
+          "Sun"
+        ],
+        "Purple Clouds": [
+          "Neptune",
+          "Saturn"
+        ],
+        "Ceres": [
+          "Syzygy"
+        ],
+        "Intp_Apog": [
+          "Jupiter",
+          "Sun"
+        ],
+        "Intp_Perg": [
+          "Syzygy"
+        ]
+      },
+      "delta": 0,
+      "status": "PASS",
+      "failureClass": "DECLINATION"
+    },
+    {
+      "field": "parallel.Ceres+Intp_Perg",
+      "expected": [
+        "Ceres",
+        "Intp_Perg"
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "group includes a body that is not on the browser chart"
+    },
+    {
+      "field": "parallel.Chiron+Venus",
+      "expected": [
+        "Chiron",
+        "Venus"
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "group includes a body that is not on the browser chart"
+    },
+    {
+      "field": "parallel.Dark Moon+Intp_Apog+Uranus",
+      "expected": [
+        "Dark Moon",
+        "Intp_Apog",
+        "Uranus"
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "group includes a body that is not on the browser chart"
+    },
+    {
+      "field": "parallel.Desc+Vesta",
+      "expected": [
+        "Desc",
+        "Vesta"
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "group includes a body that is not on the browser chart"
+    },
+    {
+      "field": "parallel.Intp_Apog+Neptune+Saturn+Uranus",
+      "expected": [
+        "Intp_Apog",
+        "Neptune",
+        "Saturn",
+        "Uranus"
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "group includes a body that is not on the browser chart"
+    },
+    {
+      "field": "parallel.Juno+Pallas+Pluto",
+      "expected": [
+        "Juno",
+        "Pallas",
+        "Pluto"
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "group includes a body that is not on the browser chart"
+    },
+    {
+      "field": "parallel.Jupiter+Sun",
+      "expected": [
+        "Jupiter",
+        "Sun"
+      ],
+      "actual": [
+        "Jupiter",
+        "Sun"
+      ],
+      "delta": 0,
+      "status": "PASS"
+    },
+    {
+      "field": "parallel.North Node+South Node",
+      "expected": [
+        "North Node",
+        "South Node"
+      ],
+      "actual": null,
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "group includes a body that is not on the browser chart"
+    },
+    {
+      "field": "browser.parallel.Dark Moon+Uranus",
+      "expected": "partial of a historical group",
+      "actual": [
+        "Dark Moon",
+        "Uranus"
+      ],
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "historical group also contains bodies absent from the browser chart"
+    },
+    {
+      "field": "browser.parallel.Neptune+Saturn",
+      "expected": "partial of a historical group",
+      "actual": [
+        "Neptune",
+        "Saturn"
+      ],
+      "delta": null,
+      "status": "NOT_COMPARABLE",
+      "reason": "historical group also contains bodies absent from the browser chart"
+    }
+  ],
+  "parans": {
+    "status": "RULE-INCOMPLETE",
+    "dependency": "astrostudyui paransLocal.js is a Brady axis-contact approximation (obliquity 23.4367, default orb 2°). Production /chart declParallel is perchart.getParallel and is a different algorithm. Star parans need the Swiss fixed-star catalog. No production paran payload is reproduced here."
+  },
+  "fixedStars": {
+    "status": "RULE-INCOMPLETE",
+    "dataDependency": "flatlib chart.getFixedStars reads const.LIST_FIXED_STARS through the Swiss star catalog at the chart epoch. fixedStarSu28 and guoStarSect further depend on mansion catalogs, epoch tables, and precession modes in perchart and guo74."
+  },
+  "nakshatras": {
+    "status": "NAKSHATRA_DATA_DEPENDENCY",
+    "dataDependency": "astrostudy/nakshatra.py maps a sidereal longitude into 27 spans of 13°20′. The experimental chart is tropical. Sidereal longitude is REFERENCE-ONLY and is not an input to this layer."
+  }
+}

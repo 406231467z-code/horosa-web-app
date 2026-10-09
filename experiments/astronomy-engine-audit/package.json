@@ -1,0 +1,1 @@
+﻿{"name":"astronomy-engine-audit","private":true,"type":"module","description":"Isolated Astronomy Engine vs Swiss browser experiment. Not a production dependency.","dependencies":{"astronomy-engine":"2.1.19"}}

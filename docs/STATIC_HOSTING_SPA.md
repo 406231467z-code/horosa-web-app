@@ -36,3 +36,7 @@ location / {
 ## Verification
 
 `node tests/final-parity/closure-static-runtime.mjs` — serves `dist/` with SPA fallback (`spa-static-server.mjs`) and checks removed routes return home UI without calc network.
+
+`node tests/final-parity/static-chunk-http.mjs` — every preloaded `/static/*.chunk.css` and hashed `umi.*.js` must return **200** with real CSS/JS bodies (never SPA `index.html`).
+
+**LAN / real phone on `npm start`:** Umi dev uses `publicPath: /static/` while async chunks are written under `dist/` root. `.umirc.js` enables `devServer.writeToDisk` plus a `/static/` disk fallback for hashed chunks; **restart `npm start`** after pulling this fix. For release sign-off, prefer `npm run build` + static host (nginx rule above or `spa-static-server.mjs`).
