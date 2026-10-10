@@ -1,4 +1,5 @@
 const buildForFile = process.env.BUILD_FOR_FILE === '1';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 export default {
 	// Allow phones/tablets on the same LAN to fetch the dev HTML and async JS/CSS chunks.
@@ -12,7 +13,7 @@ export default {
 			Expires: '0',
 		},
 	},
-	publicPath: buildForFile ? './' : process.env.NODE_ENV === 'development' ? '/' : '/static/',
+	publicPath: buildForFile ? './' : isDevelopment ? '/' : '/static/',
 	outputPath: buildForFile ? 'dist-file' : 'dist',
 	history: buildForFile ? { type: 'hash' } : undefined,
 	hash: true,
@@ -20,7 +21,10 @@ export default {
 		immer: false,
 	},
 	antd: {},
-	dynamicImport: {},
+	// Umi route chunks are useful in production, but make local phone debugging brittle
+	// when a runtime and its CSS/JS chunks are refreshed out of sync. Keep dev pages in
+	// the main bundle; production still uses the existing async route splitting.
+	dynamicImport: isDevelopment ? false : {},
 	// 性能分包:多个技法路由 chunk 曾各自内联同一批重依赖(three/lunar/kinastro 等被双份
 	// 打进 5.7MB+4.8MB 两个 chunk,双份下载双份解析)。把 ≥2 处引用的重库/重源码提成命名
 	// async vendor chunk;moment 裁掉未用 locale(zh-cn 在 layouts 显式 import 完整路径,
