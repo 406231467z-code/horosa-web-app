@@ -25,12 +25,7 @@ function isLanHostname(value){
 }
 
 function isLoopbackRoot(value){
-	try{
-		const host = new URL(value).hostname.toLowerCase().replace(/^\[|\]$/g, '');
-		return host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '::1';
-	}catch(e){
-		return false;
-	}
+	return /^https?:\/\/(?:localhost|[^/]*\.localhost|127\.0\.0\.1|\[?::1\]?)(?::\d+)?(?:\/|$)/i.test(String(value || ''));
 }
 
 const isLocalHost =
