@@ -35,6 +35,41 @@ function isLoopbackRoot(value){
 	}
 }
 
+// Treat RFC1918/LAN origins as local browser sessions too. When the UI is opened
+// from a phone (for example http://172.20.10.5:8001), localhost would mean the phone,
+// not the computer running the Java/Python services.
+function isLanHostname(value){
+	const host = String(value || '').toLowerCase().replace(/^\[|\]$/g, '').trim();
+	if(!host || host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '::1'){
+		return false;
+	}
+	if(host.endsWith('.local') || /^fe80:/i.test(host) || /^(fc|fd)[0-9a-f]{2}:/i.test(host)){
+		return true;
+	}
+	const match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+	if(!match){
+		return false;
+	}
+	const octets = match.slice(1).map(Number);
+	if(octets.some((n)=>n < 0 || n > 255)){
+		return false;
+	}
+	const [a, b] = octets;
+	return a === 10 ||
+		(a === 172 && b >= 16 && b <= 31) ||
+		(a === 192 && b === 168) ||
+		(a === 169 && b === 254);
+}
+
+function isLoopbackRoot(value){
+	try{
+		const host = new URL(value).hostname.toLowerCase().replace(/^\[|\]$/g, '');
+		return host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '::1';
+	}catch(e){
+		return false;
+	}
+}
+
 const isLocalHost =
 	typeof window !== 'undefined' &&
 	(
@@ -45,7 +80,7 @@ const isLocalHost =
 	);
 
 function isValidServerRootValue(val){
-	return !!(val && /^https?:\\/\\/.+/i.test(`${val}`));
+	return !!(val && /^https?:\/\/.+/i.test(String(val)));
 }
 
 function safeStorageGet(storage, key){
@@ -75,8 +110,8 @@ function deriveLocalRootFromPagePort(){
 		// Java remains on its configured local service port. Do not infer webPort + 1999:
 		// Umi may move from 8000 to 8001 when the default port is already occupied.
 		// For LAN access use the host serving the UI, not the phone's own loopback.
-		const hostname = `${window.location.hostname || ''}`.trim() || '127.0.0.1';
-		return `http://${hostname}:9999`;
+		const hostname = String(window.location.hostname || '').trim() || '127.0.0.1';
+		return 'http://' + hostname + ':9999';
 	}catch(e){
 		return null;
 	}
