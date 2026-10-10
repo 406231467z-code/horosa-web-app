@@ -128,17 +128,17 @@ const App = ({children, dispatch, app, user, astro, })=>{
     let headerstyle = {
         position: 'fixed', width:'100%', zIndex: 100,
         backgroundColor: astroHeaderBg,
-        height:72, padding: 0,
+        height: 'var(--horosa-app-header-height, 72px)', padding: 0,
         borderBottom: '1px solid',
         borderBottomColor: astroHeaderBorder,
         color: 'var(--horosa-text)',
         stroke: 'var(--horosa-text)',
     };
     let contentStyle = {
-        marginTop: 72,
+        marginTop: 'var(--horosa-app-header-height, 72px)',
         // 🔴 同上勿用 100vh(域劈叉:clientHeight 物理域 vs vh 布局域,缩放≠1 时两口径
         // 差出可平移空间=拖选后整页滚动的元凶);100% 基=根壳链,恒同域。
-        height: 'calc(100% - 72px)',
+        height: 'calc(100% - var(--horosa-app-header-height, 72px))',
         overflow: 'hidden',
         boxSizing: 'border-box',
         backgroundColor: 'var(--horosa-bg)',
