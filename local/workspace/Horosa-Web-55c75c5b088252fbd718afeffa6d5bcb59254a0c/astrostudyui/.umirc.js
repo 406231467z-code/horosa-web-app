@@ -17,12 +17,12 @@ export default {
 	// on the host machine. They are disabled for production/file builds.
 	proxy: isDevelopment ? {
 		'/backend': {
-			target: 'http://127.0.0.1:9999',
+			target: 'http://127.0.0.1:' + (process.env.HOROSA_SERVER_PORT || '9999'),
 			changeOrigin: true,
 			pathRewrite: { '^/backend': '' },
 		},
 		'/chart-service': {
-			target: 'http://127.0.0.1:8899',
+			target: 'http://127.0.0.1:' + (process.env.HOROSA_CHART_PORT || '8899'),
 			changeOrigin: true,
 			pathRewrite: { '^/chart-service': '' },
 		},
