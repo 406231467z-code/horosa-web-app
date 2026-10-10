@@ -13,6 +13,20 @@ export default {
 			Expires: '0',
 		},
 	},
+	// Same-origin dev proxies let phones use backend ports that remain loopback-only
+	// on the host machine. They are disabled for production/file builds.
+	proxy: isDevelopment ? {
+		'/backend': {
+			target: 'http://127.0.0.1:9999',
+			changeOrigin: true,
+			pathRewrite: { '^/backend': '' },
+		},
+		'/chart-service': {
+			target: 'http://127.0.0.1:8899',
+			changeOrigin: true,
+			pathRewrite: { '^/chart-service': '' },
+		},
+	} : {},
 	publicPath: buildForFile ? './' : isDevelopment ? '/' : '/static/',
 	outputPath: buildForFile ? 'dist-file' : 'dist',
 	history: buildForFile ? { type: 'hash' } : undefined,
