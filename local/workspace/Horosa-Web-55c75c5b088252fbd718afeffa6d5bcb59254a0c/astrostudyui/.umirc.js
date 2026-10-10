@@ -2,7 +2,7 @@ const buildForFile = process.env.BUILD_FOR_FILE === '1';
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 export default {
-	// Allow phones/tablets on the same LAN to fetch the dev HTML and async JS/CSS chunks.
+	// Bind the dev server for LAN testing; route JS/CSS chunks are disabled in dev below.
 	// These options affect only the development server; production build output is unchanged.
 	devServer: {
 		host: '0.0.0.0',
