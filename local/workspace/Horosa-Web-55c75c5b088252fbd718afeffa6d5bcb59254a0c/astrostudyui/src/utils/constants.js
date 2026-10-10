@@ -73,7 +73,10 @@ function deriveLocalRootFromPagePort(){
 		// Java remains on its configured local service port. Do not infer webPort + 1999:
 		// Umi may move from 8000 to 8001 when the default port is already occupied.
 		// For LAN access use the host serving the UI, not the phone's own loopback.
-		const hostname = String(window.location.hostname || '').trim() || '127.0.0.1';
+		let hostname = String(window.location.hostname || '').trim() || '127.0.0.1';
+		if(hostname.indexOf(':') >= 0 && hostname.charAt(0) !== '['){
+			hostname = '[' + hostname + ']';
+		}
 		return 'http://' + hostname + ':9999';
 	}catch(e){
 		return null;
