@@ -899,7 +899,8 @@ export default {
 				fun: null
 			},
 			cnyibu:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			guazhan:{
 				fun: null,
