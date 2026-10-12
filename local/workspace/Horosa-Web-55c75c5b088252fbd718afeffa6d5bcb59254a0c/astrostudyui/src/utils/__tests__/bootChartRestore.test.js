@@ -1,6 +1,6 @@
 // horosa_boot_chart_restore_v1 金标(PERF-R10 S2):
 //   ① 快照↔record 往返:birth/ad/zone 精确、manifest 选项键随行、memo×8 恒有键(空串);
-//   ② 门:非桌面壳 / 开关关 / 超 7 天 / 坏档 → 一律 null(启动回空白默认态,零风险);
+//   ② 门:Web/桌面壳均可恢复本地快照;开关关 / 超 7 天 / 坏档 → null;
 //   ③ 键单一事实源:快照包含 RECORD_FIELDS_RESTORE_MANIFEST 里出现在 fields 的每个键。
 import {
 	buildBootChartRecord, saveBootChartSnapshot, loadBootChartSnapshot, __bootChartStoreKeyForTest,
@@ -62,12 +62,11 @@ test('save→load 闭环(经 deferredStorage 空闲写,flush 后可读)', ()=>{
 	expect(snap.currentTab).toBe('astrochart');
 });
 
-test('门:非桌面壳 / kill-switch / 7 天窗 / 坏档 → null', ()=>{
+test('门:Web 本地恢复 / kill-switch / 7 天窗 / 坏档', ()=>{
 	saveBootChartSnapshot(mkFields(), 'bazi');
 	flushStorageWrites();
 	delete window.__HOROSA_DESKTOP_CONFIG__;
-	expect(loadBootChartSnapshot()).toBeNull();          // 非桌面壳
-	window.__HOROSA_DESKTOP_CONFIG__ = { desktop: true };
+	expect(loadBootChartSnapshot()).not.toBeNull();      // Web 浏览器也可恢复本地快照
 	window.localStorage.setItem('horosa.perf.bootChartRestore', '0');
 	expect(loadBootChartSnapshot()).toBeNull();          // 开关关
 	window.localStorage.removeItem('horosa.perf.bootChartRestore');
