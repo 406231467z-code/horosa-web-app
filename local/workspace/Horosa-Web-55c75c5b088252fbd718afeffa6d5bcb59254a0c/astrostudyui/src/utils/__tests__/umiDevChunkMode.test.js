@@ -33,6 +33,12 @@ describe('mobile LAN development chunk mode', ()=>{
 		expect(config.dynamicImport).toBe(false);
 	});
 
+	test('production mode stays production when the parent shell sets NODE_ENV=development', ()=>{
+		const config = loadUmiConfig({ NODE_ENV: 'development', HOROSA_UMI_MODE: 'production' });
+		expect(config.dynamicImport).toEqual({});
+		expect(config.publicPath).toBe('/static/');
+	});
+
 	test('production keeps route-level dynamic imports and the production asset path', ()=>{
 		const config = loadUmiConfig({ NODE_ENV: 'production', HOROSA_UMI_MODE: 'production' });
 		expect(config.dynamicImport).toEqual({});
