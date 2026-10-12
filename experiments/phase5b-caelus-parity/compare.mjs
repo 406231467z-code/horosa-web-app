@@ -108,7 +108,15 @@ async function main() {
     const production = byId(productionObjects, horosaId);
     const body = candidate.bodies && candidate.bodies[engineId];
     if (!production || !body) {
-      fields.push({ field: horosaId, status: 'MISSING', productionPresent: !!production, candidatePresent: !!body });
+      // Keep the planned 64-field matrix stable even when a body is absent.
+      for (const suffix of ['lon', 'lat', 'lonspeed', 'house', 'wholeSignHouse']) {
+        fields.push({
+          field: `${horosaId}.${suffix}`,
+          status: 'MISSING',
+          productionPresent: !!production,
+          candidatePresent: !!body,
+        });
+      }
       continue;
     }
     fields.push(compareLongitude(`${horosaId}.lon`, production.lon, body.lon));
@@ -173,6 +181,7 @@ async function main() {
       jdUt: chart.date.jd,
     },
     toleranceArcsec: 1,
+    fieldsCompared: fields.length,
     counts,
     completeHorosaSchemaCompared: false,
     unsupportedScope: [
@@ -180,7 +189,7 @@ async function main() {
       'Arabic lots and Horosa-specific derived fields',
       'fixed-star and lunar-mansion IDs',
       'sidereal/ayanamsa variants',
-      'house placements and classical dignity payload',
+      'house placements for non-core points and Horosa-specific house conventions outside this comparison, plus classical dignity payload',
       'primary directions, Jyotish, Qizheng, Three Styles, and Yi methods',
       'independent real charts and wider date coverage',
       'full 1000–3000 CE range and any dates outside the candidate library\'s advertised core-body range',
@@ -194,6 +203,7 @@ async function main() {
   console.log(JSON.stringify({
     verdict: report.verdict,
     candidate: report.candidate,
+    fieldsCompared: report.fieldsCompared,
     counts,
     report: outPath,
     failures: fields.filter((row) => row.status === 'FAIL'),
