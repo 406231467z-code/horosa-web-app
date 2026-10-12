@@ -54,6 +54,14 @@ function compareNumber(field, production, candidate, tolerance, unit) {
   };
 }
 
+function houseNumber(value) {
+  if (Number.isInteger(value) && value >= 1 && value <= 12) return value;
+  const match = /^House(\d{1,2})$/i.exec(String(value ?? ''));
+  if (!match) return null;
+  const n = Number(match[1]);
+  return n >= 1 && n <= 12 ? n : null;
+}
+
 function compareLongitude(field, production, candidate) {
   if (!isFiniteValue(production) || !isFiniteValue(candidate)) {
     return { field, production: production ?? null, candidate: candidate ?? null, status: 'MISSING' };
@@ -98,6 +106,16 @@ async function main() {
     fields.push(compareLongitude(`${horosaId}.lon`, production.lon, body.lon));
     fields.push(compareNumber(`${horosaId}.lat`, production.lat, body.lat, ARCSEC, 'degrees latitude'));
     fields.push(compareNumber(`${horosaId}.lonspeed`, production.lonspeed, body.speed, ARCSEC, 'degrees/day'));
+    const productionHouse = houseNumber(production.house);
+    const candidateHouse = houseNumber(body.house);
+    fields.push({
+      field: `${horosaId}.house`,
+      production: productionHouse,
+      candidate: candidateHouse,
+      status: productionHouse === null || candidateHouse === null
+        ? 'MISSING'
+        : productionHouse === candidateHouse ? 'PASS' : 'FAIL',
+    });
   }
 
   for (const [id, key] of [['Asc', 'asc'], ['MC', 'mc']]) {
