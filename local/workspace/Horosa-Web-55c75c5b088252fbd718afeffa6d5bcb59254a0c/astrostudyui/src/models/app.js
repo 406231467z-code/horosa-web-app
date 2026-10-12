@@ -18,7 +18,7 @@ function getMinWorkspaceHeight(){
     // use their real viewport (especially landscape) instead of inheriting a 660px floor.
     try{
         const width = typeof window !== 'undefined'
-            ? (window.visualViewport && window.visualViewport.width) || document.documentElement.clientWidth
+            ? document.documentElement.clientWidth || window.innerWidth || 1024
             : 1024;
         return Number(width) <= 760 ? 320 : MinWorkspaceHeight;
     }catch(e){
