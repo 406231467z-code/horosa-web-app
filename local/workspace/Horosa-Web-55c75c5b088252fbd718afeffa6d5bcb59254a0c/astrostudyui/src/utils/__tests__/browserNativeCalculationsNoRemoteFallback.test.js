@@ -71,4 +71,11 @@ describe('browser-native calculation paths do not fall back to remote services',
 		expect(source).toContain('setLiurengRunyearLocalCache(runyearKey, clonePlain(result))');
 		expect(source).not.toMatch(/request\s*\(|Constants\.ServerRoot/);
 	});
+
+	test('standalone LiuReng run-year is also browser-local', ()=>{
+		const source = withoutComments(read('components/lrzhan/LiuRengMain.js'));
+		expect(source).toContain('calcRunYearLocal(');
+		expect(source).toContain('setLiurengRunyearLocalCache(runyearKey, clonePlain(result))');
+		expect(source).not.toMatch(/request\s*\(|Constants\.ServerRoot/);
+	});
 });
