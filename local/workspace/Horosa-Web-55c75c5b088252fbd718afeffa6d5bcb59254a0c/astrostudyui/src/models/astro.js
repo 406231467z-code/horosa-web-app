@@ -690,7 +690,8 @@ function buildStepPrefetchTasks(fieldValues, stepHint, astroState){
 	}
 	const unit = (stepHint && stepHint.unit) || 'm';
 	// 本地漏斗技法(紫微/遁甲)的武装:/chart 不在其步进路径上,预取它纯属浪费 —— 只做技法端点。
-	const skipChart = !!(stepHint && stepHint.skipChart);
+	const activeStepHook = astroState && astroState.predictHook && astroState.predictHook[astroState.currentTab];
+	const skipChart = !!(stepHint && stepHint.skipChart) || !!(activeStepHook && activeStepHook.chartFree === true);
 	// Phase B:当前技法登记的端点(kentang pan 等)——用技法自己的请求函数,落其自己的缓存。
 	// 🔴 传给登记方的必须是【已步进到目标时间的 f2】(旧版传的是基准 fields,构出来的是
 	//    「此刻」的参数 —— 与用户下一步要看的盘不是同一张,预取白打;死表期潜伏未爆,R4-B2 修)。
