@@ -1632,8 +1632,25 @@ export default {
 			if(fields === undefined || fields === null){
 				fields = newEmptyFields();
 			}
-			const param = fieldsToParams(fields);
 			const astroState = yield select((state)=>state.astro);
+			const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
+			if(activeHook && activeHook.chartFree === true){
+				// The current tab has a verified local engine and declares that it does not
+				// consume chartObj. Create/recalculate it directly from fields; never call /chart.
+				const drawer = closeAllDrawer('*nowChart-local');
+				yield put({
+					type: 'save',
+					payload: { fields, drawerVisible: drawer },
+				});
+				if(!values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: astroState.chartObj, fields },
+					});
+				}
+				return;
+			}
+			const param = fieldsToParams(fields);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
 			const rsp = yield call(service.fetchChart, param);
