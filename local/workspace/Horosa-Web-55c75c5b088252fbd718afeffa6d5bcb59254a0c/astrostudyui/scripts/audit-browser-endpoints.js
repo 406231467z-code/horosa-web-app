@@ -16,7 +16,7 @@ const patterns = [
   ['ServerRoot', /\bServerRoot\b/g],
   ['request()', /\brequest\s*\(/g],
   ['fetch()', /\bfetch\s*\(/g],
-  ['WebSocket', /\bWebSocket\b|\bnew\s+WebSocket\b/g],
+  ['WebSocket', /\bWebSocket\b/g],
   ['EventSource/SSE', /\bEventSource\b/g],
   ['HTTP URL literal', /https?:\/\/[^\s'"`<>]+/g],
   ['legacy Horosa/Kentang endpoint', /(?:srv\.horosa\.com|horosaIdentity|\/chart|\/nongli\/time|\/jieqi\/year|\/qizheng|\/qizhengelection|\/aianalysis|\/predict\/|\/india\/|\/ziwei\/birth|\/qimen\/pan|\/taiyi\/pan|\/jinkou\/pan|\/liureng\/)/gi],
@@ -26,7 +26,7 @@ function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name !== '__tests__' || true) walk(full, files);
+      walk(full, files);
     } else if (extensions.has(path.extname(entry.name))) {
       files.push(full);
     }
