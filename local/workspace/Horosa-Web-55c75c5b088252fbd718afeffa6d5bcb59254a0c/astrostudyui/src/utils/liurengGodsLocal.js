@@ -2,8 +2,7 @@ import gods from './data/gods.json';
 import taisui from './data/taisui.json';
 import { buildLocalNongliLite } from './baziLunarLocal';
 import { isLunarJsYearReliable } from './lunarDomainGuard';
-import request from './request';
-import { ServerRoot, ResultKey } from './constants';
+import { ResultKey } from './constants';
 
 // PHASE 4-C: 六壬神煞与旬日。公式对齐 LiuReng.fillGods / fillXun 与 GodsHelper.findGods、findTaiSuiGods。
 // 四柱来自既有本地农历。域外抛错则返回 null，由调用方改走 /liureng/gods。
@@ -186,9 +185,8 @@ export function fetchLiurengGods(params, requestOpts){
 	if(local){
 		return Promise.resolve({ [ResultKey]: { liureng: local } });
 	}
-	const opts = {
-		body: JSON.stringify(params || {}),
-		...(requestOpts || {}),
-	};
-	return request(`${ServerRoot}/liureng/gods`, opts);
+	const { year } = yearOf(params || {});
+	return Promise.reject(new Error(
+		`六壬本地计算目前仅支持公元 ${1}–${9999} 年；当前输入年份 ${Number.isFinite(year) ? year : '未知'} 未能可靠计算。请勿回退到远程排盘服务。`
+	));
 }
