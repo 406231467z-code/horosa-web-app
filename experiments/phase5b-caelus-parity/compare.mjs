@@ -33,8 +33,12 @@ function byId(rows, id) {
   return (rows || []).find((row) => row && row.id === id) || null;
 }
 
+function isFiniteValue(value) {
+  return value !== null && value !== undefined && Number.isFinite(Number(value));
+}
+
 function compareNumber(field, production, candidate, tolerance, unit) {
-  if (!Number.isFinite(Number(production)) || !Number.isFinite(Number(candidate))) {
+  if (!isFiniteValue(production) || !isFiniteValue(candidate)) {
     return { field, production: production ?? null, candidate: candidate ?? null, status: 'MISSING' };
   }
   const delta = Math.abs(Number(production) - Number(candidate));
@@ -51,7 +55,7 @@ function compareNumber(field, production, candidate, tolerance, unit) {
 }
 
 function compareLongitude(field, production, candidate) {
-  if (!Number.isFinite(Number(production)) || !Number.isFinite(Number(candidate))) {
+  if (!isFiniteValue(production) || !isFiniteValue(candidate)) {
     return { field, production: production ?? null, candidate: candidate ?? null, status: 'MISSING' };
   }
   const delta = angularDistance(Number(production), Number(candidate));
