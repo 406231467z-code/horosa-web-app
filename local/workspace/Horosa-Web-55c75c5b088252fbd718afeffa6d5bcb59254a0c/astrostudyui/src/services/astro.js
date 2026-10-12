@@ -67,6 +67,19 @@ function markChartCacheHit(){
 
 export function fetchChart(values, requestOptions){
 	const opts = requestOptions || {};
+	// Explicit local-only path for the browser-native natal engine. It is opt-in while
+	// parity/feature coverage is being expanded; it never falls back to Java/Python.
+	if(opts.browserNative === true){
+		return import('../utils/browserChartEngine').then((module)=>{
+			const calculate = module.calculateBrowserChart || module.default;
+			if(typeof calculate !== 'function'){
+				throw new Error('浏览器占星引擎未能加载。');
+			}
+			return calculate(values || {});
+		});
+	}
+
+	const opts = requestOptions || {};
 	const disableCache = opts.cache === false;
 	const key = disableCache ? '' : buildChartKey(values);
 	if(key && chartMem.has(key)){
