@@ -171,7 +171,7 @@ function nonDefault(value){
 
 export function canCalculateBrowserChart(values){
 	const p = values || {};
-	if(nonDefault(p.predictive) || nonDefault(p.includePrimaryDirection) || nonDefault(p.pdtype)){
+	if(nonDefault(p.includePrimaryDirection) || nonDefault(p.pdtype)){
 		return { ok: false, reason: '主限预测计算仍需独立迁移。' };
 	}
 	if(nonDefault(p.tradition) || nonDefault(p.strongRecption) || nonDefault(p.simpleAsp) || nonDefault(p.virtualPointReceiveAsp)){
@@ -248,8 +248,8 @@ function classicalSignData(longitude, planetId){
 	const signName = signOf(longitude);
 	const degree = mod(longitude,30);
 	const opposite = mod(signIndex+6,12);
-	const exaltEntry = Object.entries(HELLENISTIC.exaltation || {}).find((entry)=>entry[1] && Number(entry[1].sign) === signIndex);
-	const fallEntry = Object.entries(HELLENISTIC.exaltation || {}).find((entry)=>entry[1] && Number(entry[1].sign) === opposite);
+	const exaltEntry = Object.entries(HELLENISTIC.exaltation || {}).find((entry)=>entry[1] && !entry[1].optional && Number(entry[1].sign) === signIndex);
+	const fallEntry = Object.entries(HELLENISTIC.exaltation || {}).find((entry)=>entry[1] && !entry[1].optional && Number(entry[1].sign) === opposite);
 	const elementEntry = Object.entries(HELLENISTIC.elements || {}).find((entry)=>Array.isArray(entry[1]) && entry[1].includes(signIndex));
 	const tri = elementEntry && HELLENISTIC.triplicity && HELLENISTIC.triplicity.Dorothean
 		? HELLENISTIC.triplicity.Dorothean[elementEntry[0]] : null;
