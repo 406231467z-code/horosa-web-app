@@ -157,7 +157,7 @@ export default {
     namespace: 'app',
 
     state: {
-        systime: null,
+        systime: Date.now(),
         theme: 'light',
         appearanceMode: 'system',
         resolvedAppearance: 'light',
@@ -314,7 +314,7 @@ export default {
             Modal.info({ title: '云账号密码重置已移除。此版本不再使用云账号。' });
         },
 
-                *checkUser({ payload: values }, { put, select }) {
+                *initializeLocalWorkspace({ payload: values }, { put, select }) {
             // Pure-Web migration: there is no remote login/session validation at boot.
             // Restore user preferences locally and initialize an anonymous local workspace.
             let setupJson = localStorage.getItem(Constants.GlobalSetupKey);
@@ -419,17 +419,6 @@ export default {
    
         },
 
-        *getSysTime({ payload: values }, { put }) {
-            // No server clock is required for a browser-only workspace. Use the local
-            // device clock and keep request signing delta neutral for any legacy callers.
-            const Result = Date.now();
-            yield put({
-                type: 'save',
-                payload: { systime: Result },
-            });
-            setTmDelta(0);
-        },
-
         *beginRefresh({ payload:values }, { put, call }){
             yield put({
                 type: 'save',
@@ -477,7 +466,7 @@ export default {
             const { query } = location;
             if(location.pathname === '/' || location.pathname === ''){
                 dispatch({
-                    type: 'checkUser',
+                    type: 'initializeLocalWorkspace',
                     payload:{},
                 });                           
             }
@@ -607,10 +596,6 @@ export default {
                 payload: { aspects: aspects },
             });
 
-            dispatch({
-                type: 'getSysTime',
-                payload:{},
-            });                           
 
             dispatch({
                 type: 'rules/ziwei',
