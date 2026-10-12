@@ -3,6 +3,7 @@ import { message, Spin } from 'antd';
 import { XQButton as Button, XQSelect as Select, XQTabs as Tabs, XQSideSection } from '../xq-ui';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
 import { fetchPreciseNongli } from '../../utils/preciseCalcBridge';
+import { isBrowserOnlyEnv } from '../../utils/constants';
 import GeoCoordModal from '../amap/GeoCoordModal';
 import PlusMinusTime from '../astro/PlusMinusTime';
 import DateTime from '../comp/DateTime';
@@ -574,6 +575,9 @@ class TaiYiMain extends Component {
 		}
 		if(this.unmounted || reqSeq !== this.taiyiRequestSeq){
 			return;
+		}
+		if(!pan && isBrowserOnlyEnv()){
+			message.warning('当前日期超出浏览器本地太乙历算覆盖范围；未连接后端，也未生成盘面。');
 		}
 		// P1 流派覆盖层:以 kintaiyi base pan 为底,按所选流派开关覆盖受影响神煞 + 几何重算主客算(默认=空操作,字节不变)。
 		const ov = pan ? applyTaiyiSchool(pan, nextOptions.school) : { pan, overrides: null };
