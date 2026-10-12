@@ -229,11 +229,11 @@ export async function extractMaterialContent(values){
 		extractedText = paragraphs.map((paragraph)=>{
 			return Array.from(paragraph.getElementsByTagName('*')).map((node)=>{
 				if(node.localName === 't'){ return node.textContent || ''; }
-				if(node.localName === 'tab'){ return '\\t'; }
-				if(node.localName === 'br' || node.localName === 'cr'){ return '\\n'; }
+				if(node.localName === 'tab'){ return '\t'; }
+				if(node.localName === 'br' || node.localName === 'cr'){ return '\n'; }
 				return '';
 			}).join('');
-		}).join('\\n').trim();
+		}).join('\n').trim();
 		extractor = 'browser-docx-jszip';
 	}else if(ext === 'pdf'){
 		throw new Error('PDF 文本解析器尚未迁入浏览器；请先将 PDF 导出为 TXT、Markdown 或 DOCX，再添加资料。未上传到远程服务。');
