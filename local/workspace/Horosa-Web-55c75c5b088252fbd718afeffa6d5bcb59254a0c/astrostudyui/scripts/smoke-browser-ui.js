@@ -13,6 +13,7 @@ const puppeteer = require('puppeteer-core');
 
 const APP_ROOT = path.resolve(__dirname, '..');
 const DIST_ROOT = path.join(APP_ROOT, 'dist');
+const ARTIFACT_ROOT = path.join(APP_ROOT, 'artifacts');
 const MIME = {
   '.css': 'text/css; charset=utf-8',
   '.eot': 'application/vnd.ms-fontobject',
@@ -93,6 +94,7 @@ async function main() {
   if (!fs.existsSync(path.join(DIST_ROOT, 'index.html'))) {
     throw new Error('dist/index.html not found; run npm run build first');
   }
+  fs.mkdirSync(ARTIFACT_ROOT, { recursive: true });
   const executablePath = findChrome();
   if (!executablePath) {
     throw new Error('Chrome/Chromium not found. Set CHROME_BIN to a Chromium executable.');
@@ -144,6 +146,7 @@ async function main() {
     }, { timeout: 20000 });
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
+    await page.screenshot({ path: path.join(ARTIFACT_ROOT, 'browser-ui-mobile.png'), fullPage: false });
     const mobile = await page.evaluate(() => ({
       title: document.title,
       viewportWidth: window.innerWidth,
@@ -156,6 +159,7 @@ async function main() {
 
     await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false, hasTouch: false });
     await new Promise((resolve) => setTimeout(resolve, 400));
+    await page.screenshot({ path: path.join(ARTIFACT_ROOT, 'browser-ui-desktop.png'), fullPage: false });
     const desktop = await page.evaluate(() => ({
       title: document.title,
       viewportWidth: window.innerWidth,
@@ -194,6 +198,7 @@ async function main() {
         'This checks the entry screen and local assets; retained calculators that still call legacy APIs remain a separate migration blocker.',
       ],
     };
+    fs.writeFileSync(path.join(ARTIFACT_ROOT, 'browser-ui-smoke.json'), JSON.stringify(report, null, 2) + '\n');
     console.log(JSON.stringify(report, null, 2));
     if (failures.length) {
       console.error('[browser-ui-smoke] ' + failures.join('\n[browser-ui-smoke] '));
