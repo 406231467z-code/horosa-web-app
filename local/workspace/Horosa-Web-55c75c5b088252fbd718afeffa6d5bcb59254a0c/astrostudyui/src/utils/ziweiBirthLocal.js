@@ -1,6 +1,7 @@
 import { isLunarJsYearReliable } from './lunarDomainGuard';
 import { calcZiwei } from '../components/ziwei/ZiweiCalc';
 import { detectPatterns } from '../components/ziwei/ziweiPatterns';
+import { ResultKey } from './constants';
 
 // 与 ziweiLocalParity 的 Java 兼容档相同：正月换年、日历农历日、命主按生年支。
 const ZIWEI_JAVA_COMPAT_OPTS = Object.freeze({
