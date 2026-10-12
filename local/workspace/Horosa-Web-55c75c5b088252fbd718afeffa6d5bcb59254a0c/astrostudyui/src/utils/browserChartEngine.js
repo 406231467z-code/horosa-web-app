@@ -241,7 +241,7 @@ function createObject(id, type, lon, lat, ra, dec, speed, cusps, asc, jdUt, geo,
 	const horiz = horizontal(eq.ra, eq.dec, jdUt, geo);
 	const whole = 180 - lon;
 	const antisciaLon = mod(whole, 360);
-	const cantisciaLon = mod(antisciaLon + 180, 360);
+	const cantisciaLon = mod(lon + 180, 360);
 	const outOfBounds = Math.abs(dec) > 23.4367;
 	const obj = {
 		id, type, lon, lat: Number(lat) || 0, ra: mod(ra,360), decl: Number(dec) || 0,
@@ -301,6 +301,48 @@ function makeHouses(chart, objects, label){
 		};
 	});
 	return rows.sort((a,b)=>a.lon-b.lon);
+}
+
+function makeFixedStarRows(engine, chart, geo){
+	const names = engine.starNames();
+	const rows = [];
+	for(let i=0;i<names.length;i++){
+		let star;
+		try{ star = engine.fixedStar(names[i], chart.jdUt, { zodiac: chart.zodiac }); }catch(e){ continue; }
+		if(!Number.isFinite(Number(star.mag)) || Number(star.mag) > 4.0){ continue; }
+		const horiz = horizontal(star.ra, star.dec, chart.jdUt, geo);
+		rows.push({
+			id: names[i], type: 'Fixed Star', lon: mod(star.lon,360), lat: star.lat,
+			ra: mod(star.ra,360), decl: star.dec, sign: star.sign, signlon: star.signDeg,
+			azimuth: horiz.azimuth, altitudeTrue: horiz.altitude, altitudeAppa: horiz.altitude,
+			mag: [star.mag, names[i]], name: names[i],
+		});
+	}
+	return rows.sort((a,b)=>a.lon-b.lon);
+}
+
+function makeStarConjunctions(engine, chart, objectIds){
+	const grouped = {};
+	objectIds.forEach((id)=>{ grouped[id] = []; });
+	let matches = [];
+	try{ matches = engine.starConjunctions(chart,{ orb: 1.5, maxMag: 4.0 }); }catch(e){ matches = []; }
+	matches.forEach((match)=>{
+		const def = BODY_DEFS.find((item)=>item[0] === match.body);
+		const id = def ? def[1] : match.body;
+		if(!grouped[id]){ grouped[id] = []; }
+		try{
+			const star = engine.fixedStar(match.star, chart.jdUt, { zodiac: chart.zodiac });
+			grouped[id].push([match.star, star.sign, mod(star.lon,360), match.orb, match.star]);
+		}catch(e){ /* a catalog gap must not invalidate a calculated chart */ }
+	});
+	return Object.keys(grouped).map((id)=>({ id, stars: grouped[id] }));
+}
+
+function makeSignsRA(jde){
+	return AstroConst.LIST_SIGNS.map((id,index)=>{
+		const eq = equatorialFor(index*30,0,jde);
+		return { id, ra: eq.ra, decl: eq.dec };
+	});
 }
 
 function formatDate(birth){
@@ -381,6 +423,9 @@ export function calculateBrowserChart(values){
 	const houses = makeHouses(chart,objectRows,label);
 	const objectIds = objectRows.map((obj)=>obj.id);
 	const aspects = makeAspectBuckets(objectIds,chart.aspects);
+	const fixedStars = makeFixedStarRows(engine,chart,geo);
+	const stars = makeStarConjunctions(engine,chart,objectIds);
+	const signsRA = makeSignsRA(jde);
 	const chartResult = {
 		zodiacal: zodiac.label,
 		date: { date: { jdn: Math.floor(jdUt+0.5) }, time: { value: birth.hour+birth.minute/60+birth.second/3600 }, utcoffset: { value: birth.zone }, jd: jdUt },
@@ -390,8 +435,8 @@ export function calculateBrowserChart(values){
 			antiscia: objectRows.reduce((acc,obj)=>{ acc[obj.id]=obj.antisciaPoint; return acc; },{}),
 			cantiscia: objectRows.reduce((acc,obj)=>{ acc[obj.id]=obj.cantisciaPoint; return acc; },{}),
 		},
-		stars: [], orientOccident: {}, displayCoord: 'equatorial',
-		fixedStarSu28: [], fixedStars: [], signsRA: [],
+		stars, orientOccident: {}, displayCoord: 'equatorial',
+		fixedStarSu28: [], fixedStars, signsRA,
 		signsRaDoubingSu28: [], su28Adjust: [], su28Virtual: [], beidou: [], beiji: [],
 		timerStar: null, dayerStar: null, dayofweek: '',
 		sunRiseTime: '', sunSetTime: '',
