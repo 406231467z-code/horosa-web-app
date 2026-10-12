@@ -64,6 +64,8 @@ jobs:
         run: npm run build
       - name: Smoke-check static browser output
         run: npm run check:browser-build
+      - name: Smoke-test mobile and desktop UI in Chromium
+        run: npm run smoke:browser-ui
       - name: Upload legacy endpoint inventory
         if: always()
         uses: actions/upload-artifact@v4
