@@ -37,14 +37,12 @@ describe('PHASE 4-C ziwei birth and liuren gods', ()=>{
 		expect(fetched.Result.chart.lifeMaster).toBe(java.lifeMaster);
 	});
 
-	test('域外年份不编造紫微盘，改走 /ziwei/birth', async ()=>{
+	test('域外年份明确拒绝本地计算，不伪造结果，也不请求后端', async ()=>{
 		expect(localZiweiBirthEnvelope({ date: '12000-06-01', time: '12:00:00', ad: 1 })).toBeNull();
 		expect(localZiweiBirthEnvelope({ date: '500-01-01', time: '12:00:00', ad: -1 })).toBeNull();
-		request.mockResolvedValue({ Result: { chart: { remote: true } } });
-		const env = await fetchZiweiBirth({ date: '12000-06-01', time: '12:00:00', ad: 1 });
-		expect(request).toHaveBeenCalled();
-		expect(String(request.mock.calls[0][0])).toContain('/ziwei/birth');
-		expect(env.Result.chart.remote).toBe(true);
+		await expect(fetchZiweiBirth({ date: '12000-06-01', time: '12:00:00', ad: 1 })).rejects.toThrow('仅验证公元 1–9999 年');
+		await expect(fetchZiweiBirth({ date: '-0500-01-01', time: '12:00:00', ad: -1 })).rejects.toThrow('仅验证公元 1–9999 年');
+		expect(request).not.toHaveBeenCalled();
 	});
 
 	test('格局规则是静态表', ()=>{
@@ -87,9 +85,7 @@ describe('PHASE 4-C ziwei birth and liuren gods', ()=>{
 		expect(Array.isArray(lr.gods['驿马'])).toBe(true);
 		expect(lr.godsYear.taisui1['岁驾']).toBeTruthy();
 		expect(buildLocalLiureng({ date: '12000-01-01', time: '12:00:00', ad: 1 })).toBeNull();
-		request.mockResolvedValue(undefined);
-		const missing = await fetchLiurengGods({ date: '12000-01-01', time: '12:00:00', ad: 1 });
-		expect(request).toHaveBeenCalled();
-		expect(missing).toBeUndefined();
+		await expect(fetchLiurengGods({ date: '12000-01-01', time: '12:00:00', ad: 1 })).rejects.toThrow('仅支持公元 1–9999 年');
+		expect(request).not.toHaveBeenCalled();
 	});
 });
