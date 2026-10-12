@@ -14,6 +14,16 @@ function withoutComments(text){
 }
 
 describe('browser-native calculation paths do not fall back to remote services', ()=>{
+	test('AI analysis transport is browser-to-provider only, including legacy proxy profiles', ()=>{
+		const transport = withoutComments(read('utils/aiDirectTransport.js'));
+		const service = withoutComments(read('services/aianalysis.js'));
+		expect(transport).toContain('const mode = AI_TRANSPORT_DIRECT');
+		expect(transport).not.toMatch(/mode:\s*AI_TRANSPORT_PROXY|proxyValues:\s*stripAiTransport/);
+		expect(service).toContain('fetch(plan.url, {');
+		expect(service).toContain('fetch(vendor.url, {');
+		expect(service).not.toMatch(/ServerRoot|\/aianalysis\/(chat|chat\/stream|diagnose|providers\/models|embeddings|materials\/extract)/);
+	});
+
 	test('Qimen main path calculates with calcDunJia and has no Kentang/ServerRoot transport', ()=>{
 		const main = withoutComments(read('components/dunjia/DunJiaMain.js'));
 		const engine = withoutComments(read('components/dunjia/DunJiaCalc.js'));
