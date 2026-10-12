@@ -1,6 +1,5 @@
-// Treat RFC1918/LAN origins as local browser sessions too. When the UI is opened
-// from a phone (for example http://172.20.10.5:8001), localhost would mean the phone,
-// not the computer running the Java/Python services.
+// Recognize private LAN hosts for stale-loopback checks. A LAN browser keeps the
+// original remote API by default; local host services require explicit opt-in.
 function isLanHostname(value){
 	const host = String(value || '').toLowerCase().replace(/^\[|\]$/g, '').trim();
 	if(!host || host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '::1'){
@@ -35,8 +34,7 @@ function hasLocalBackendOptIn(){
 		return false;
 	}
 	try{
-		const params = new URLSearchParams(window.location.search || '');
-		if(params.get('localBackend') === '1'){
+		if(/(?:^|[?&])localBackend=1(?:&|$)/.test(String(window.location.search || ''))){
 			return true;
 		}
 		return window.localStorage && window.localStorage.getItem('horosaUseLocalBackend') === '1';
