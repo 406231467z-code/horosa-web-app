@@ -598,7 +598,7 @@ export default {
 
 
             dispatch({
-                type: 'rules/ziwei',
+                type: 'rules/loadZiweiRulesLocal',
                 payload:{},
             });
 
