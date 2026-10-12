@@ -64,6 +64,12 @@ export async function parseMaterialFile(file){
 		throw new Error('material.file.required');
 	}
 	const kind = guessKind(file);
+	// The pure-browser build intentionally has no PDF or legacy binary DOC parser.
+	// Reject these formats before reading/Base64-encoding the entire file, especially on phones.
+	if(kind === 'pdf' || kind === 'doc'){
+		const label = kind === 'pdf' ? 'PDF' : '旧版 DOC';
+		throw new Error(`${label} 在纯浏览器模式下暂不支持解析；请先转换为 TXT、Markdown 或 DOCX。`);
+	}
 	const arrayBuffer = await readFileAsArrayBuffer(file);
 	const base64Data = await arrayBufferToBase64(arrayBuffer);
 	const fileHash = await sha256Hex(arrayBuffer);
