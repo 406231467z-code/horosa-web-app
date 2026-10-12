@@ -18,6 +18,7 @@
 		"prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
 		"audit:endpoints": "node scripts/audit-browser-endpoints.js",
 		"check:browser-build": "node scripts/check-browser-build.js",
+		"smoke:browser-ui": "node scripts/smoke-browser-ui.js",
 		"test": "umi-test",
 		"test:coverage": "umi-test --coverage"
 	},
