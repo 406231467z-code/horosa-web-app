@@ -441,6 +441,9 @@ class GuaZhanMain extends Component{
 				}
 				this.restoreFromCurrentCase();
 			};
+			// 六爻盘面、卦辞、神煞及断卦均在本地 JS 引擎计算；公历转农历使用本地历法桥。
+			// 本组件不消费共享西洋星盘 chartObj，浏览器端不应等待 /chart 代理。
+			this.props.hook.chartFree = true;
 		}
 	}
 
