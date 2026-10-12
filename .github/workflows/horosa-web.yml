@@ -17,6 +17,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: horosa-web-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   frontend-validation:
     runs-on: ubuntu-latest
@@ -39,7 +43,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Run browser migration regression suite
         run: >-
-          npm test -- --runInBand --runTestsByPath
+          npm test -- --runInBand --forceExit --testTimeout=30000 --runTestsByPath
           src/services/__tests__/aianalysisDocxExtraction.test.js
           src/layouts/__tests__/phase4gKeepMobile.test.js
           src/utils/__tests__/browserBootstrapNoLegacyBackend.test.js
@@ -49,14 +53,14 @@ jobs:
           src/utils/__tests__/phase4cZiweiLiureng.test.js
           src/utils/__tests__/phase4fAiDirectTransport.test.js
           src/utils/__tests__/pdPolesLocal.test.js
-                    src/components/dunjia/__tests__/DunJiaCalc.test.js
-                    src/components/jinkou/JinKouCalc.test.js
-                    src/components/jinkou/JinKouMain.test.js
-                    src/components/kinastro/__tests__/cetianTextsLocal.test.js
-                    src/components/taiyi/__tests__/TaiYiCore.test.js
-                    src/utils/__tests__/localchartsBcAd.test.js
-                    src/utils/__tests__/phase4hDeadDeps.test.js
-                    src/utils/__tests__/phase4iInstallerExit.test.js
+          src/components/dunjia/__tests__/DunJiaCalc.test.js
+          src/components/jinkou/JinKouCalc.test.js
+          src/components/jinkou/JinKouMain.test.js
+          src/components/kinastro/__tests__/cetianTextsLocal.test.js
+          src/components/taiyi/__tests__/TaiYiCore.test.js
+          src/utils/__tests__/localchartsBcAd.test.js
+          src/utils/__tests__/phase4hDeadDeps.test.js
+          src/utils/__tests__/phase4iInstallerExit.test.js
           src/utils/__tests__/umiDevChunkMode.test.js
           src/constants/__tests__/ProductScope.test.js
       - name: Build browser application
