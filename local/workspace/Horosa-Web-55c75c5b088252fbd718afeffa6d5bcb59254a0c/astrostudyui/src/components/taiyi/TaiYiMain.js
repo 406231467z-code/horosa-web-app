@@ -158,6 +158,8 @@ class TaiYiMain extends Component {
 				}
 				this.requestNongli(fields || this.props.fields);
 			};
+			// 太乙已有本地 Kintaiyi 立成表引擎，不依赖共享西洋 chartObj。
+			this.props.hook.chartFree = true;
 			// R4-B3(A6):太乙同为【两段式】—— stage-1(/nongli/time)先回来盘才能推。
 			// 与主 /chart 无关,在 /chart 返回之前并行发出即把 stage-1 摘出关键路径
 			// (latency sum→max)。闸:horosa.perf.prewarmRequests(关=此函数不被调用,逐字节旧序)。
