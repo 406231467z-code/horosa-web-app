@@ -39,6 +39,19 @@ function walk(dir, files = []) {
   return files;
 }
 
+function classifyEndpointReferenceLine(line) {
+  const trimmed = String(line || '').trim();
+  if (/^(?:\/\/|\/\*|\*\/?|\{\/\*)/.test(trimmed)) {
+    return 'endpoint reference in comment';
+  }
+  // The shared step-prefetch registry uses endpoint-shaped keys to group local jobs.
+  // A path label by itself is not evidence that the browser sends a request.
+  if (/\bpath\s*:/i.test(line) && !/\b(?:request|fetch|cachedPost|cachedKentangFetch|buildKentangEndpoint)\s*\(/.test(line)) {
+    return 'endpoint-like scheduler metadata';
+  }
+  return 'legacy Horosa/Kentang endpoint';
+}
+
 function scanText(source, relativePath) {
   const results = [];
   String(source).split(/\r?\n/).forEach((line, index) => {
@@ -48,7 +61,7 @@ function scanText(source, relativePath) {
         results.push({
           file: relativePath,
           line: index + 1,
-          kind,
+          kind: kind === 'legacy Horosa/Kentang endpoint' ? classifyEndpointReferenceLine(line) : kind,
           text: line.trim().slice(0, 280),
         });
       }
