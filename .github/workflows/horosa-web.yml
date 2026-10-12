@@ -31,6 +31,8 @@ jobs:
           cache-dependency-path: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/package-lock.json
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
+      - name: Generate legacy endpoint inventory
+        run: node scripts/audit-legacy-endpoints.js --out artifacts/legacy-endpoint-audit.json
       - name: Run browser migration regression suite
         run: >-
           npm test -- --runInBand --forceExit --testTimeout=30000 --runTestsByPath
@@ -57,8 +59,16 @@ jobs:
           src/utils/__tests__/phase4iInstallerExit.test.js
           src/utils/__tests__/umiDevChunkMode.test.js
           src/constants/__tests__/ProductScope.test.js
+          scripts/__tests__/audit-legacy-endpoints.test.js
       - name: Build browser application
         run: npm run build
+      - name: Upload legacy endpoint inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-legacy-endpoint-inventory
+          path: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/legacy-endpoint-audit.json
+          if-no-files-found: warn
 
   chart-engine-candidate:
     runs-on: ubuntu-latest
