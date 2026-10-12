@@ -25,4 +25,14 @@ describe('browser endpoint inventory', ()=>{
       text: expect.stringContaining('new WebSocket'),
     }));
   });
+  test('distinguishes comment references and local prefetch metadata from probable transports', ()=>{
+    const comments = scanText('// legacy /chart note', 'src/utils/notes.js');
+    expect(comments).toContainEqual(expect.objectContaining({ kind: 'endpoint reference in comment' }));
+    expect(comments.some((row)=>row.kind === 'legacy Horosa/Kentang endpoint')).toBe(false);
+
+    const localTask = scanText("return { path: '/nongli/time', run: () => fetchPreciseNongli(params) };", 'src/components/dunjia/DunJiaMain.js');
+    expect(localTask).toContainEqual(expect.objectContaining({ kind: 'endpoint-like scheduler metadata' }));
+    expect(localTask.some((row)=>row.kind === 'legacy Horosa/Kentang endpoint')).toBe(false);
+  });
+
 });
