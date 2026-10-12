@@ -28,16 +28,15 @@ function isLoopbackRoot(value){
 }
 
 // LAN browser visits use the same remote API as the original browser build by default.
-// Opt into the host computer's loopback-only Java/Python services with ?localBackend=1.
+// Opt into the host computer's loopback-only Java/Python services for this URL with
+// ?localBackend=1. Do not honor a persisted localStorage flag on LAN hosts: an old
+// desktop preference can otherwise silently switch every phone session to local proxies.
 function hasLocalBackendOptIn(){
 	if(typeof window === 'undefined'){
 		return false;
 	}
 	try{
-		if(/(?:^|[?&])localBackend=1(?:&|$)/.test(String(window.location.search || ''))){
-			return true;
-		}
-		return window.localStorage && window.localStorage.getItem('horosaUseLocalBackend') === '1';
+		return /(?:^|[?&])localBackend=1(?:&|$)/.test(String(window.location.search || ''));
 	}catch(e){
 		return false;
 	}
