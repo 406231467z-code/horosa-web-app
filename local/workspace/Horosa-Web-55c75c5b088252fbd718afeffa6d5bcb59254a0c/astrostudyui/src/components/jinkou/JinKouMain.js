@@ -1523,7 +1523,17 @@ class JinKouMain extends Component{
 			if(godsKey){
 				this.godsInflight.set(godsKey, req);
 			}
-			result = await req;
+			try{
+				result = await req;
+			}catch(e){
+				if(!this.unmounted){
+					Modal.error({
+						title: '当前出生日期暂不支持本地六壬计算',
+						content: e && e.message ? e.message : '本地历法无法可靠计算该日期；未调用远程服务。',
+					});
+				}
+				return;
+			}
 			if(godsKey && result){
 				pushCache(this.godsCache, godsKey, clonePlain(result), 72);
 			}
