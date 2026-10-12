@@ -14,6 +14,15 @@ function withoutComments(text){
 }
 
 describe('browser-native calculation paths do not fall back to remote services', ()=>{
+	test('main natal chart routes through the local engine while retained other tabs keep their own route', ()=>{
+		const model = withoutComments(read('models/astro.js'));
+		const service = withoutComments(read('services/astro.js'));
+		expect(model).toContain("canonicalizeTabKey(state.currentTab) === 'astrochart'");
+		expect(model).toContain('opts.browserNative = true');
+		expect(service).toContain("if(opts.browserNative === true)");
+		expect(service).toContain("import('../utils/browserChartEngine')");
+	});
+
 	test('AI analysis transport is browser-to-provider only, including legacy proxy profiles', ()=>{
 		const transport = withoutComments(read('utils/aiDirectTransport.js'));
 		const service = withoutComments(read('services/aianalysis.js'));
