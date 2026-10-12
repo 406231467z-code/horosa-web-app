@@ -66,35 +66,12 @@ jobs:
   chart-engine-candidate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Candidate parity is informative: a blocked probe must not turn into a production dependency
+    # or mask the frontend regression/build result.
+    continue-on-error: true
     defaults:
       run:
         working-directory: experiments/phase5b-caelus-parity
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install isolated candidate
-        run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
-      - name: Compare candidate with the existing historical golden
-        run: npm test
-      - name: Keep machine-readable comparison report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase5b-caelus-historical-parity
-          path: experiments/phase5b-caelus-parity/results/historical-1990.json
-          if-no-files-found: warn
-
-
-  # Informational only: the candidate is not a production dependency and a blocked
-  # single-chart result must never gate or replace the main Horosa calculator.
-  caelus-candidate-evaluation:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -103,15 +80,13 @@ jobs:
         with:
           node-version: 22
       - name: Install isolated candidate
-        working-directory: experiments/phase5b-caelus-parity
-        run: npm install --no-audit --no-fund
+        run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
       - name: Compare candidate against historical Horosa chart
-        working-directory: experiments/phase5b-caelus-parity
         run: npm test
-      - name: Upload candidate parity report
+      - name: Upload machine-readable parity report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase5b-caelus-parity-report
+          name: phase5b-caelus-historical-parity
           path: experiments/phase5b-caelus-parity/results/historical-1990.json
           if-no-files-found: warn
