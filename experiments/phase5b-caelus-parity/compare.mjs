@@ -169,7 +169,14 @@ async function main() {
 
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, JSON.stringify(report, null, 2) + '\n');
-  console.log(JSON.stringify({ verdict: report.verdict, candidate: report.candidate, counts, report: outPath }, null, 2));
+  console.log(JSON.stringify({
+    verdict: report.verdict,
+    candidate: report.candidate,
+    counts,
+    report: outPath,
+    failures: fields.filter((row) => row.status === 'FAIL'),
+    missing: fields.filter((row) => row.status === 'MISSING'),
+  }, null, 2));
 }
 
 main().catch((error) => {
