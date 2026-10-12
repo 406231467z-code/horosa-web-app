@@ -790,6 +790,7 @@ registerArmPlanBuilder((fieldValues, hint, astroState)=>buildStepPrefetchTasks(f
 // R4-B5(horosa_option_prefetch_v1):选项投机的 /chart 变体任务构造器 —— 与真点/步进预取
 // 共用同一 fieldsToParams 路径(键逐字节同是命中的唯一前提)。
 registerOptionChartTaskBuilder((variantFields, astroState)=>{
+	if(shouldUseBrowserNativeChart(astroState)){ return null; }
 	const param = fieldsToParams(variantFields);
 	param.cid = null;
 	param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
