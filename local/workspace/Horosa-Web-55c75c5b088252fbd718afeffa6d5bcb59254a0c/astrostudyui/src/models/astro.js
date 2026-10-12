@@ -1326,6 +1326,52 @@ export default {
 			const param = fieldsToParams(fields);
 			const astroState = yield select((allState)=>allState.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
+			if(isBrowserOnlyEnv()){
+				// A local chart record stores inputs/options, not a guaranteed fresh ephemeris result.
+				// Restore all saved fields and notes locally; never pretend the missing Western chart exists.
+				setF('memo74', values.memo74);
+				setF('memoBaZi', values.memoBaZi);
+				setF('memoZiWei', values.memoZiWei);
+				setF('memoAstro', values.memoAstro);
+				setF('memoGua', values.memoGua);
+				setF('memoLiuReng', values.memoLiuReng);
+				setF('memoQiMeng', values.memoQiMeng);
+				setF('memoSuZhan', values.memoSuZhan);
+				const type = state.memoType;
+				let memo = '';
+				if(type === 0){ memo = fields.memoAstro.value; }
+				else if(type === 1){ memo = fields.memoBaZi.value; }
+				else if(type === 2){ memo = fields.memoZiWei.value; }
+				else if(type === 3){ memo = fields.memo74.value; }
+				else if(type === 4){ memo = fields.memoGua.value; }
+				else if(type === 5){ memo = fields.memoLiuReng.value; }
+				else if(type === 6){ memo = fields.memoQiMeng.value; }
+				else if(type === 7){ memo = fields.memoSuZhan.value; }
+				yield put({
+					type: 'save',
+					payload: {
+						chartObj: null,
+						fields,
+						byChartData: true,
+						memo,
+						memoType: type,
+					},
+				});
+				markChartRefreshEnd();
+				try{ saveBootChartSnapshot(fields, state.currentTab); }catch(e){ /* local-only restore */ }
+				if(!values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: null, fields },
+					});
+				}
+				const activeHook = state.predictHook && state.predictHook[state.currentTab];
+				if(!(activeHook && activeHook.chartFree === true)){
+					showChartServiceError();
+				}
+				return;
+			}
+
 			const rsp = yield call(service.fetchChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
