@@ -314,7 +314,7 @@ export default {
             Modal.info({ title: '云账号密码重置已移除。此版本不再使用云账号。' });
         },
 
-                *initializeLocalWorkspace({ payload: values }, { put, select }) {
+        *initializeLocalWorkspace({ payload: values }, { put, select }) {
             // Pure-Web migration: there is no remote login/session validation at boot.
             // Restore user preferences locally and initialize an anonymous local workspace.
             let setupJson = localStorage.getItem(Constants.GlobalSetupKey);
