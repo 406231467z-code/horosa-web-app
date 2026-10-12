@@ -23,7 +23,7 @@ const PATTERNS = [
   ['WebSocket', /\bWebSocket\b/g],
   ['EventSource/SSE', /\bEventSource\b/g],
   ['HTTP URL literal', /https?:\/\/[^\s'"\x60<>]+/g],
-  ['legacy Horosa/Kentang endpoint', /(?:srv\.horosa\.com|horosaIdentity|horosaIdentity|\/allowedcharts|\/chart|\/nongli\/time|\/jieqi\/(?:year|nongli|birth)|\/qizheng(?:\/|kin\/)|\/qizhengelection(?:\/|\b)|\/aianalysis(?:\/|\b)|\/predict\/(?:pd|pdpoles)|\/india\/(?:chart|rectify)|\/ziwei\/birth|\/qimen\/pan|\/taiyi\/pan|\/jinkou\/pan|\/liureng\/(?:gods|runyear)|\/astroextra\/ephemeris)/gi],
+  ['legacy Horosa/Kentang endpoint', /(?:srv\.horosa\.com|horosaIdentity|\/allowedcharts\b|\/user\/check\b|\/common\/time\b|\/chart(?![\w-])|\/nongli\/time\b|\/jieqi\/(?:year|nongli|birth)\b|\/qizheng\/|\/qizhengkin\/|\/qizhengelection(?:\/|\b)|\/aianalysis(?:\/|\b)|\/predict\/pd(?:chart|poles)?\b|\/india\/(?:chart|rectify)\b|\/ziwei\/(?:birth|rules)\b|\/qimen\/pan\b|\/taiyi\/pan\b|\/jinkou\/pan\b|\/liureng\/(?:gods|runyear)\b|\/astroextra\/ephemeris\b|\/cetian\/texts\b)/gi],
 ];
 
 function walk(dir, files = []) {
