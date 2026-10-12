@@ -18,6 +18,7 @@ The retained Horosa product must calculate in the browser and use browser-local 
 - `fetchPreciseNongli` and `fetchPreciseJieqiYear` in `src/utils/preciseCalcBridge.js` are now browser-only. They use the local BaZi/lunar engine and bundled local Jieqi table; unsupported inputs reject clearly rather than calling `/nongli/time` or `/jieqi/year`.
 - `src/utils/divinationTimeDraft.js` no longer calls the Kentang `/jieqi/nongli` or `/jieqi/birth` endpoints for unsupported dates. It returns no calculated result when no verified local table is available. Development Umi config has no `/backend` or `/chart-service` proxy.
 - Responsive mobile/desktop CSS changes remain in this branch.
+- The Umi runner now passes `HOROSA_UMI_MODE` explicitly. Development disables route-level dynamic imports even if the parent shell inherited `NODE_ENV=production`; production keeps the existing `/static/` asset path and route splitting. A regression test evaluates the Umi config under both modes; this test still needs to run in Trea/Jest and the reported iOS Safari/Android Chrome failure still needs device verification.
 
 ## Additional browser-native paths completed in this batch
 
