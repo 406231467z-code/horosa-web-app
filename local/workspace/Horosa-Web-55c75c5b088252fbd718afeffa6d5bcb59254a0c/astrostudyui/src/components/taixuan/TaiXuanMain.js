@@ -1,5 +1,6 @@
 import QuickDockBar from '../common/QuickDockBar';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
+import { notifyBrowserCalcUnavailable } from '../../utils/browserCalcStatus';
 import { Component } from 'react';
 import { InputNumber, Spin } from 'antd';
 import DateTime from '../comp/DateTime';
@@ -386,7 +387,7 @@ class TaiXuanMain extends Component{
 				saveModuleAISnapshotLazy('taixuan', ()=>buildSnapshotText(pan));
 			});
 		}catch(e){
-			console.warn('taixuanshifa backend failed', e);
+			if(!notifyBrowserCalcUnavailable('taixuan', '太玄')) console.warn('taixuanshifa backend failed', e);
 			if(!this.unmounted && reqSeq === this.requestSeq){
 				this.setState({ loading: false });
 			}
