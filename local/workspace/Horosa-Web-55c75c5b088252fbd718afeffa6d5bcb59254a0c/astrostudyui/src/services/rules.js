@@ -1,8 +1,12 @@
 import request from '../utils/request';
-import {ServerRoot} from '../utils/constants';
+import {ServerRoot, isBrowserOnlyEnv} from '../utils/constants';
 import { ziweiRulesCacheEnabled } from '../utils/perfFlags';
+import { getZiweiRulesEnvelope } from '../utils/ziweiRulesLocal';
 
 export function ziweirules(values){
+    if(isBrowserOnlyEnv()){
+        return Promise.resolve(getZiweiRulesEnvelope());
+    }
     return request(`${ServerRoot}/ziwei/rules`, {
         body: JSON.stringify(values),
     });
