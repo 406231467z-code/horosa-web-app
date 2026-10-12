@@ -11,10 +11,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: horosa-web-validation
-  cancel-in-progress: true
-
 jobs:
   frontend-validation:
     runs-on: ubuntu-latest
