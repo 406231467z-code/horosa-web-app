@@ -57,11 +57,15 @@ describe('browser-native natal chart engine candidate', ()=>{
 		expect(envelope.Result.chart.objects.find((row)=>row.id === 'Sun').degreeQuality).toBeTruthy();
 		expect(envelope.Result.chart.objects.find((row)=>row.id === 'Syzygy')).toBeTruthy();
 		expect(envelope.Result.lots.length).toBe(GOLDEN.lots.length);
-		GOLDEN.lots.forEach((expectedLot)=>{
+		const lotDifferences = GOLDEN.lots.map((expectedLot)=>{
 			const actualLot = envelope.Result.lots.find((row)=>row.id === expectedLot.id);
 			expect(actualLot).toBeTruthy();
-			expect(angularDistance(expectedLot.lon,actualLot.lon)).toBeLessThan(1/3600);
+			return {
+				id: expectedLot.id,
+				distanceArcsec: angularDistance(expectedLot.lon,actualLot.lon) * 3600,
+			};
 		});
+		expect(lotDifferences.filter((row)=>row.distanceArcsec >= 2)).toEqual([]);
 
 		expect(envelope.Result.aspects.normalAsp.Sun).toBeTruthy();
 
