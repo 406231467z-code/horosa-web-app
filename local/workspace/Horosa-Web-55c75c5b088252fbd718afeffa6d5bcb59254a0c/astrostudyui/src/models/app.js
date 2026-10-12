@@ -555,22 +555,15 @@ export default {
    
         },
 
-        *getSysTime({ payload:values }, { put, call }){
-            const Result = yield call(appService.systime);
-            if(Result === undefined || Result === null){
-                return;
-            }
+        *getSysTime({ payload: values }, { put }) {
+            // No server clock is required for a browser-only workspace. Use the local
+            // device clock and keep request signing delta neutral for any legacy callers.
+            const Result = Date.now();
             yield put({
                 type: 'save',
-                payload: {
-                    systime: Result,
-                },
-            });    
-			let tm = new Number(Result);
-			let dt = new Date();
-			let tmS = dt.getTime();
-			let delta = tmS - tm;
-			setTmDelta(delta);
+                payload: { systime: Result },
+            });
+            setTmDelta(0);
         },
 
         *beginRefresh({ payload:values }, { put, call }){
