@@ -1,4 +1,4 @@
-import { extractDocxText } from '../aianalysis';
+import { extractDocxText } from '../../utils/docxText';
 
 describe('browser-local DOCX text extraction', ()=>{
 	test('preserves paragraphs, real tabs, and explicit line breaks', ()=>{
