@@ -96,6 +96,13 @@ describe('browser-native natal chart engine candidate', ()=>{
 		expect(actual.degreeGender).toBe(expected.degreeGender);
 		expect(actual.ninthPart).toBe(expected.ninthPart);
 		expect(local.receptions.normal.length).toBeGreaterThan(0);
+		expect(local.chart.orientOccident.Sun).toHaveProperty('oriental');
+		expect(local.chart.orientOccident.Sun).toHaveProperty('occidental');
+		expect(local.surround.planets).toHaveProperty('BySunMoon');
+		expect(local.surround).toHaveProperty('houses');
+		expect(local.surround).toHaveProperty('attacks');
+		expect(local.surround).toHaveProperty('besiegement');
+
 		expect(local.mutuals).toHaveProperty('abnormal');
 		expect(local.declParallel).toHaveProperty('contraParallel');
 		expect(local.surround.planets.Sun).toHaveLength(2);

@@ -294,54 +294,96 @@ function isClassicalPlanetId(id){
 	return ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'].includes(id);
 }
 
-function buildReceptions(objects){
-	const planets = objects.filter((obj)=>isClassicalPlanetId(obj.id));
+const DIGNITY_KEYS = ['ruler','exalt','dayTrip','nightTrip','partTrip','term','face','exile','fall'];
+const STRONG_DIGNITIES = ['ruler','exalt'];
+const CLASSICAL_PLANETS = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
+const NONTRADITIONAL_PLANETS = ['Uranus','Neptune','Pluto'];
+
+function selectedPlanetRows(objects, options){
+	const traditional = nonDefault(options && options.tradition);
+	const allowed = traditional ? CLASSICAL_PLANETS : CLASSICAL_PLANETS.concat(NONTRADITIONAL_PLANETS);
+	return (objects || []).filter((obj)=>obj && allowed.includes(obj.id) && obj.type === 'Planet');
+}
+
+function buildReceptions(objects, options){
+	const planets = selectedPlanetRows(objects,options);
 	const normal = [], abnormal = [];
-	const dignityKeys = ['ruler','exalt','dayTrip','nightTrip','partTrip','term','face','exile','fall'];
-	const majorKeys = ['ruler','exalt'];
-	planets.forEach((beneficiary)=>{
-		planets.forEach((supplier)=>{
-			if(beneficiary.id === supplier.id){ return; }
-			const supplierRulerShip = dignityKeys.filter((key)=>beneficiary.dignities && beneficiary.dignities[key] === supplier.id);
-			if(!supplierRulerShip.length){ return; }
-			const beneficiaryDignity = (beneficiary.selfDignity || []).slice();
-			const row = { beneficiary: beneficiary.id, supplier: supplier.id, beneficiaryDignity, supplierRulerShip };
-			if(supplierRulerShip.some((key)=>majorKeys.includes(key)) && beneficiaryDignity.length){
-				normal.push(row);
-			}else{
+	const strict = nonDefault(options && options.strongRecption);
+	planets.forEach((supplier)=>{
+		planets.forEach((beneficiary)=>{
+			if(supplier.id === beneficiary.id){ return; }
+			const received = DIGNITY_KEYS.filter((key)=>beneficiary.dignities && beneficiary.dignities[key] === supplier.id);
+			const filtered = received.filter((key)=>key !== 'exile' && key !== 'fall');
+			if(!filtered.length){ return; }
+			if(!filtered.includes('exalt') && !filtered.includes('ruler') && (strict || filtered.length <= 1)){ return; }
+			const row = {
+				beneficiary: beneficiary.id,
+				supplier: supplier.id,
+				beneficiaryDignity: (beneficiary.selfDignity || []).slice(),
+				supplierRulerShip: filtered,
+			};
+			if(row.beneficiaryDignity.includes('exile') || row.beneficiaryDignity.includes('fall')){
 				abnormal.push(row);
+			}else{
+				normal.push(row);
 			}
 		});
 	});
 	return { normal, abnormal };
 }
 
-function buildMutuals(objects){
-	const planets = objects.filter((obj)=>isClassicalPlanetId(obj.id));
-	const normal = [], abnormal = [];
-	const keys = ['ruler','exalt','dayTrip','nightTrip','partTrip','term','face','exile','fall'];
-	const hasMajor = (items)=>items.some((item)=>item === 'ruler' || item === 'exalt');
-	for(let i=0;i<planets.length;i++){
-		for(let j=i+1;j<planets.length;j++){
-			const a = planets[i], b = planets[j];
-			const aRulerShip = keys.filter((key)=>a.dignities && a.dignities[key] === b.id);
-			const bRulerShip = keys.filter((key)=>b.dignities && b.dignities[key] === a.id);
-			if(!aRulerShip.length || !bRulerShip.length){ continue; }
-			const row = { planetA: { id: a.id, rulerShip: aRulerShip }, planetB: { id: b.id, rulerShip: bRulerShip } };
-			if(hasMajor(aRulerShip) && hasMajor(bRulerShip)){ normal.push(row); }else{ abnormal.push(row); }
+function buildMutuals(objects, options){
+	const planets = selectedPlanetRows(objects,options);
+	const result = [];
+	const strict = nonDefault(options && options.strongRecption);
+	for(const a of planets){
+		for(const b of planets){
+			if(a.id === b.id || result.some((item)=>item.mutual.includes(a.id) && item.mutual.includes(b.id))){ continue; }
+			// inDignities(A,B): dignities held by A at B's sign; reverse inDignities(B,A) likewise.
+			const aReceivesB = DIGNITY_KEYS.filter((key)=>b.dignities && b.dignities[key] === a.id);
+			const bReceivesA = DIGNITY_KEYS.filter((key)=>a.dignities && a.dignities[key] === b.id);
+			const aFiltered = aReceivesB.filter((key)=>key !== 'exile' && key !== 'fall');
+			const bFiltered = bReceivesA.filter((key)=>key !== 'exile' && key !== 'fall');
+			const aGood = aFiltered.some((key)=>STRONG_DIGNITIES.includes(key));
+			const bGood = bFiltered.some((key)=>STRONG_DIGNITIES.includes(key));
+			const qualifies = strict
+				? aGood && bGood
+				: ((aFiltered.length > 1 && bFiltered.length > 1)
+					|| (aGood && bGood)
+					|| (aGood && bFiltered.length > 1)
+					|| (aFiltered.length > 1 && bGood));
+			if(!qualifies){ continue; }
+			// Match Horosa's legacy ordering: planet A receives rulerShip in B's place, then B in A's.
+			const aRulerShip = strict ? aReceivesB.filter((key)=>key !== 'exile' && key !== 'fall') : bReceivesA;
+			const bRulerShip = strict ? bReceivesA.filter((key)=>key !== 'exile' && key !== 'fall') : aReceivesB;
+			result.push({ mutual:[a.id,b.id], dignity:[aRulerShip,bRulerShip] });
 		}
 	}
+	const normal = [], abnormal = [];
+	result.forEach((item)=>{
+		const row = {
+			planetA:{ id:item.mutual[0], rulerShip:item.dignity[0] },
+			planetB:{ id:item.mutual[1], rulerShip:item.dignity[1] },
+		};
+		if(item.dignity.some((keys)=>keys.some((key)=>key === 'exile' || key === 'fall'))){
+			abnormal.push(row);
+		}else{
+			normal.push(row);
+		}
+	});
 	return { normal, abnormal };
 }
 
 function buildDeclParallel(objects){
-	const eligible = objects.filter((obj)=>obj && obj.type !== 'Arabic Part' && Number.isFinite(Number(obj.decl)));
-	const parallel = [], contraParallel = {};
+	const eligible = (objects || []).filter((obj)=>obj && obj.type !== 'Arabic Part' && Number.isFinite(Number(obj.decl)));
+	const adjacency = new Map(eligible.map((obj)=>[obj.id,new Set()]));
+	const contraParallel = {};
 	for(let i=0;i<eligible.length;i++){
 		for(let j=i+1;j<eligible.length;j++){
 			const a=eligible[i], b=eligible[j];
 			if(Math.abs(Number(a.decl)-Number(b.decl)) <= 1){
-				parallel.push([a.id,b.id]);
+				adjacency.get(a.id).add(b.id);
+				adjacency.get(b.id).add(a.id);
 			}
 			if(Math.abs(Number(a.decl)+Number(b.decl)) <= 1){
 				if(!contraParallel[a.id]){ contraParallel[a.id]=[]; }
@@ -351,23 +393,236 @@ function buildDeclParallel(objects){
 			}
 		}
 	}
+	const parallel=[], visited=new Set();
+	for(const obj of eligible){
+		if(visited.has(obj.id) || !(adjacency.get(obj.id)||new Set()).size){ continue; }
+		const stack=[obj.id], component=[];
+		visited.add(obj.id);
+		while(stack.length){
+			const id=stack.pop();
+			component.push(id);
+			(adjacency.get(id)||new Set()).forEach((neighbor)=>{
+				if(!visited.has(neighbor)){ visited.add(neighbor); stack.push(neighbor); }
+			});
+		}
+		if(component.length>1){ parallel.push(component.sort()); }
+	}
 	return { parallel, contraParallel };
 }
 
-function buildSurroundPlanets(objects){
-	const ids=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
-	const planets=objects.filter((obj)=>ids.includes(obj.id) && Number.isFinite(Number(obj.lon))).sort((a,b)=>a.lon-b.lon);
+function buildOrientOccidental(objects){
+	const ids=CLASSICAL_PLANETS;
+	const byId={};
+	(objects || []).forEach((obj)=>{ if(obj && obj.id){ byId[obj.id]=obj; } });
 	const result={};
-	if(planets.length<3){ return result; }
-	planets.forEach((planet,index)=>{
-		const before=planets[(index-1+planets.length)%planets.length];
-		const after=planets[(index+1)%planets.length];
-		result[planet.id]=[
-			{ id: before.id, delta: angularDistance(planet.lon,before.lon) },
-			{ id: after.id, delta: angularDistance(planet.lon,after.lon) },
-		];
+	ids.forEach((id)=>{
+		const planet=byId[id];
+		if(!planet){ return; }
+		const pntA=mod(planet.lon,360), pntB=mod(pntA+180,360);
+		const row={ oriental:[], occidental:[] };
+		ids.forEach((otherId)=>{
+			if(otherId===id || !byId[otherId]){ return; }
+			const otherLon=mod(byId[otherId].lon,360);
+			const oriental=(pntB < otherLon && otherLon < pntA)
+				|| (otherLon >= 0 && otherLon < pntA && pntB > 180)
+				|| (pntB > 180 && otherLon > pntB);
+			if(oriental){
+				row.oriental.push({id:otherId,delta:mod(pntA-otherLon,360)});
+			}else{
+				row.occidental.push({id:otherId,delta:mod(otherLon-pntA,360)});
+			}
+		});
+		row.oriental.sort((a,b)=>a.delta-b.delta);
+		row.occidental.sort((a,b)=>a.delta-b.delta);
+		result[id]=row;
 	});
 	return result;
+}
+
+function buildSurroundPlanets(orientOccident){
+	const result={ Sun:[], Moon:[], BySunMoon:null };
+	const ids=CLASSICAL_PLANETS;
+	ids.forEach((id)=>{
+		const entry=orientOccident && orientOccident[id];
+		if(!entry || !entry.oriental.length || !entry.occidental.length){ return; }
+		const orient=entry.oriental[0], occi=entry.occidental[0];
+		if(orient.delta+occi.delta>90){ return; }
+		const pair=[orient,occi];
+		if(id==='Sun' || id==='Moon'){
+			result[id]=pair;
+		}else if((pair[0].id==='Sun' && pair[1].id==='Moon') || (pair[0].id==='Moon' && pair[1].id==='Sun')){
+			result[id]={id,SunMoon:pair};
+		}
+	});
+	return result;
+}
+
+function buildOrientOccidentalHouses(houses, objects){
+	const byId={};
+	(objects || []).forEach((obj)=>{ if(obj && obj.id){ byId[obj.id]=obj; } });
+	const result={};
+	const houseList=(houses || []).slice().sort((a,b)=>Number(a.id.replace('House',''))-Number(b.id.replace('House','')));
+	houseList.forEach((house)=>{
+		const pntA=mod(house.lon,360), pntB=mod(pntA+180,360);
+		const row={inHouse:[],oriental:[],occidental:[]};
+		CLASSICAL_PLANETS.forEach((id)=>{
+			const planet=byId[id];
+			if(!planet){ return; }
+			if((house.planets || []).includes(id)){
+				row.inHouse.push({id,delta:Number(planet.lon)-Number(house.lon)});
+				return;
+			}
+			const lon=mod(planet.lon,360);
+			const oriental=(pntB < lon && lon < pntA)
+				|| (lon >= 0 && lon < pntA && pntB > 180)
+				|| (pntB > 180 && lon > pntB);
+			if(oriental){ row.oriental.push({id,delta:mod(pntA-lon,360)}); }
+			else{ row.occidental.push({id,delta:mod(lon-pntA,360)}); }
+		});
+		row.oriental.sort((a,b)=>a.delta-b.delta);
+		row.occidental.sort((a,b)=>a.delta-b.delta);
+		result[house.id]=row;
+	});
+	return result;
+}
+
+function buildSurroundHouses(houses,orientOccidentHouses){
+	const result={};
+	const byId={};
+	(houses || []).forEach((house)=>{ byId[house.id]=house; });
+	for(let i=1;i<=12;i++){
+		const id='House'+i, row=orientOccidentHouses && orientOccidentHouses[id], house=byId[id];
+		const previous=byId['House'+(i===1?12:i-1)], next=byId['House'+(i===12?1:i+1)];
+		if(!row || !house || !previous || !next || row.inHouse.length || !row.oriental.length || !row.occidental.length){ continue; }
+		const oriental=row.oriental[0], occidental=row.occidental[0];
+		if(occidental.delta > Number(house.size)+Number(next.size) || oriental.delta > Number(previous.size)){ continue; }
+		result[id]=[
+			{id:oriental.id,delta:oriental.delta},
+			{id:occidental.id,delta:occidental.delta-Number(house.size)},
+		];
+	}
+	return result;
+}
+
+const SURROUND_ASPECTS = [-120,-90,-60,0,60,90,120,180];
+const SURROUND_ORBS = {Sun:15,Moon:12,Mercury:7,Venus:8,Mars:8,Jupiter:9,Saturn:9};
+
+function pointForAspect(planet, aspect){
+	const lon=mod(Number(planet.lon)+aspect,360);
+	return {lon,sign:signOf(lon),signlon:mod(lon,30)};
+}
+
+function surroundsTarget(targetLon, pointA, pointB, pairOrb, orb){
+	const opposite=mod(targetLon+180,360);
+	if((pointA.lon<=targetLon && targetLon<=pointB.lon && pointB.lon<=opposite)
+		|| (opposite<=pointA.lon && pointA.lon<=targetLon && targetLon<=pointB.lon)
+		|| (360-pairOrb<=pointA.lon && pointA.lon<=targetLon && targetLon<=360 && 0<=pointB.lon && pointB.lon<=pairOrb)
+		|| (360-pairOrb<=pointA.lon && 0<=targetLon && targetLon<=pointB.lon && pointB.lon<=pairOrb)){ return true; }
+	if((pointB.lon<=targetLon && targetLon<=pointA.lon && pointA.lon<=opposite)
+		|| (opposite<=pointB.lon && pointB.lon<=targetLon && targetLon<=pointA.lon)
+		|| (360-orb<=pointB.lon && pointB.lon<=targetLon && targetLon<=360 && 0<=pointA.lon && pointA.lon<=orb)
+		|| (360-orb<=pointB.lon && 0<=targetLon && targetLon<=pointA.lon && pointA.lon<=orb)){ return true; }
+	return false;
+}
+
+function buildSurroundAttack(planet, planetMap){
+	const all=[];
+	for(const idA of CLASSICAL_PLANETS){
+		if(idA===planet.id || !planetMap[idA]){ continue; }
+		const a=planetMap[idA], orbA=SURROUND_ORBS[idA];
+		for(const aspA of SURROUND_ASPECTS){
+			const pA=pointForAspect(a,aspA);
+			const deltaA=angularDistance(pA.lon,planet.lon);
+			if(deltaA>27){ continue; }
+			for(const idB of CLASSICAL_PLANETS){
+				if(idB===idA || idB===planet.id || !planetMap[idB]){ continue; }
+				const b=planetMap[idB], orbB=SURROUND_ORBS[idB], pairOrb=orbA+orbB;
+				for(const aspB of SURROUND_ASPECTS){
+					const pB=pointForAspect(b,aspB);
+					const deltaB=angularDistance(pB.lon,planet.lon);
+					if(deltaA>pairOrb || deltaB>pairOrb){ continue; }
+					if(angularDistance(pA.lon,pB.lon)>pairOrb || deltaA>orbA || deltaB>orbB){ continue; }
+					if(!surroundsTarget(mod(planet.lon,360),pA,pB,pairOrb,27)){ continue; }
+					all.push([
+						{aspect:aspA,id:idA,lon:pA.lon,sign:pA.sign,signlon:pA.signlon,delta:deltaA},
+						{aspect:aspB,id:idB,lon:pB.lon,sign:pB.sign,signlon:pB.signlon,delta:deltaB},
+					]);
+				}
+			}
+		}
+	}
+	all.sort((a,b)=>mod(a[1].lon-a[0].lon,360)-mod(b[1].lon-b[0].lon,360));
+	const groups={SunMoon:[],VenusJupiter:[],MarsSaturn:[],MinDelta:all.length?all[0]:[]};
+	all.forEach((pair)=>{
+		const a=pair[0].id,b=pair[1].id;
+		if((a==='Sun'&&b==='Moon')||(a==='Moon'&&b==='Sun')){ groups.SunMoon=pair; }
+		else if((a==='Venus'&&b==='Jupiter')||(a==='Jupiter'&&b==='Venus')){ groups.VenusJupiter=pair; }
+		else if((a==='Mars'&&b==='Saturn')||(a==='Saturn'&&b==='Mars')){ groups.MarsSaturn=pair; }
+	});
+	return groups;
+}
+
+function objectRulesWeakHouse(planet, houses){
+	const weak=new Set(['House3','House6','House8','House12']);
+	const ruled=(houses || []).filter((house)=>house.ruler===planet.id).map((house)=>house.id);
+	if(ruled.some((id)=>weak.has(id))){ return false; }
+	if(ruled.length){ return true; }
+	return !weak.has(planet.house);
+}
+
+function buildBesiegement(objects,attacks,mutuals,houses){
+	const byId={};
+	(objects || []).forEach((obj)=>{ byId[obj.id]=obj; });
+	const restrained={};
+	[...(mutuals.normal||[]),...(mutuals.abnormal||[])].forEach((row)=>{
+		const a=row.planetA && row.planetA.id,b=row.planetB && row.planetB.id;
+		['Sun','Jupiter'].forEach((authority)=>{
+			if(!byId[authority] || !objectRulesWeakHouse(byId[authority],houses)){ return; }
+			if(a===authority && b){ (restrained[b]||(restrained[b]=[])).push(authority); }
+			else if(b===authority && a){ (restrained[a]||(restrained[a]=[])).push(authority); }
+		});
+	});
+	const besiegedSet=new Set(Object.keys(attacks).filter((id)=>{
+		const a=attacks[id]; return a.SunMoon.length || a.VenusJupiter.length || a.MarsSaturn.length;
+	}));
+	const specs={
+		MarsSaturn:{kind:'围攻',nature:'凶',malefic:true},
+		VenusJupiter:{kind:'围荣',nature:'富',malefic:false},
+		SunMoon:{kind:'围耀',nature:'贵',malefic:false},
+	};
+	const output=[];
+	Object.keys(attacks).forEach((targetId)=>{
+		const target=byId[targetId];
+		if(!target){ return; }
+		const targetSign=AstroConst.LIST_SIGNS.indexOf(target.sign);
+		['MarsSaturn','VenusJupiter','SunMoon'].forEach((type)=>{
+			const pair=attacks[targetId][type];
+			if(!pair || !pair.length){ return; }
+			const spec=specs[type], besiegers=[];
+			pair.forEach((entry)=>{
+				const body=byId[entry.id];
+				if(!body){ return; }
+				const offset=mod(AstroConst.LIST_SIGNS.indexOf(body.sign)-targetSign,12);
+				let season='中';
+				if([7,8,9,10,11].includes(offset)){ season=offset===9?'夏':'春'; }
+				else if([1,2,3,4,5].includes(offset)){ season=offset===3?'冬':'秋'; }
+				const item={id:entry.id,aspect:entry.aspect,season,retro:Number(body.lonspeed||0)<0,delta:Number(Number(entry.delta).toFixed(2))};
+				if(spec.malefic){
+					item.restrained=restrained[entry.id]||[];
+					item.counterBesieged=besiegedSet.has(entry.id);
+				}
+				besiegers.push(item);
+			});
+			const severe=!!(spec.malefic && besiegers.some((item)=>item.season==='春'||item.season==='夏'));
+			output.push({
+				target:targetId,type,kind:spec.kind,nature:spec.nature,besiegers,
+				targetRetro:Number(target.lonspeed||0)<0,
+				severe:spec.malefic?severe:null,
+				defense:[],
+			});
+		});
+	});
+	return output;
 }
 
 function createObject(id, type, lon, lat, ra, dec, speed, cusps, asc, jdUt, geo, dignity){
@@ -729,10 +984,15 @@ export function calculateBrowserChart(values){
 	const isDiurnal = enrichClassicalPlanetData(objectRows,chart,jdUt);
 	const objectIds = objectRows.map((obj)=>obj.id);
 	const aspects = makeAspectBuckets(objectIds,chart.aspects);
-	const receptions = buildReceptions(objectRows);
-	const mutuals = buildMutuals(objectRows);
+	const receptions = buildReceptions(objectRows,p);
+	const mutuals = buildMutuals(objectRows,p);
 	const declParallel = buildDeclParallel(objectRows);
-	const surround = { planets: buildSurroundPlanets(objectRows), attacks: {}, houses: {}, besiegement: [] };
+	const orientOccident = buildOrientOccidental(objectRows);
+	const orientOccidentHouses = buildOrientOccidentalHouses(houses,objectRows);
+	const attacks = {};
+	CLASSICAL_PLANETS.forEach((id)=>{ const planet=objectRows.find((obj)=>obj.id===id); if(planet){ const attack=buildSurroundAttack(planet,Object.fromEntries(objectRows.map((obj)=>[obj.id,obj]))); if(attack.SunMoon.length||attack.VenusJupiter.length||attack.MarsSaturn.length||attack.MinDelta.length){ attacks[id]=attack; } } });
+	const surround = { planets: buildSurroundPlanets(orientOccident), attacks, houses: buildSurroundHouses(houses,orientOccidentHouses), besiegement: [] };
+	surround.besiegement = buildBesiegement(objectRows,attacks,mutuals,houses);
 	const fixedStars = makeFixedStarRows(engine,chart,geo);
 	const stars = makeStarConjunctions(engine,chart,objectIds);
 	const signsRA = makeSignsRA(jde);
@@ -745,7 +1005,7 @@ export function calculateBrowserChart(values){
 			antiscia: objectRows.reduce((acc,obj)=>{ acc[obj.id]=obj.antisciaPoint; return acc; },{}),
 			cantiscia: objectRows.reduce((acc,obj)=>{ acc[obj.id]=obj.cantisciaPoint; return acc; },{}),
 		},
-		stars, orientOccident: {}, displayCoord: 'equatorial',
+		stars, orientOccident: orientOccident, displayCoord: 'equatorial',
 		fixedStarSu28: [], fixedStars, signsRA,
 		signsRaDoubingSu28: [], su28Adjust: [], su28Virtual: [], beidou: [], beiji: [],
 		timerStar: null, dayerStar: null, dayofweek: '',
