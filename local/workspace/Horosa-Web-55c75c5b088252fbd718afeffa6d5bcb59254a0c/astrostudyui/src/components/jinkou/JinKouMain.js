@@ -3,7 +3,6 @@ import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
 import { sideSectionIcon } from '../../constants/sideSectionIcons'; // [观象P1]
 import { message, Modal } from 'antd';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import { fetchLiurengGods } from '../../utils/liurengGodsLocal';
 import * as LRConst from '../liureng/LRConst';
 import { ZSList, ZhangSheng, } from '../liureng/LRZhangSheng';
@@ -1618,40 +1617,12 @@ class JinKouMain extends Component{
 
 		let result = fallbackRunYear ? { ...fallbackRunYear } : {};
 		const runyearKey = buildCacheKey(params);
+		// Browser-only行年:可复用已存本地计算结果，但不再请求 /liureng/runyear。
+		const localRunyearHit = runyearKey ? getLiurengRunyearLocalCache(runyearKey) : null;
+		if(localRunyearHit){
+			result = { ...clonePlain(localRunyearHit), ...result };
+		}
 		try{
-			let serverRes = {};
-			const localRunyearHit = runyearKey ? getLiurengRunyearLocalCache(runyearKey) : null;
-			if(runyearKey && this.runYearServerCache.has(runyearKey)){
-				serverRes = clonePlain(this.runYearServerCache.get(runyearKey)) || {};
-			}else if(runyearKey && this.runYearServerInflight.has(runyearKey)){
-				serverRes = clonePlain(await this.runYearServerInflight.get(runyearKey)) || {};
-			}else if(localRunyearHit){
-				serverRes = clonePlain(localRunyearHit) || {};
-				pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-			}else{
-				const req = request(`${Constants.ServerRoot}/liureng/runyear`, {
-					body: JSON.stringify(params),
-					silent: true,
-				}).then((data)=>{
-					return data && data[Constants.ResultKey] ? { ...data[Constants.ResultKey] } : {};
-				}).finally(()=>{
-					if(runyearKey){
-						this.runYearServerInflight.delete(runyearKey);
-					}
-				});
-				if(runyearKey){
-					this.runYearServerInflight.set(runyearKey, req);
-				}
-				serverRes = await req;
-				if(runyearKey){
-					pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-					setLiurengRunyearLocalCache(runyearKey, clonePlain(serverRes));
-				}
-			}
-			result = {
-				...serverRes,
-				...result,
-			};
 			const guaGanZi = extractGanZi(params.guaYearGanZi) || resolveGuaYearGanZi(this.state.liureng);
 			const birthGanZi = await this.requestBirthYearGanZi();
 			// 生年干支留档：金口诀行年（旬法）要以生年所在旬起一岁，与干支流年并存两法。
@@ -1666,22 +1637,13 @@ class JinKouMain extends Component{
 			if(!localRunYear && fallbackRunYear){
 				localRunYear = fallbackRunYear;
 			}
-			if(!localRunYear && serverRes.age !== undefined && serverRes.age !== null){
-				const age = Number(serverRes.age);
-				if(Number.isFinite(age)){
-					const ageCycle = ((age % 60) + 60) % 60;
-					const yearList = `${genderVal}` === '0' ? FemaleRunYearList : MaleRunYearList;
-					localRunYear = {
-						age: age,
-						ageCycle: ageCycle,
-						year: yearList[ageCycle] || serverRes.year || '',
-					};
-				}
-			}
 			if(localRunYear){
 				result.year = localRunYear.year;
 				result.age = localRunYear.age;
 				result.ageCycle = localRunYear.ageCycle;
+				if(runyearKey){
+					setLiurengRunyearLocalCache(runyearKey, clonePlain(result));
+				}
 			}
 		}catch(e){
 			if(fallbackRunYear){
