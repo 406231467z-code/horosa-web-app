@@ -15,9 +15,20 @@ The retained Horosa product must calculate in the browser and use browser-local 
 - Ziwei rules are bundled JSON through `src/utils/ziweiRulesLocal.js`; the rules service no longer makes an HTTP request.
 - Removed cloud password/profile/reader effects from `src/models/user.js` and deleted `src/services/user.js`. Browser chart/case CRUD through `localcharts.js` / `localcases.js` remains.
 - Removed the obsolete cloud-chart entitlement wrapper `/allowedcharts` from `src/services/astro.js`.
-- `fetchPreciseNongli` in `src/utils/preciseCalcBridge.js` now prefers its real local BaZi/lunar implementation and caches the local result when that implementation can produce a result. It still has a legacy service fallback when local calculation returns no result.
-- Development Umi config no longer proxies `/backend` or `/chart-service`; development-only route splitting is disabled to reduce async chunk mismatches. Production split behavior and existing asset paths are preserved.
+- `fetchPreciseNongli` and `fetchPreciseJieqiYear` in `src/utils/preciseCalcBridge.js` are now browser-only. They use the local BaZi/lunar engine and bundled local Jieqi table; unsupported inputs reject clearly rather than calling `/nongli/time` or `/jieqi/year`.
+- `src/utils/divinationTimeDraft.js` no longer calls the Kentang `/jieqi/nongli` or `/jieqi/birth` endpoints for unsupported dates. It returns no calculated result when no verified local table is available. Development Umi config has no `/backend` or `/chart-service` proxy.
 - Responsive mobile/desktop CSS changes remain in this branch.
+
+## Additional browser-native paths completed in this batch
+
+- Qimen main calculation and step-prefetch now use the existing local `calcDunJia` path. `DunJiaCalc.js` no longer imports the Kentang client or calls `/qimen/pan`.
+- Taiyi wrapper now calls the existing browser `calcTaiyi` / `TaiYiCore` engine and no longer calls `/taiyi/pan`.
+- JinKou main/prefetch use `buildJinKouData` locally; the `/jinkou/pan` transport wrapper was removed.
+- LiuReng gods calculation now uses local data tables and local lunar calculation; unsupported dates reject rather than call `/liureng/gods`.
+- JinKou run-year is calculated locally with its existing age-cycle/ganzhi rules and local cache; `/liureng/runyear` is no longer called.
+- Ziwei birth uses its existing browser calculation in the validated date domain and explicitly rejects unsupported years without calling `/ziwei/birth`.
+- The startup/main-chart error path no longer probes `/horosaIdentity` to classify errors.
+- Regression guards were added for the browser-native Qimen/Taiyi/JinKou/LiuReng/Ziwei paths and local-only calendar paths.
 
 ## Confirmed remaining calculation/service dependencies
 
@@ -26,9 +37,9 @@ These paths must be migrated to browser-native calculation or explicitly removed
 | Retained surface | Current dependency | Source location | Migration work |
 | --- | --- | --- | --- |
 | Main Western/natal astrology, many chart panels | `POST /chart` | `src/services/astro.js` | Implement a production browser chart engine; match PerChart response schema and golden parity before switching callers. |
-| Precisely bounded nongli/other calendars | `/nongli/time` fallback | `src/utils/preciseCalcBridge.js` | Port/test the remaining date domains; then remove request fallback. |
-| Jieqi-year outside local JS support | `/jieqi/year` fallback | `src/utils/preciseCalcBridge.js` | Port unsupported historical domains; do not use a modern table for BC dates. |
-| Ziwei dates outside the tested local lunar domain | `/ziwei/birth` fallback | `src/utils/ziweiBirthLocal.js` | Extend and parity-test the browser algorithm or explicitly define the supported domain. |
+| Precisely bounded nongli/other calendars | unsupported dates now reject locally; no fallback | `src/utils/preciseCalcBridge.js` | Extend local calendar algorithms/data for BCE and out-of-domain years. |
+| Jieqi-year outside local JS support | unsupported years now reject locally; no fallback | `src/utils/preciseCalcBridge.js` | Port verified astronomical/calendar support for BCE and out-of-domain years. |
+| Ziwei dates outside the tested local lunar domain | unsupported dates now reject locally; no fallback | `src/utils/ziweiBirthLocal.js` | Extend and parity-test the browser algorithm to restore old date coverage. |
 | Qizheng / Kinastro-related retained techniques | `/qizheng/moira`, `/qizhengkin/pan`, `/qizhengelection/*` | `src/services/qizheng.js` | Port retained algorithms and their inputs/outputs to JS/WASM; confirm licensing. |
 | 2D primary-direction pole calculations | `/predict/pdpoles` | `src/services/astroPd3d.js` | Port this calculation; do not confuse it with removed 3D rendering. |
 | AI models/providers/chat/extraction/embeddings | `/aianalysis/*` API paths; some providers are direct fetches | `src/services/aianalysis.js` | Remove own-server proxy/config dependency and handle provider keys safely in-browser; retain AI only with a real provider path. |
