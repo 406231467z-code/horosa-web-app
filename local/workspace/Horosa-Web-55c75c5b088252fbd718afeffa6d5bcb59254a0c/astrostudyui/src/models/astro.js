@@ -913,7 +913,8 @@ export default {
 				chartFree: true,
 			},
 			taiyi:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			shusuan:{
 				fun: null,
