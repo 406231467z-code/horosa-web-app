@@ -79,7 +79,6 @@ export function fetchChart(values, requestOptions){
 		});
 	}
 
-	const opts = requestOptions || {};
 	const disableCache = opts.cache === false;
 	const key = disableCache ? '' : buildChartKey(values);
 	if(key && chartMem.has(key)){
