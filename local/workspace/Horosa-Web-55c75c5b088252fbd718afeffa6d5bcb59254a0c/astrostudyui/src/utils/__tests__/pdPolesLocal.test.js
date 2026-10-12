@@ -1,4 +1,5 @@
 import { computePdPolesLocal } from '../pdPolesLocal';
+import historicalChart from '../../divination/engine/__tests__/fixtures/realChartResult.json';
 
 function makeChart(){
 	return {
@@ -42,6 +43,27 @@ describe('browser-native primary-direction pole calculation', ()=>{
 		expect(result.poles.IC).toBe(0);
 		['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Spirit', 'House2', 'House3'].forEach((key)=>{
 			expect(Number.isFinite(result.poles[key])).toBe(true);
+		});
+	});
+
+
+	test('matches the historical backend golden poles within 0.0003 degrees', ()=>{
+		const result = computePdPolesLocal(historicalChart, {
+			...historicalChart.params,
+			pdProjection: 'placidus',
+			pdtype: 0,
+		});
+		const golden = {
+			Sun: 7.0185,
+			Moon: -29.7899,
+			Mercury: 0.3339,
+			Venus: -5.6072,
+			Mars: -18.8795,
+			Jupiter: 14.7696,
+			Saturn: -17.5996,
+		};
+		Object.keys(golden).forEach((name)=>{
+			expect(Math.abs(result.poles[name] - golden[name])).toBeLessThanOrEqual(0.0003);
 		});
 	});
 
