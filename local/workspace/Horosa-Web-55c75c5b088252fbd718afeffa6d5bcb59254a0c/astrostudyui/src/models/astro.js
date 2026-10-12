@@ -4,7 +4,7 @@ import { Modal, } from 'antd';
 import DateTime from '../components/comp/DateTime';
 import * as service from '../services/astro';
 import {randomStr,} from '../utils/helper';
-import { DefLat, DefLon, DefGpsLat, DefGpsLon, ServerRoot, } from '../utils/constants';
+import { DefLat, DefLon, DefGpsLat, DefGpsLon, ServerRoot, isBrowserOnlyEnv } from '../utils/constants';
 import { showChartServiceError as showChartServiceErrorRich } from '../components/common/ChartServiceErrorModal';
 import { saveAstroAISnapshotLazy, } from '../utils/astroAiSnapshot';
 import { hookRafEnabled, fieldsFastCommitEnabled, prewarmRequestsEnabled, stepPrefetchArmEnabled, stepPrefetchDepth, mainChainAbortEnabled, stepPrefetchSkewEnabled, speculativePrecomputeEnabled } from '../utils/perfFlags';
@@ -573,6 +573,13 @@ function isValidChartResponse(rsp){
 // (dva 的 model parser 不支持 JSX,所以 React 端必须放独立组件文件)。
 // fallback 用经典 Modal.error 防止任何加载/导入异常导致用户拿不到反馈。
 function showChartServiceError(extraDetail){
+	if(isBrowserOnlyEnv()){
+		Modal.error({
+			title: '该排盘模块尚未完成纯前端迁移',
+			content: '此浏览器版本不会连接 Java、Python 或远程排盘服务。当前模块尚不能在本机独立计算，因此没有生成结果。命盘本地管理不受影响。',
+		});
+		return;
+	}
 	// 先探活再定弹窗:服务在线但本次计算失败(如参数异常/超出星历数据域)≠「服务未就绪」。
 	// 误报「未就绪」会把用户引向重启/防火墙排查,掩盖真实原因(全年份域工程实测坑)。
 	try {
