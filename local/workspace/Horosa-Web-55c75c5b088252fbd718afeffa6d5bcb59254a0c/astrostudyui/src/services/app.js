@@ -25,20 +25,9 @@ export function resetpwd(values, headers){
     });
 }
 
-export function checkUser(values) {
-	return request(`${ServerRoot}/user/check`, {
-		body: JSON.stringify(values),
-	});
-}
-
 export function logout() {
 	return request(`${ServerRoot}/user/logout`, {
 		body: '',
 	});
 }
 
-export function systime() {
-	return request(`${ServerRoot}/common/time`, {
-		body: null,
-	});
-}
