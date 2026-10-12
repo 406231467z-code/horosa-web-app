@@ -376,10 +376,12 @@ function createObject(id, type, lon, lat, ra, dec, speed, cusps, asc, jdUt, geo,
 	const antisciaLon = mod(whole, 360);
 	const cantisciaLon = mod(lon + 180, 360);
 	const outOfBounds = Math.abs(dec) > 23.4367;
+	const classicalId = id === 'North Node' ? 'NorthNode' : (id === 'South Node' ? 'SouthNode' : id);
+	const meta = classicalSignData(lon,classicalId);
 	const obj = {
 		id, type, lon, lat: Number(lat) || 0, ra: mod(ra,360), decl: Number(dec) || 0,
 		sign: signOf(lon), signlon: mod(lon,30), azimuth: horiz.azimuth,
-		altitudeTrue: horiz.altitude, altitudeAppa: horiz.altitude,
+		altitudeTrue: horiz.altitude, altitudeAppa: horiz.altitude, aboveHorizon: horiz.altitude > 0,
 		lonspeed: Number(speed) || 0,
 		movedir: speed < -0.00001 ? 'Retrograde' : speed > 0.00001 ? 'Direct' : 'Stationary',
 		outOfBounds, oobDelta: outOfBounds ? (dec < 0 ? dec + 23.4367 : dec - 23.4367) : 0,
@@ -388,9 +390,46 @@ function createObject(id, type, lon, lat, ra, dec, speed, cusps, asc, jdUt, geo,
 		antisciaPoint: { lon: antisciaLon, sign: signOf(antisciaLon), signlon: mod(antisciaLon,30) },
 		cantisciaPoint: { lon: cantisciaLon, sign: signOf(cantisciaLon), signlon: mod(cantisciaLon,30) },
 		su: mansion27(lon),
-		dignities: dignity || [],
+		dignities: meta.dignities,
+		selfDignity: meta.selfDignity,
+		score: meta.score,
+		degreeGender: meta.degreeGender,
+		ninthPart: meta.ninthPart,
+		joyHouse: meta.joyHouse,
+		joy: !!meta.joyHouse && houseIndex(lon,cusps) === Number(meta.joyHouse),
 	};
 	return obj;
+}
+
+function enrichClassicalPlanetData(objects, chart, jdUt){
+	const sun = objects.find((obj)=>obj && obj.id === 'Sun');
+	const sunLon = sun ? sun.lon : null;
+	const isDay = !!(sun && sun.altitudeTrue > 0);
+	const classics = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
+	objects.forEach((obj)=>{
+		if(!obj || classics.indexOf(obj.id) < 0){ return; }
+		obj.ofSect = obj.id === 'Sun' ? isDay
+			: (obj.id === 'Moon' ? !isDay
+				: (obj.id === 'Jupiter' || obj.id === 'Saturn' ? isDay
+					: (obj.id === 'Venus' || obj.id === 'Mars' ? !isDay
+						: (sunLon === null ? false : mod(obj.lon - sunLon + 180,360) - 180 < 0)));
+		if(obj.id !== 'Sun' && obj.id !== 'Moon' && sunLon !== null){
+			const elong = angularDistance(obj.lon,sunLon);
+			obj.phasisElong = elong;
+			obj.phase = elong <= (17/60) ? 'cazimi' : (elong <= 8.5 ? 'combust' : (elong <= 15 ? 'under_beams' : 'free'));
+		}
+		if(obj.id !== 'Sun'){
+			const relevant = (chart.aspects || []).some((aspect)=>{
+				const a = BODY_DEFS.find((def)=>def[0] === aspect.a);
+				const b = BODY_DEFS.find((def)=>def[0] === aspect.b);
+				const idA = a ? a[1] : aspect.a, idB = b ? b[1] : aspect.b;
+				return (idA === obj.id && classics.includes(idB) && idB !== obj.id)
+					|| (idB === obj.id && classics.includes(idA) && idA !== obj.id);
+			});
+			obj.feral = !relevant;
+		}
+	});
+	return isDay;
 }
 
 function makeAngle(id, lon, house, cusps, asc, jdUt, geo, jde){
@@ -554,8 +593,13 @@ export function calculateBrowserChart(values){
 	objectRows.sort((a,b)=>a.lon-b.lon);
 	const label = AstroConst.HouseSys[String(p.hsys == null ? 1 : p.hsys)] || houseSystem;
 	const houses = makeHouses(chart,objectRows,label);
+	const isDiurnal = enrichClassicalPlanetData(objectRows,chart,jdUt);
 	const objectIds = objectRows.map((obj)=>obj.id);
 	const aspects = makeAspectBuckets(objectIds,chart.aspects);
+	const receptions = buildReceptions(objectRows);
+	const mutuals = buildMutuals(objectRows);
+	const declParallel = buildDeclParallel(objectRows);
+	const surround = { planets: buildSurroundPlanets(objectRows), attacks: {}, houses: {}, besiegement: [] };
 	const fixedStars = makeFixedStarRows(engine,chart,geo);
 	const stars = makeStarConjunctions(engine,chart,objectIds);
 	const signsRA = makeSignsRA(jde);
@@ -563,7 +607,7 @@ export function calculateBrowserChart(values){
 		zodiacal: zodiac.label,
 		date: { date: { jdn: Math.floor(jdUt+0.5) }, time: { value: birth.hour+birth.minute/60+birth.second/3600 }, utcoffset: { value: birth.zone }, jd: jdUt },
 		geo, hsys: label, houses, objects: objectRows, nakshatras: null,
-		siderealAyanamsa: zodiac.ayanamsa, isDiurnal: day,
+		siderealAyanamsa: zodiac.ayanamsa, isDiurnal,
 		antiscias: {
 			antiscia: objectRows.reduce((acc,obj)=>{ acc[obj.id]=obj.antisciaPoint; return acc; },{}),
 			cantiscia: objectRows.reduce((acc,obj)=>{ acc[obj.id]=obj.cantisciaPoint; return acc; },{}),
@@ -591,10 +635,10 @@ export function calculateBrowserChart(values){
 		ResultCode: 0,
 		Result: {
 			params, chart: chartResult, aspects, lots,
-			receptions: { normal: [], abnormal: [] },
-			mutuals: { normal: [], abnormal: [] },
-			declParallel: { parallel: [], contraParallel: [] },
-			surround: { planets: {}, attacks: {}, houses: {}, besiegement: {} },
+			receptions,
+			mutuals,
+			declParallel,
+			surround,
 			guoStarSect: { houses: [] },
 			localEngine: 'caelus@0.25.0',
 		},
