@@ -1453,7 +1453,7 @@ export default {
 				requestOptions = { ...requestOptions, signal: chartMainAbortCtl.signal };
 			}
 			const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
-			const fastPath = fastCommitOn && !!(activeHook && activeHook.chartFree === true);
+			const fastPath = !!(activeHook && activeHook.chartFree === true && (isBrowserOnlyEnv() || fastCommitOn));
 
 			let fld = {
 				...fieldValues,
@@ -1477,6 +1477,16 @@ export default {
 			}else if(fastCommitOn && prewarmRequestsEnabled() && activeHook && typeof activeHook.prewarmRequests === 'function'){
 				// fire-and-forget:组件自述的预热函数(silent 请求),失败静默——正式请求照常兜底。
 				try{ activeHook.prewarmRequests(fld); }catch(e){ /* 预热失败无害 */ }
+			}
+
+			if(isBrowserOnlyEnv()){
+				// chartFree pages (BaZi / ZiWei and other self-contained panels) have already run
+				// their own browser calculators above. All other pages must stop before /chart.
+				if(fastPath){
+					return;
+				}
+				showChartServiceError();
+				return;
 			}
 
 			let rsp;
