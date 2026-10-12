@@ -67,6 +67,29 @@ function markChartCacheHit(){
 
 export function fetchChart(values, requestOptions){
 	const opts = requestOptions || {};
+	// Explicit local-only path for the browser-native natal engine. It is opt-in while
+	// parity/feature coverage is being expanded; it never falls back to Java/Python.
+	if(opts.browserNative === true){
+		const key = buildChartKey(values);
+		const localKey = key ? 'browser:' + key : '';
+		if(localKey && chartMem.has(localKey)){
+			markChartCacheHit();
+			return Promise.resolve(clonePlain(chartMem.get(localKey)));
+		}
+		return import('../utils/browserChartEngine').then((module)=>{
+			const calculate = module.calculateBrowserChart || module.default;
+			if(typeof calculate !== 'function'){
+				throw new Error('浏览器占星引擎未能加载。');
+			}
+			return calculate(values || {});
+		}).then((rsp)=>{
+			if(localKey && rsp && rsp.Result && rsp.Result.params){
+				pushCache(chartMem, localKey, clonePlain(rsp));
+			}
+			return clonePlain(rsp);
+		});
+	}
+
 	const disableCache = opts.cache === false;
 	const key = disableCache ? '' : buildChartKey(values);
 	if(key && chartMem.has(key)){
@@ -115,12 +138,7 @@ export function fetchChart(values, requestOptions){
 	return req.then((rsp)=>clonePlain(rsp));
 }
 
-export function fetchAllowedCharts(values){
-    return request(`${ServerRoot}/allowedcharts`, {
-        body: JSON.stringify(values),
-    });
-}
-
+// The legacy cloud entitlement wrapper was retired; saved charts use localcharts.js.
 // [R4] fetchFateEvents/dlTrain 已删:唯一调用方是 models/astro 里 `localOnly=true` 写死的
 // 永不可达分支(登录多用户时代残留),分支收敛后此处零引用。人生事件走本地存储。
 

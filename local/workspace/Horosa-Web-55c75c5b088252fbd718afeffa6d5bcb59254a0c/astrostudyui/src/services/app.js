@@ -1,44 +1,25 @@
-import request from '../utils/request';
-import {ServerRoot} from '../utils/constants';
+// Cloud account endpoints were removed from the pure-web product scope.
+// These compatibility exports deliberately perform no network requests.
+function unavailableAccountAction(){
+	return Promise.reject(new Error('云账号功能已移除；请使用本地命盘管理。'));
+}
 
 export function getImgToken(){
-    return request(`${ServerRoot}/common/imgToken`);
+	return unavailableAccountAction();
 }
 
-export function login(values){
-    return request(`${ServerRoot}/user/login`, {
-        body: JSON.stringify(values),
-    });
+export function login(){
+	return unavailableAccountAction();
 }
 
-export function register(values, headers){
-    return request(`${ServerRoot}/user/register`, {
-		body: JSON.stringify(values),
-		headers: headers,
-    });
+export function register(){
+	return unavailableAccountAction();
 }
 
-export function resetpwd(values, headers){
-    return request(`${ServerRoot}/user/resetpwd`, {
-        body: JSON.stringify(values),
-        headers: headers,
-    });
+export function resetpwd(){
+	return unavailableAccountAction();
 }
 
-export function checkUser(values) {
-	return request(`${ServerRoot}/user/check`, {
-		body: JSON.stringify(values),
-	});
-}
-
-export function logout() {
-	return request(`${ServerRoot}/user/logout`, {
-		body: '',
-	});
-}
-
-export function systime() {
-	return request(`${ServerRoot}/common/time`, {
-		body: null,
-	});
+export function logout(){
+	return Promise.resolve({ Result: true });
 }

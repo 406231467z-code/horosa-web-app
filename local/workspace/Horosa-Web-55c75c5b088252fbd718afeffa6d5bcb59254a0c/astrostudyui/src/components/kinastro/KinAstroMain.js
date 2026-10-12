@@ -19,6 +19,7 @@ import { SCHOOL_LABEL as ZHENGCHUAN_SCHOOL_LABEL } from '../shusuan/zhengchuanSc
 import YiZhangJingMain from '../yizhangjing/YiZhangJingMain';
 import YanQinBranchPanel from '../yanqin/YanQinBranchPanel';
 import renderCetianSectionList from './CetianSections';
+import CETIAN_YIYU_TEXTS from './cetianYiyuTexts.json';
 import YanQinControls from '../yanqin/YanQinControls';
 import { buildYanqinYanfaSnapshot } from '../yanqin/yanqinSnapshot';
 import { deriveLocalNongliAsync } from '../../utils/divinationTimeDraft';
@@ -3675,26 +3676,15 @@ class KinAstroMain extends Component{
 		return sections.slice(0, 4);
 	}
 
-	// 策天典籍全文:惰性拉取 /cetian/texts(一次加载,组件态缓存;失败可重试)。
-	loadCetianTexts = async ()=>{
+	// 策天典籍正文随前端静态打包；阅读典籍不再依赖 /cetian/texts 或 Kentang 服务。
+	loadCetianTexts = ()=>{
 		if(this.state.cetianTexts || this.state.cetianTextsLoading){
 			return;
 		}
-		this.setState({ cetianTextsLoading: true });
-		try{
-			let rsp = null;
-			try{
-				const raw = await cachedKentangFetch(buildKentangEndpoint('cetian', 'texts'), { method: 'GET' }, { retries: 0 });
-				rsp = JSON.parse(await raw.text());
-			}catch(e){
-				const raw = await cachedKentangFetch(`${ServerRoot}/cetian/texts`, { method: 'GET' }, { retries: 0 });
-				rsp = JSON.parse(await raw.text());
-			}
-			const texts = rsp && rsp[ResultKey] && rsp[ResultKey].texts ? rsp[ResultKey].texts : null;
-			this.setState({ cetianTexts: texts, cetianTextsLoading: false });
-		}catch(e){
-			this.setState({ cetianTextsLoading: false });
-		}
+		this.setState({
+			cetianTexts: CETIAN_YIYU_TEXTS,
+			cetianTextsLoading: false,
+		});
 	};
 
 	renderCetianZiliao(){

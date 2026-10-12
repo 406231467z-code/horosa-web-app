@@ -1,21 +1,12 @@
-import {
-	ClientApp,
-	ClientChannel,
-	ClientVer,
-	ServerRoot,
-	TokenKey,
-} from '../utils/constants';
-import { signRequest } from '../utils/request';
-import { encryptRSA } from '../utils/rsahelper';
-import { NeedEncrypt } from '../utils/constants';
-import { aiBodyEncryptEnabled } from '../utils/perfFlags';
+import { extractDocxText } from '../utils/docxText';
+import JSZip from 'jszip';
 import {
 	buildAiTransportPlan,
+	buildDirectModelListRequest,
 	createVendorSseBridge,
 	extractDirectChatContent,
 	extractEmbeddingVectors,
 	redactSecret,
-	stripAiTransport,
 } from '../utils/aiDirectTransport';
 
 function safeParseJson(text, defVal = null){
@@ -36,19 +27,6 @@ function resolveRequestTimeout(values){
 	const pt = values && values.providerType;
 	if(pt === 'ollama') return 180000;
 	return 120000;
-}
-
-function unwrapServicePayload(payload){
-	if(!payload || typeof payload !== 'object'){
-		return payload;
-	}
-	if(payload.Result && typeof payload.Result === 'object' && !Array.isArray(payload.Result) && Object.prototype.hasOwnProperty.call(payload.Result, 'Result')){
-		return {
-			...payload,
-			Result: payload.Result.Result,
-		};
-	}
-	return payload;
 }
 
 function createSseParser(onEvent){
@@ -116,40 +94,6 @@ function createSseParser(onEvent){
 	};
 }
 
-function getTokenSafe(){
-	try{
-		if(typeof window !== 'undefined' && window.localStorage){
-			return window.localStorage.getItem(TokenKey) || '';
-		}
-	}catch(e){
-	}
-	return '';
-}
-
-// [G2] 请求体 RSA 会话束封套(与排盘 API 同机制):AES 密文 + 会话钥 RSA 块。
-// Signature 仍按明文计算(后端解封后核签,校验链不变);SSE/JSON 响应不加密。
-// NeedEncrypt=false 或回退阀关 → 明文(后端明文直通宽容,双向兼容)。
-export function sealAiProxyBody(bodyText){
-	if(!NeedEncrypt || !bodyText || !aiBodyEncryptEnabled()){ return bodyText; }
-	try{
-		return encryptRSA(bodyText);
-	}catch(_){
-		return bodyText;   // 加密失败宁走明文,不断 AI 功能
-	}
-}
-
-function buildAIAnalysisHeaders(bodyText = '', extraHeaders = {}){
-	return {
-		'Content-Type': 'application/json; charset=UTF-8',
-		Token: getTokenSafe(),
-		ClientChannel,
-		ClientApp,
-		ClientVer,
-		Signature: signRequest(bodyText || ''),
-		...extraHeaders,
-	};
-}
-
 function withTimeout(promiseFactory, timeoutMs, externalSignal){
 	const timeout = Number(timeoutMs) > 0 ? Math.floor(Number(timeoutMs)) : 0;
 	if(!timeout && !externalSignal){
@@ -181,51 +125,130 @@ function withTimeout(promiseFactory, timeoutMs, externalSignal){
 	});
 }
 
-async function requestJson(url, values, options = {}){
+function normalizeDirectModelList(providerType, payload){
+	let entries = [];
+	if(providerType === 'gemini'){
+		entries = Array.isArray(payload && payload.models) ? payload.models : [];
+	}else{
+		entries = Array.isArray(payload && payload.data) ? payload.data
+			: (Array.isArray(payload && payload.models) ? payload.models : []);
+	}
+	const models = [];
+	entries.forEach((entry)=>{
+		const raw = typeof entry === 'string' ? entry : (entry && (entry.id || entry.name || entry.model));
+		const id = `${raw || ''}`.replace(/^models\//, '').trim();
+		if(id && models.indexOf(id) < 0){
+			models.push(id);
+		}
+	});
+	return models;
+}
+
+async function requestDirectProviderModels(values){
+	const plan = buildDirectModelListRequest(values || {});
 	return withTimeout(async (signal)=>{
-		const bodyText = JSON.stringify(stripProxyValues(values));
-		const response = await fetch(url, {
-			method: 'POST',
+		const response = await fetch(plan.url, {
+			method: 'GET',
 			cache: 'no-store',
-			headers: buildAIAnalysisHeaders(bodyText, options.headers),
-			body: sealAiProxyBody(bodyText),
+			headers: plan.headers,
 			signal,
 		});
-		const text = await response.text();
-		const payload = safeParseJson(text, null);
 		if(!response.ok){
-			const errorText = payload && (payload.ResultMessage || payload.Result || payload.message)
-				? (payload.ResultMessage || payload.Result || payload.message)
-				: `${response.status} ${response.statusText || ''}`.trim();
-			throw new Error(errorText || 'request.failed');
+			await readDirectError(response, plan.apiKey);
 		}
-		if(payload === null){
-			throw new Error('service.response.invalid');
+		const payload = safeParseJson(await response.text(), null);
+		if(!payload || typeof payload !== 'object'){
+			throw new Error('供应商模型列表返回了无效数据');
 		}
-		return unwrapServicePayload(payload);
-	}, options.timeoutMs, options.signal);
+		const models = normalizeDirectModelList(plan.providerType, payload);
+		if(!models.length){
+			throw new Error('供应商未返回模型列表；可手动填写聊天模型与 Embedding 模型');
+		}
+		return { Result: { models } };
+	}, resolveRequestTimeout(values), null);
 }
 
+/** 模型列表与诊断由浏览器直接请求用户配置的 AI 供应商，不经过 Horosa API。 */
 export function fetchProviderModels(values){
-	return requestJson(`${ServerRoot}/aianalysis/providers/models`, values, {
-		timeoutMs: resolveRequestTimeout(values),
-	});
+	return requestDirectProviderModels(values);
 }
 
-export function diagnoseProvider(values){
-	return requestJson(`${ServerRoot}/aianalysis/providers/diagnose`, values, {
-		timeoutMs: resolveRequestTimeout(values),
-	});
+export async function diagnoseProvider(values){
+	const startedAt = Date.now();
+	const rsp = await requestDirectProviderModels(values);
+	const models = rsp && rsp.Result && Array.isArray(rsp.Result.models) ? rsp.Result.models : [];
+	return {
+		Result: {
+			healthy: models.length > 0,
+			latencyMs: Date.now() - startedAt,
+			modelCount: models.length,
+			failureReason: models.length ? '' : '供应商未返回可用模型',
+			checkedAt: new Date().toISOString(),
+		},
+	};
 }
 
-export function extractMaterialContent(values){
-	return requestJson(`${ServerRoot}/aianalysis/materials/extract`, values, {
-		timeoutMs: resolveRequestTimeout(values),
-	});
-}
-
-function stripProxyValues(values){
-	return stripAiTransport(values || {});
+/**
+ * Local material extraction. Text and Markdown are UTF-8. DOCX is unpacked and
+ * parsed in-browser using the existing JSZip dependency. PDF and legacy .doc
+ * need a dedicated binary document parser; fail honestly rather than forwarding
+ * the uploaded document to a removed Horosa server or returning fabricated text.
+ */
+export async function extractMaterialContent(values){
+	const input = values || {};
+	const name = `${input.fileName || 'material'}`;
+	const ext = (name.split('.').pop() || '').toLowerCase();
+	const mimeType = input.mimeType || '';
+	const base64 = `${input.base64Data || ''}`;
+	if(!base64){
+		throw new Error('资料内容为空');
+	}
+	const binary = typeof atob === 'function' ? atob(base64) : '';
+	if(!binary){
+		throw new Error('当前浏览器无法读取资料数据');
+	}
+	const bytes = new Uint8Array(binary.length);
+	for(let i = 0; i < binary.length; i += 1){
+		bytes[i] = binary.charCodeAt(i);
+	}
+	let extractedText = '';
+	let extractor = 'browser-text';
+	if(ext === 'txt' || ext === 'md' || mimeType.startsWith('text/')){
+		extractedText = new TextDecoder('utf-8').decode(bytes).replace(/^\uFEFF/, '').trim();
+	}else if(ext === 'docx'){
+		const zip = await JSZip.loadAsync(bytes);
+		const documentFile = zip.file('word/document.xml');
+		if(!documentFile){
+			throw new Error('DOCX 文件缺少 word/document.xml');
+		}
+		const xmlText = await documentFile.async('text');
+		extractedText = extractDocxText(xmlText);
+		extractor = 'browser-docx-jszip';
+	}else if(ext === 'pdf'){
+		throw new Error('PDF 文本解析器尚未迁入浏览器；请先将 PDF 导出为 TXT、Markdown 或 DOCX，再添加资料。未上传到远程服务。');
+	}else if(ext === 'doc'){
+		throw new Error('旧版 .doc 二进制格式尚未支持浏览器本地解析；请另存为 DOCX 或 TXT。未上传到远程服务。');
+	}else{
+		throw new Error(`浏览器不支持本地提取 .${ext || '未知'} 资料格式`);
+	}
+	if(!extractedText){
+		throw new Error('资料中没有提取到可用文本');
+	}
+	const encoded = new TextEncoder().encode(extractedText);
+	const digest = await crypto.subtle.digest('SHA-256', encoded);
+	const textHash = Array.from(new Uint8Array(digest)).map((b)=>b.toString(16).padStart(2, '0')).join('');
+	return {
+		Result: {
+			fileName: name,
+			fileExt: `.${ext}`,
+			mimeType: mimeType || (ext === 'md' ? 'text/markdown' : 'text/plain'),
+			size: bytes.byteLength,
+			fileHash: input.fileHash || '',
+			extractedText,
+			textHash,
+			extractMeta: { extractor },
+		},
+	};
 }
 
 async function readDirectError(response, secret){
@@ -239,12 +262,7 @@ async function readDirectError(response, secret){
 
 export function requestEmbeddingVectors(values){
 	const plan = buildAiTransportPlan(values, { embedding: true });
-	if(plan.mode === 'direct'){
-		return requestDirectEmbeddings(plan.embedding);
-	}
-	return requestJson(`${ServerRoot}/aianalysis/embeddings`, values, {
-		timeoutMs: resolveRequestTimeout(values),
-	});
+	return requestDirectEmbeddings(plan.embedding);
 }
 
 async function requestDirectEmbeddings(embedding){
@@ -281,12 +299,7 @@ async function requestDirectEmbeddings(embedding){
 
 export function requestAIAnalysisChat(values){
 	const plan = buildAiTransportPlan(values, { stream: false });
-	if(plan.mode === 'direct'){
-		return requestDirectChat(plan.vendor, values);
-	}
-	return requestJson(`${ServerRoot}/aianalysis/chat`, values, {
-		timeoutMs: resolveRequestTimeout(values),
-	});
+	return requestDirectChat(plan.vendor, values);
 }
 
 async function requestDirectChat(vendor, values){
@@ -316,38 +329,19 @@ async function requestDirectChat(vendor, values){
 export async function requestAIAnalysisChatStream(values, handlers = {}){
 	const plan = buildAiTransportPlan(values, { stream: true });
 	const response = await withTimeout(async (signal)=>{
-		if(plan.mode === 'direct'){
-			const rsp = await fetch(plan.vendor.url, {
-				method: 'POST',
-				cache: 'no-store',
-				headers: plan.vendor.headers,
-				body: JSON.stringify(plan.vendor.body),
-				signal,
-			});
-			if(!rsp.ok){
-				await readDirectError(rsp, plan.vendor.apiKey);
-			}
-			return rsp;
-		}
-		const bodyText = JSON.stringify(stripProxyValues(values));
-		const rsp = await fetch(`${ServerRoot}/aianalysis/chat/stream`, {
+		const rsp = await fetch(plan.vendor.url, {
 			method: 'POST',
 			cache: 'no-store',
-			headers: buildAIAnalysisHeaders(bodyText),
-			body: sealAiProxyBody(bodyText),
+			headers: plan.vendor.headers,
+			body: JSON.stringify(plan.vendor.body),
 			signal,
 		});
 		if(!rsp.ok){
-			const text = await rsp.text();
-			const payload = safeParseJson(text, null);
-			const errorText = payload && (payload.ResultMessage || payload.Result || payload.message)
-				? (payload.ResultMessage || payload.Result || payload.message)
-				: `${rsp.status} ${rsp.statusText || ''}`.trim();
-			throw new Error(redactSecret(errorText || 'chat.stream.failed', values && values.apiKey));
+			await readDirectError(rsp, plan.vendor.apiKey);
 		}
 		return rsp;
 	}, handlers.timeoutMs || resolveRequestTimeout(values), handlers.signal);
-	const vendorBridge = plan.mode === 'direct' ? createVendorSseBridge(plan.vendor.family) : null;
+	const vendorBridge = createVendorSseBridge(plan.vendor.family);
 	const reader = response.body && response.body.getReader ? response.body.getReader() : null;
 	if(!reader){
 		throw new Error('chat.stream.not.supported');

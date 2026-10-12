@@ -1,0 +1,89 @@
+# Pure Frontend Migration Status
+
+Updated: 2026-10-12
+Branch: `fix/mobile-devserver-host`
+Status: **IN PROGRESS — NOT WEB READY**
+
+## Target
+
+The retained Horosa product must calculate in the browser and use browser-local chart/case storage. It must not require this repository's Java service, Python/CherryPy service, or a remote Horosa calculation API for retained calculation flows. Do not replace real calculations with canned fixtures, stale chart snapshots, or fabricated success envelopes.
+
+## Completed in the current migration branch
+
+- Startup no longer calls the cloud account check `/user/check`; it initializes a local anonymous workspace.
+- Startup clock no longer calls `/common/time`.
+- Ziwei rules are bundled JSON through `src/utils/ziweiRulesLocal.js`; the rules service no longer makes an HTTP request.
+- Removed cloud password/profile/reader effects from `src/models/user.js` and deleted `src/services/user.js`. Browser chart/case CRUD through `localcharts.js` / `localcases.js` remains.
+- Removed the obsolete cloud-chart entitlement wrapper `/allowedcharts` from `src/services/astro.js`.
+- `fetchPreciseNongli` and `fetchPreciseJieqiYear` in `src/utils/preciseCalcBridge.js` are now browser-only. They use the local BaZi/lunar engine and bundled local Jieqi table; unsupported inputs reject clearly rather than calling `/nongli/time` or `/jieqi/year`.
+- `src/utils/divinationTimeDraft.js` no longer calls the Kentang `/jieqi/nongli` or `/jieqi/birth` endpoints for unsupported dates. It returns no calculated result when no verified local table is available. Development Umi config has no `/backend` or `/chart-service` proxy.
+- Responsive mobile/desktop CSS changes remain in this branch.
+- The Umi runner now passes `HOROSA_UMI_MODE` explicitly, and `.umirc.js` treats that explicit mode as authoritative in both directions. Development disables route-level dynamic imports even if the parent shell inherited `NODE_ENV=production`; production keeps the existing `/static/` asset path and route splitting even if the shell inherited `NODE_ENV=development`. Regression tests cover both mismatched environment combinations. GitHub Actions run #82 passed the focused migration test suite, production build, static asset check, and Chromium entry-screen smoke at 390px and 1440px widths. Real iOS Safari/Android Chrome device verification remains outstanding.
+- Cetian's classical reading catalogue is now bundled as `astrostudyui/src/components/kinastro/cetianYiyuTexts.json` (13 documents, 78 sections) and `KinAstroMain.loadCetianTexts` reads it locally; `/cetian/texts` no longer needs Kentang or `ServerRoot`. This removes the reading-data endpoint only; the Cetian/Xianqin calculation endpoints (`/{serviceKey}/pan`) remain backend blockers. `cetianTextsLocal.test.js` is included in the focused CI regression suite.
+
+## Additional browser-native paths completed in this batch
+
+- Qimen main calculation and step-prefetch now use the existing local `calcDunJia` path. `DunJiaCalc.js` no longer imports the Kentang client or calls `/qimen/pan`.
+- Taiyi wrapper now calls the existing browser `calcTaiyi` / `TaiYiCore` engine and no longer calls `/taiyi/pan`.
+- JinKou main/prefetch use `buildJinKouData` locally; the `/jinkou/pan` transport wrapper was removed.
+- LiuReng gods calculation now uses local data tables and local lunar calculation; unsupported dates reject rather than call `/liureng/gods`.
+- JinKou run-year is calculated locally with its existing age-cycle/ganzhi rules and local cache; `/liureng/runyear` is no longer called.
+- Ziwei birth uses its existing browser calculation in the validated date domain and explicitly rejects unsupported years without calling `/ziwei/birth`.
+- The startup/main-chart error path no longer probes `/horosaIdentity` to classify errors.
+- Regression guards were added for the browser-native Qimen/Taiyi/JinKou/LiuReng/Ziwei paths and local-only calendar paths.
+
+## Confirmed remaining calculation/service dependencies
+
+These paths must be migrated to browser-native calculation or explicitly removed from the retained product scope before the backend directories can be deleted:
+
+| Retained surface | Current dependency | Source location | Migration work |
+| --- | --- | --- | --- |
+| Main Western/natal astrology, many chart panels | `POST /chart` | `src/services/astro.js` | Implement a production browser chart engine; match PerChart response schema and golden parity before switching callers. |
+| Precisely bounded nongli/other calendars | unsupported dates now reject locally; no fallback | `src/utils/preciseCalcBridge.js` | Extend local calendar algorithms/data for BCE and out-of-domain years. |
+| Jieqi-year outside local JS support | unsupported years now reject locally; no fallback | `src/utils/preciseCalcBridge.js` | Port verified astronomical/calendar support for BCE and out-of-domain years. |
+| Ziwei dates outside the tested local lunar domain | unsupported dates now reject locally; no fallback | `src/utils/ziweiBirthLocal.js` | Extend and parity-test the browser algorithm to restore old date coverage. |
+| Main Western/natal astrology, chart-dependent pages, relative/auxiliary charts | `POST /chart` | `src/services/astro.js` | Implement a production browser chart engine; match PerChart response schema and golden parity before switching callers. |
+| India/Jyotish charts, divisional charts, dasha, prashna | `POST /india/chart` | `src/components/astro/IndiaChart.js` | Port IndiaChartKernel and Jyotish/divisional chart engines; reuse the production browser ephemeris once approved. |
+| India birth-time rectification | `POST /india/rectify` | `src/components/astro/IndiaChartMain.js` | Port the scan kernel, sunrise/ruling-planet inputs, and event scoring; the pure scoring module alone is insufficient. |
+| Primary-direction event tables and directed charts | `POST /predict/pd`, `POST /predict/pdchart` | `src/components/astro/AstroPrimaryDirectionChart.js`, `src/components/direction/AstroDirectMain.js` | Port the complete PerPredict/pd_engine pipeline and compare multiple historical goldens. |
+| Qizheng / Kinastro retained techniques and election | `/qizheng/moira`, `/qizhengkin/pan`, `/qizhengelection/*`, plus Kentang endpoints assembled per engine | `src/services/qizheng.js`, `src/integrations/kentang/serviceRoot.js`, retained component call sites | Port retained algorithms and response contracts to JS/WASM; audit vendor source licences before moving source into the bundle. |
+| AI provider model lists, chat, streaming, embeddings | Direct browser provider APIs (no Horosa AI proxy) | `src/services/aianalysis.js`, `src/utils/aiDirectTransport.js` | Verify each provider protocol/CORS in browser; keys must be treated as public client-side secrets, and users must configure their own keys. |
+| AI material extraction | `.txt`, `.md`, `.docx` local; PDF and legacy `.doc` explicitly unsupported in the browser | `src/services/aianalysis.js` | The picker now constrains imports to TXT/Markdown/DOCX and unsupported PDF/legacy DOC inputs reject before reading bytes. Add a local PDF parser only if PDF support remains required; legacy DOC should be converted to DOCX. |
+| Main chart/predictive calculations outside validated calendar domain | Unsupported dates now reject locally; no fallback | `src/utils/preciseCalcBridge.js`, local lunar guards | Extend and parity-test browser calendars for BCE/extended domain before claiming the former server range. |
+| Optional 2D primary-direction Pole column | Browser-local computation; old `/predict/pdpoles` wrapper deleted | `src/utils/pdPolesLocal.js`, `src/components/astro/AstroPrimaryDirection.js` | Port/test pole formulas and verify all projections/significator options. This does not migrate `/predict/pd` or `/predict/pdchart`. |
+
+The list above is the **confirmed set**, not a claim that every remaining API reference in the repository has been enumerated. Run a full static endpoint scan and call-site audit before deleting any backend directory.
+
+## Swiss Ephemeris / main chart gate
+
+The isolated `experiments/phase5a-sweph-parity` work is not the production browser chart engine. The stored parity evidence is limited; the main production `/chart` request has not been replaced. Before connecting a WASM engine, verify the full fields consumed by retained charts, multiple independent real chart goldens, house-system/zodiac variants, date limits, browser asset loading/offline behavior, and licensing/deployment obligations.
+
+A separate PHASE 5-B feasibility probe now evaluates the MIT-licensed `caelus@0.25.0` clean-room candidate without adding it to the production bundle. It compares 64 core fields against the single captured Shanghai 1990 historical golden at 1-arcsecond tolerance: Sun–Pluto longitude/latitude/daily speed, Sun–Pluto house assignment, an independent whole-sign house overlay, Ascendant/Midheaven, and twelve house cusps. This is deliberately not a PerChart replacement: Arabic lots, Horosa-specific object metadata, stars/mansions, sidereal variants, and the other kept calculation families are out of scope. The browser candidate job records `experiments/phase5b-caelus-parity/results/historical-1990.json`; do not use the candidate in production unless the report passes and additional independent golden charts/schema coverage are added.
+
+## Deletion gate for Java/Python directories
+
+Do **not** delete `astrostudysrv`, `astropy`, `flatlib-ctrad2`, or the legacy server runtime yet. Deleting them now would break retained calculations listed above, or push those calls to the external `https://srv.horosa.com` service rather than make the application pure frontend.
+
+The backend deletion is allowed only when all of these are true:
+
+1. No retained frontend code calls `ServerRoot` calculation endpoints or any legacy Java/Python/remote Horosa API.
+2. Each retained calculator has a browser-native implementation with parity tests against real reference outputs; unsupported input domains fail clearly instead of inventing results.
+3. Local chart/case create, edit, save memo, delete, and round-trip tests pass.
+4. Production and file builds succeed, and the app starts under static hosting without Java, Python, a proxy, or a desktop shell.
+5. Browser network inspection shows no calls to the removed Horosa API paths; desktop and mobile smoke tests pass.
+
+## Latest incremental verification
+
+- Removed the optional primary-direction Pole HTTP request; the component now calculates this column locally and the unused `src/services/astroPd3d.js` wrapper is deleted.
+- Added `src/utils/pdPolesLocal.js` and tests, including a real historical chart fixture with seven Placidus planetary pole reference values. A direct static JavaScript execution matched those values within 0.0003 degrees. This check is not a full Jest run or live-service verification.
+- AI analysis now calls configured provider APIs directly instead of Horosa's `/aianalysis/*` proxy. Text/Markdown/DOCX extraction is local; PDF/legacy DOC remain explicitly unsupported rather than uploaded to a backend.
+
+## Verification for this branch
+
+- Source files were re-fetched after edits.
+- Static syntax checks previously passed for the edited Umi config, user model, migration tests, rules service/models, astro service, and precise calculation bridge test. These checks are not substitutes for Jest or a production build.
+- `src/utils/docxText.js` isolates local DOCX paragraph/tab/newline extraction from the AI service module. `src/services/__tests__/aianalysisDocxExtraction.test.js` covers paragraph and explicit line breaks, malformed XML rejection, and empty documents.
+- The existing `astrostudyui/scripts/audit-browser-endpoints.js` is the canonical source inventory and runs in CI with an artifact upload. It now separates comment references and endpoint-shaped local prefetch metadata from probable Horosa/Kentang transport lines; it remains a heuristic inventory, so call-site review and a browser Network-panel audit are required before backend deletion.
+- AI material import now rejects PDF and legacy `.doc` before reading/Base64-encoding file bytes, and file pickers advertise only TXT, Markdown, and DOCX; upload/replace handlers surface the actual local parser error. `src/utils/__tests__/aiAnalysisMaterial.test.js` covers the supported-format contract and is included in CI.
+- `.github/workflows/horosa-web.yml` runs a focused Jest regression set covering retained local engines, browser-only transports, responsive layout/chunk loading, AI material import, divination golden contracts and product scope. Runs #82 and #83 passed. The workflow also builds the production bundle, verifies entry assets/viewport metadata, and runs a real Chromium smoke test at 390×844 and 1440×900. Run #85 passed on source commit `f24bd1f08e745fb3e609d1ef6f6bed9ac784d982`; it also uploaded 390×844 mobile and 1440×900 desktop screenshots plus the JSON smoke report. The separate Node 22 Caelus feasibility job completed, but its report verdict is `BLOCKED` (one house-placement mismatch and three missing golden fields); this does not qualify the candidate as a production engine.
+- The production build and focused CI regression set passed in runs #82/#83; the full project Jest suite was not run. Chromium entry-screen emulation reported no horizontal overflow, local JS/CSS load failures, or uncaught errors, but physical iOS Safari / Android Chrome validation is still outstanding.

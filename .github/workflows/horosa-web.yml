@@ -1,0 +1,114 @@
+name: Horosa Web validation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/horosa-web.yml'
+      - 'local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/**'
+      - 'experiments/phase5b-caelus-parity/**'
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui
+    env:
+      NODE_OPTIONS: --openssl-legacy-provider
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Generate legacy endpoint inventory
+        run: node scripts/audit-browser-endpoints.js --json-out artifacts/legacy-endpoint-audit.json --summary-only
+      - name: Run browser migration regression suite
+        run: >-
+          npm test -- --runInBand --forceExit --testTimeout=30000 --runTestsByPath
+          src/services/__tests__/aianalysisDocxExtraction.test.js
+          src/layouts/__tests__/phase4gKeepMobile.test.js
+          src/utils/__tests__/browserBootstrapNoLegacyBackend.test.js
+          src/utils/__tests__/preciseCalcBridge.test.js
+          src/utils/__tests__/browserNativeCalculationsNoRemoteFallback.test.js
+          src/utils/__tests__/browserChartEngine.test.js
+          src/utils/__tests__/aiAnalysisMaterial.test.js
+          src/utils/__tests__/divinationTimeDraft.test.js
+          src/utils/__tests__/phase4cZiweiLiureng.test.js
+          src/utils/__tests__/phase4fAiDirectTransport.test.js
+          src/utils/__tests__/pdPolesLocal.test.js
+          src/components/dunjia/__tests__/DunJiaCalc.test.js
+          src/components/jinkou/JinKouCalc.test.js
+          src/components/jinkou/JinKouMain.test.js
+          src/components/kinastro/__tests__/cetianTextsLocal.test.js
+          src/components/jinkou/__tests__/jinkouSchoolGolden.test.js
+          src/components/liureng/__tests__/liurengSanChuanGolden.test.js
+          src/divination/engine/__tests__/resultShapes.contract.test.js
+          src/components/taiyi/__tests__/TaiYiCore.test.js
+          src/utils/__tests__/localchartsBcAd.test.js
+          src/utils/__tests__/phase4hDeadDeps.test.js
+          src/utils/__tests__/phase4iInstallerExit.test.js
+          src/utils/__tests__/umiDevChunkMode.test.js
+          src/constants/__tests__/ProductScope.test.js
+          scripts/__tests__/audit-browser-endpoints.test.js
+      - name: Build browser application
+        run: npm run build
+      - name: Smoke-check static browser output
+        run: npm run check:browser-build
+      - name: Smoke-test mobile and desktop UI in Chromium
+        run: npm run smoke:browser-ui
+      - name: Upload browser UI smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-ui-smoke-evidence
+          path: |
+            local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/browser-ui-mobile.png
+            local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/browser-ui-desktop.png
+            local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/browser-ui-smoke.json
+          if-no-files-found: warn
+      - name: Upload legacy endpoint inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-legacy-endpoint-inventory
+          path: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/legacy-endpoint-audit.json
+          if-no-files-found: warn
+
+  chart-engine-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Candidate parity is informative: a blocked probe must not turn into a production dependency
+    # or mask the frontend regression/build result.
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: experiments/phase5b-caelus-parity
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install isolated candidate
+        run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
+      - name: Compare candidate against historical Horosa chart
+        run: npm test
+      - name: Upload machine-readable parity report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase5b-caelus-historical-parity
+          path: experiments/phase5b-caelus-parity/results/historical-1990.json
+          if-no-files-found: warn

@@ -1,4 +1,4 @@
-import { fetchPdPoles } from '../../services/astroPd3d';
+import { computePdPolesLocal } from '../../utils/pdPolesLocal';
 import { markPanelReady } from '../../utils/perfMark';
 import { Component } from 'react';
 import { safeLocalStorageSet } from '../../utils/safeStorage';
@@ -782,13 +782,11 @@ class AstroPrimaryDirection extends Component{
 		const key = JSON.stringify(body);
 		if(this.pdPolesKey === key){ return; }
 		this.pdPolesKey = key;
-		fetchPdPoles(body).then((res)=>{
-			if(this.pdPolesKey !== key){ return; }
-			const poles = res && res.poles ? res.poles : (res && res.data && res.data.poles ? res.data.poles : null);
-			this.setState({ pdPolesData: poles || {} });
-		}).catch(()=>{
-			if(this.pdPolesKey === key){ this.setState({ pdPolesData: {} }); }
-		});
+		// The pole column derives from the already-loaded natal chart. No backend call.
+		const local = computePdPolesLocal(chart, body);
+		if(this.pdPolesKey === key){
+			this.setState({ pdPolesData: local && local.poles ? local.poles : {} });
+		}
 	}
 
 	handlePdCalculate(){

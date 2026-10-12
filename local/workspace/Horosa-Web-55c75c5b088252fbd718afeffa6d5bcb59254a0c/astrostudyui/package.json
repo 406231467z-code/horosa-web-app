@@ -12,10 +12,13 @@
 	],
 	"scripts": {
 		"start": "node scripts/umi-runner.js dev",
-		"build": "node scripts/patch-dom-align-zoom.js && node scripts/umi-runner.js build && node scripts/scrub-build-paths.js dist && node scripts/write-build-info.js dist && node scripts/inject-preload.js dist && node scripts/check-chunk-dup.js dist",
-		"build:file": "node scripts/patch-dom-align-zoom.js && node scripts/umi-runner.js build --for-file && node scripts/scrub-build-paths.js dist-file && node scripts/write-build-info.js dist-file && node scripts/inject-preload.js dist-file && node scripts/check-chunk-dup.js dist-file",
-		"postinstall": "node scripts/patch_quill_domnodeinserted.js && node scripts/patch-dom-align-zoom.js && umi generate tmp",
+		"build": "node scripts/patch-caelus-webpack4.js && node scripts/patch-dom-align-zoom.js && node scripts/umi-runner.js build && node scripts/scrub-build-paths.js dist && node scripts/write-build-info.js dist && node scripts/inject-preload.js dist && node scripts/check-chunk-dup.js dist",
+		"build:file": "node scripts/patch-caelus-webpack4.js && node scripts/patch-dom-align-zoom.js && node scripts/umi-runner.js build --for-file && node scripts/scrub-build-paths.js dist-file && node scripts/write-build-info.js dist-file && node scripts/inject-preload.js dist-file && node scripts/check-chunk-dup.js dist-file",
+		"postinstall": "node scripts/patch_quill_domnodeinserted.js && node scripts/patch-dom-align-zoom.js && node scripts/patch-caelus-webpack4.js && umi generate tmp",
 		"prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
+		"audit:endpoints": "node scripts/audit-browser-endpoints.js",
+		"check:browser-build": "node scripts/check-browser-build.js",
+		"smoke:browser-ui": "node scripts/smoke-browser-ui.js",
 		"test": "umi-test",
 		"test:coverage": "umi-test --coverage"
 	},
@@ -53,7 +56,8 @@
 		"react": "17.x",
 		"react-dom": "17.x",
 		"tz-lookup": "^6.1.25",
-		"umi": "^3.5.41"
+		"umi": "^3.5.41",
+		"caelus": "0.25.0"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.29.0",

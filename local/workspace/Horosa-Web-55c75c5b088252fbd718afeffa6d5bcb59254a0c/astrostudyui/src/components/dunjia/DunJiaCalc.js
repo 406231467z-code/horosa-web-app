@@ -3,10 +3,6 @@ import { Solar } from 'lunar-javascript';
 import { buildQimenBaGongSnapshotLines, buildQimenBaGongKeYingSnapshotLines, buildQimenFuShiYiGua, buildQimenOverviewSummary } from './DunJiaBaGongRules';
 import { buildFaQimenAnalysis } from './DunJiaFaCalc';
 import { LUOSHU_NUM } from './DunJiaFaDoc';
-import request from '../../utils/request';
-import { ServerRoot, ResultKey } from '../../utils/constants';
-import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from '../../utils/kentangCache';
 
 export const SEX_OPTIONS = [
 	{ value: 1, label: '男' },
@@ -1228,147 +1224,6 @@ function mergeKinqimenMaps(raw, fallbackPan, opts){
 	return { diPan, tianPan, renPan, tianXing, shenPan };
 }
 
-export function normalizeKinqimenData(backendPan, fallbackPan, options, nongli){
-	if(!backendPan || !fallbackPan){
-		return fallbackPan;
-	}
-	const raw = backendPan.selected || backendPan.raw || {};
-	const opts = options || {};
-	const maps = mergeKinqimenMaps(raw, fallbackPan, opts);
-	const zfzs = normalizeZhiFuZhiShi(getRawValue(raw, ['值符值使'], {}));
-	const zhiFuPalaceRaw = zfzs.zhiFuStar[1] || '';
-	const zhiShiPalaceRaw = zfzs.zhiShiDoor[1] || '';
-	const shiftPalace = normalizeShiftPalace(opts.shiftPalace);
-	const zhiFuPalace = zhiFuPalaceRaw ? rotateOuterPalaceNum(GUA_POS_MAP[zhiFuPalaceRaw] || 5, shiftPalace) : fallbackPan.zhiFuPalace;
-	const zhiShiPalace = zhiShiPalaceRaw ? rotateOuterPalaceNum(GUA_POS_MAP[zhiShiPalaceRaw] || 5, shiftPalace) : fallbackPan.zhiShiPalace;
-	// 飞盘天禽有本位(中宫),值符星=禽 时不替芮;转盘禽寄芮照旧。
-	const zhiFuShort = (opts.school === '飞盘') ? (zfzs.zhiFuStar[0] || '') : (zfzs.zhiFuStar[0] || '').replace(/[芮禽]+/g, '内');
-	const zhiShiShort = zfzs.zhiShiDoor[0] || '';
-	const xunkong = getRawValue(raw, ['旬空'], fallbackPan.xunkong || {});
-	const kongWang = getKongByMode(opts.kongMode, {
-		日空: normalizeText(xunkong && xunkong.日空 ? xunkong.日空 : ''),
-		时空: normalizeText((xunkong && (xunkong.時空 || xunkong.时空)) || ''),
-	}) || fallbackPan.kongWang;
-	const kongWangMeta = resolveKongWangPalaces(kongWang);
-	const horse = getRawValue(raw, ['馬星', '马星'], {});
-	// 驿马按 yimaMode(日马=日支三合 / 时马=时支三合)自算,与本地 calcDunJia 同源(resolveYiMa);
-	//   后端 馬星.驛馬 是单一值、不随 yimaMode 变,时家须自算,左栏「日马/时马」切换才会改盘+右栏(用户报障)。
-	const yiMaMeta = resolveYiMa(opts.yimaMode, fallbackPan.ganzhi || {});
-	const yiMaZhi = yiMaMeta.yimaZhi || normalizeText((horse && (horse.驛馬 || horse.驿马)) || '');
-	const yiMaPalace = yiMaMeta.palace || BRANCH_TO_POS[yiMaZhi] || (fallbackPan.yiMa ? fallbackPan.yiMa.palace : 0);
-	const yiMa = {
-		...(fallbackPan.yiMa || {}),
-		mode: opts.yimaMode,
-		yimaZhi: yiMaZhi || (fallbackPan.yiMa ? fallbackPan.yiMa.yimaZhi : ''),
-		palace: yiMaPalace,
-		text: yiMaMeta.text || (yiMaPalace ? `驿马：${yiMaZhi}（${PALACE_NAME[yiMaPalace]}${LUOSHU_NUM[PALACE_NAME[yiMaPalace]]}宫）` : (fallbackPan.yiMa ? fallbackPan.yiMa.text : '驿马：无')),
-		raw: horse,
-	};
-	const specials = resolveSpecials(maps.tianPan);
-	const menPo = resolveMenPo(maps.renPan);
-	const cells = buildCells(maps.diPan, maps.tianPan, maps.renPan, maps.shenPan, maps.tianXing, zhiFuPalace, zhiShiPalace, {
-		jiXingPalaces: specials.jiXingPalaces,
-		ruMuPalaces: specials.ruMuPalaces,
-		menPoPalaces: menPo.palaces,
-		kongWangPalaces: kongWangMeta.palaces,
-		yimaPalace: yiMaPalace,
-		school: opts.school,
-	});
-	const qimenModeLabel = normalizeText(backendPan.modeLabel || '');
-	const juText = normalizeText(getRawValue(raw, ['排局', '局'], fallbackPan.juText));
-	let ganzhi = parseKinqimenGanzhi(getRawValue(raw, ['干支'], ''), fallbackPan.ganzhi);
-	// v2.2.1: 本地 buildGanzhiForQimen 是 lateZi 语义的唯一可信来源(覆盖 4 case 矩阵)。
-	// 后端 kinqimen 引擎对 (after23=1 + lateZi=0 + hour==23) 不返回 戊子,而是仍按 shifted day 的壬给出 庚子;
-	// 这里以本地 fallback 的时柱为准,保证用户看到的 4 柱与设置一致。
-	if(fallbackPan && fallbackPan.ganzhi && fallbackPan.ganzhi.time && ganzhi.time !== fallbackPan.ganzhi.time){
-		ganzhi = { ...ganzhi, time: fallbackPan.ganzhi.time };
-	}
-	return {
-		...fallbackPan,
-		source: 'kinqimen',
-		backend: backendPan,
-		raw,
-		allRaw: backendPan.allRaw || {},
-		sections: normalizeBackendSections(backendPan.sections),
-		qimenMode: backendPan.mode || getKinqimenMode(opts.paiPanType),
-		qimenModeLabel,
-		qimenCapabilities: backendPan.capabilities || null,
-		juText: juText || fallbackPan.juText,
-		jieqiText: normalizeText(getRawValue(raw, ['節氣', '节气'], fallbackPan.jieqiText)) || fallbackPan.jieqiText,
-		yinYangDun: juText.indexOf('阴遁') >= 0 ? '阴遁' : (juText.indexOf('阳遁') >= 0 ? '阳遁' : fallbackPan.yinYangDun),
-		sanYuan: juText.indexOf('上元') >= 0 || juText.endsWith('上') ? '上元' : (juText.indexOf('中元') >= 0 || juText.endsWith('中') ? '中元' : (juText.indexOf('下元') >= 0 || juText.endsWith('下') ? '下元' : fallbackPan.sanYuan)),
-		juShu: (juText.match(/[一二三四五六七八九]/) || [fallbackPan.juShu || ''])[0],
-		ganzhi,
-		xunShou: normalizeText(getRawValue(raw, ['旬首'], fallbackPan.xunShou)),
-		fuTou: normalizeText(getRawValue(raw, ['旬首'], fallbackPan.fuTou)),
-		xunkong,
-		kongWang,
-		zhiFu: zhiFuShort ? (JIU_XING_NAME[zhiFuShort] || zhiFuShort) : fallbackPan.zhiFu,
-		zhiShi: zhiShiShort ? (BA_MEN_NAME[zhiShiShort] || `${zhiShiShort}门`) : fallbackPan.zhiShi,
-		zhiFuPalace,
-		zhiShiPalace,
-		diPan: maps.diPan,
-		tianPan: maps.tianPan,
-		renPan: maps.renPan,
-		shenPan: maps.shenPan,
-		tianGan: maps.tianPan,
-		tianXing: maps.tianXing,
-		diPanList: mapListByPos(maps.diPan),
-		tianPanList: mapListByPos(maps.tianPan),
-		renPanList: mapListByPos(maps.renPan),
-		shenPanList: mapListByPos(maps.shenPan),
-		jiXingPalaces: specials.jiXingPalaces,
-		ruMuPalaces: specials.ruMuPalaces,
-		liuYiJiXing: specials.liuYi,
-		qiYiRuMu: specials.ruMu,
-		menPo,
-		kongWangDesc: kongWangMeta.list,
-		kongWangPalaces: kongWangMeta.palaces,
-		yiMa,
-		cells,
-		options: {
-			...(fallbackPan.options || {}),
-			qimenEngineLabel: '',
-			qimenModeLabel,
-			paiPanLabel: getOptionLabel(PAIPAN_OPTIONS, opts.paiPanType),
-			qijuMethodLabel: normalizeText(backendPan.qijuMethod) === 'zhirun' ? '置闰' : (normalizeText(getRawValue(raw, ['排盤方式', '排盘方式'], '')) || (fallbackPan.options ? fallbackPan.options.qijuMethodLabel : '')),
-		},
-		lunarText: fallbackPan.lunarText || (nongli ? `${nongli.year || ''}年${nongli.leap ? '闰' : ''}${nongli.month || ''}${nongli.day || ''}` : ''),
-	};
-}
-
-// horosa_kentang_result_cache_v1 —— 奇门(时家转盘)/qimen/pan 直连缓存(LRU 48)。
-// 确定性论证:payload = resolveCalcDateTime(格式化字串+整数)+ qimenMode/qijuMethod/option/school
-// + 真太阳时/节气差字串 + 两个日界开关(0/1);无 Date 对象、无随机、无「现在时刻」依赖;
-// 后端 webqimensrv.py 全文无 random/now(已 grep 核对)→ 同 payload 必同盘。
-// ⚠️ 节气种子只影响**本地** calcDunJia 分支(DunJiaMain.panCache 那条),不进本 payload,故与本层无关。
-// 关 horosa.perf.techniqueResultCache 即逐字回到下面的直连原函数。
-async function fetchQimenPanRaw(payload){
-	let rsp = null;
-	try{
-		const rawResponse = await cachedKentangFetch(buildKentangEndpoint('qimen', 'pan'), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(payload),
-		});
-		const rawText = await rawResponse.text();
-		rsp = rawText ? JSON.parse(rawText) : null;
-		if(!rsp || (rsp.ResultCode !== undefined && rsp.ResultCode !== 0)){
-			throw new Error(rsp && rsp[ResultKey] ? `${rsp[ResultKey]}` : 'qimen.local.fetch.failed');
-		}
-	}catch(e){
-		rsp = await request(`${ServerRoot}/qimen/pan`, {
-			body: JSON.stringify(payload),
-			silent: true,
-			timeoutMs: 45000,
-			retry: { retries: 2 },
-		});
-	}
-	return rsp && rsp[ResultKey] ? rsp[ResultKey] : rsp;
-}
-
 // [H-F] 刻家十分局:一时辰(2h)分十刻(12min/刻),初局=本时辰时家局(沿当前起局法链),
 //   逐刻推移:阳遁顺进一局、阴遁逆退一局(第k刻=初局±(k-1),九局循环)。
 //   分遁 keJiaFenDun:zihou(默认)=子后阳午后阴(时支子~巳阳/午~亥阴,与节气无关)/jieqi=沿时家节气分遁。
@@ -1409,32 +1264,6 @@ function calcKeJiaMeta(opts, ganzhi, jieqi, dateParts, context){
 		keIndex: keIndex + 1,
 		keGanZhi,
 	};
-}
-
-export async function fetchQimenPan(fields, nongli, options, context){
-	const baseDt = parseDateTime(fields);
-	if(!baseDt){
-		return null;
-	}
-	const opt = options || {};
-	// 按所选时间口径计算:真太阳时(timeAlg=0)用 nongli.birth 校正后的时刻,直接时间(=1)用钟表时。
-	// 与前端 calcDunJia(resolveCalcDateTime)、太乙(resolveCalculationDateTime)一致;此前后端漏用此校正,真太阳时被当直接时间排盘。
-	const dt = resolveCalcDateTime(baseDt, nongli, opt, context);
-	const payload = {
-		...dt,
-		zone: fields && fields.date && fields.date.value ? fields.date.value.zone : '',
-		qimenMode: getKinqimenMode(opt.paiPanType),
-		qijuMethod: normalizeQijuMethod(opt.qijuMethod),
-		option: normalizeQijuMethod(opt.qijuMethod) === 'zhirun' ? 2 : 1,
-		school: normalizeSchool(opt.school),
-		realSunTime: (context && context.displaySolarTime) || (nongli ? (nongli.birth || '') : ''),
-		jiedelta: nongli ? (nongli.jiedelta || '') : '',
-		after23NewDay: opt.after23NewDay !== undefined ? (opt.after23NewDay ? 1 : 0) : 1,
-		lateZiHourUseNextDay: opt.lateZiHourUseNextDay !== undefined ? (opt.lateZiHourUseNextDay ? 1 : 0) : 1,
-	};
-	// v3.5.1 收敛:结果级缓存退役 —— Raw 内部已走上游 utils/kentangCache
-	// (L1/L2/L3 + 在途去重,kt-v1|rv 信封);外面再包一层 = 双缓存双内存,零增益。
-	return fetchQimenPanRaw(payload);
 }
 
 function resolvePaiPanMeta(opts, ganzhi, jieqi, dateParts, context){

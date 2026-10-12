@@ -4,8 +4,7 @@ import { Modal, } from 'antd';
 import DateTime from '../components/comp/DateTime';
 import * as service from '../services/astro';
 import {randomStr,} from '../utils/helper';
-import { DefLat, DefLon, DefGpsLat, DefGpsLon, ServerRoot, } from '../utils/constants';
-import { showChartServiceError as showChartServiceErrorRich } from '../components/common/ChartServiceErrorModal';
+import { DefLat, DefLon, DefGpsLat, DefGpsLon, } from '../utils/constants';
 import { saveAstroAISnapshotLazy, } from '../utils/astroAiSnapshot';
 import { hookRafEnabled, fieldsFastCommitEnabled, prewarmRequestsEnabled, stepPrefetchArmEnabled, stepPrefetchDepth, mainChainAbortEnabled, stepPrefetchSkewEnabled, speculativePrecomputeEnabled } from '../utils/perfFlags';
 import { submitStepPrefetch, getStepPrefetcher, registerStepSelectHandler } from '../utils/stepPrefetch';
@@ -565,6 +564,20 @@ function shouldIncludePrimaryDirection(state){
 	);
 }
 
+function shouldUseBrowserNativeChart(state){
+	// The main Western natal page is served by the browser chart engine. Other
+	// retained calculation families stay on their own migration paths until ported.
+	return !!state && canonicalizeTabKey(state.currentTab) === 'astrochart';
+}
+
+function chartRequestOptions(state, options){
+	const opts = { ...(options || {}) };
+	if(shouldUseBrowserNativeChart(state)){
+		opts.browserNative = true;
+	}
+	return opts;
+}
+
 function isValidChartResponse(rsp){
 	return rsp !== undefined && rsp !== null && rsp.Result !== undefined && rsp.Result !== null;
 }
@@ -573,24 +586,13 @@ function isValidChartResponse(rsp){
 // (dva 的 model parser 不支持 JSX,所以 React 端必须放独立组件文件)。
 // fallback 用经典 Modal.error 防止任何加载/导入异常导致用户拿不到反馈。
 function showChartServiceError(extraDetail){
-	// 先探活再定弹窗:服务在线但本次计算失败(如参数异常/超出星历数据域)≠「服务未就绪」。
-	// 误报「未就绪」会把用户引向重启/防火墙排查,掩盖真实原因(全年份域工程实测坑)。
-	try {
-		fetch(`${ServerRoot}/horosaIdentity`, { method: 'GET' }).then((r) => {
-			if(r && r.ok){
-				Modal.error({
-					title: '排盘失败：该时刻或参数计算失败',
-					content: '本地服务在线,但此次排盘未能完成。常见原因:日期超出星历数据域(公元前 12999 ~ 公元 16799)、参数组合异常。请调整时间/参数后重试;若反复失败请反馈该时刻。',
-				});
-			}else{
-				showChartServiceErrorRich(extraDetail);
-			}
-		}).catch(() => {
-			showChartServiceErrorRich(extraDetail);
-		});
-	} catch(e) {
-		Modal.error({ title: '排盘失败：本地排盘服务未就绪。请确认 Horosa 本地服务仍在运行后重试。' });
-	}
+	const detail = extraDetail && (extraDetail.message || extraDetail.detail || extraDetail);
+	Modal.error({
+		title: '浏览器排盘失败',
+		content: detail
+			? `本次没有生成命盘。计算引擎返回：${String(detail)}`
+			: '本次没有生成命盘。请检查出生日期、时间、地点及所选宫制/黄道设置；当前输入无法可靠计算时，系统不会使用占位数据。',
+	});
 }
 
 
@@ -690,7 +692,8 @@ function buildStepPrefetchTasks(fieldValues, stepHint, astroState){
 	}
 	const unit = (stepHint && stepHint.unit) || 'm';
 	// 本地漏斗技法(紫微/遁甲)的武装:/chart 不在其步进路径上,预取它纯属浪费 —— 只做技法端点。
-	const skipChart = !!(stepHint && stepHint.skipChart);
+	const activeStepHook = astroState && astroState.predictHook && astroState.predictHook[astroState.currentTab];
+	const skipChart = !!(stepHint && stepHint.skipChart) || !!(activeStepHook && activeStepHook.chartFree === true);
 	// Phase B:当前技法登记的端点(kentang pan 等)——用技法自己的请求函数,落其自己的缓存。
 	// 🔴 传给登记方的必须是【已步进到目标时间的 f2】(旧版传的是基准 fields,构出来的是
 	//    「此刻」的参数 —— 与用户下一步要看的盘不是同一张,预取白打;死表期潜伏未爆,R4-B2 修)。
@@ -722,14 +725,14 @@ function buildStepPrefetchTasks(fieldValues, stepHint, astroState){
 		}
 		param.cid = null;
 		param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-		if(skipChart){
+		if(skipChart || shouldUseBrowserNativeChart(astroState)){
 			chartTasks.push(null);   // 本地漏斗武装:占位保序,只发技法端点
 		}else{
 			chartTasks.push({
 				name: `chart${label}`,
 				path: '/chart',   // R4-B1 运行时白名单契约:无 path 的任务会被 submitStepPrefetch 丢弃
 				// silent+零重试:预取失败静默、绝不退避风暴;结果自动进 chartMem+requestDedupe
-				run: ()=> service.fetchChart(param, { silent: true, retry: { retries: 0 } }),
+				run: ()=> service.fetchChart(param, chartRequestOptions(astroState, { silent: true, retry: { retries: 0 } })),
 			});
 		}
 		let mine = null;
@@ -787,13 +790,14 @@ registerArmPlanBuilder((fieldValues, hint, astroState)=>buildStepPrefetchTasks(f
 // R4-B5(horosa_option_prefetch_v1):选项投机的 /chart 变体任务构造器 —— 与真点/步进预取
 // 共用同一 fieldsToParams 路径(键逐字节同是命中的唯一前提)。
 registerOptionChartTaskBuilder((variantFields, astroState)=>{
+	if(shouldUseBrowserNativeChart(astroState)){ return null; }
 	const param = fieldsToParams(variantFields);
 	param.cid = null;
 	param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 	return {
 		name: 'chart',
 		path: '/chart',
-		run: ()=> service.fetchChart(param, { silent: true, retry: { retries: 0 } }),
+		run: ()=> service.fetchChart(param, chartRequestOptions(astroState, { silent: true, retry: { retries: 0 } })),
 	};
 });
 
@@ -1219,7 +1223,9 @@ export default {
 				}
 				const astroState = yield select((state)=>state.astro);
 				param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-				yield call(service.fetchChart, param, { silent: true, disableLoading: true });
+								if(!shouldUseBrowserNativeChart(astroState)){
+					yield call(service.fetchChart, param, { silent: true, disableLoading: true });
+				}
 			}catch(e){
 				// speculative only — never surface
 			}
@@ -1241,7 +1247,7 @@ export default {
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState));
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;
@@ -1308,7 +1314,7 @@ export default {
 			const param = fieldsToParams(fields);
 			const astroState = yield select((allState)=>allState.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState));
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;
@@ -1415,7 +1421,7 @@ export default {
 			// 病根:此前 fields 的 save 排在 /chart 网络之后 → 纯本地技法(八字/数算/风水…)
 			// 也被迫等一次网络(实测热态 229ms 占总延迟 70%),网络失败则 fields 根本不更新。
 			// 修法:当前 tab 的 hook 自述 chartFree(=本页中右栏不消费 chartObj)时,fields 立即
-			// 提交+立即 doHook —— 本地技法一次性整体出(<100ms);/chart 照发,回来单独补 chartObj。
+			// 提交+立即 doHook —— 本地技法一次性整体出;chartFree 不消费 chartObj,因此不发 /chart。
 			// 非 chartFree 页维持「到齐才 save{fields+chartObj}」的原子性(逐字节旧序),但先把
 			// 本页的请求集并行预热(prewarm,silent,经 requestDedupe 在途共享)→ latency=max 而非 sum。
 			const fastCommitOn = fieldsFastCommitEnabled();
@@ -1446,7 +1452,8 @@ export default {
 				requestOptions = { ...requestOptions, signal: chartMainAbortCtl.signal };
 			}
 			const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
-			const fastPath = fastCommitOn && !!(activeHook && activeHook.chartFree === true);
+			const chartFreePath = !!(activeHook && activeHook.chartFree === true);
+			const fastPath = fastCommitOn && chartFreePath;
 
 			let fld = {
 				...fieldValues,
@@ -1468,13 +1475,35 @@ export default {
 					pm.committed();
 				}
 			}else if(fastCommitOn && prewarmRequestsEnabled() && activeHook && typeof activeHook.prewarmRequests === 'function'){
-				// fire-and-forget:组件自述的预热函数(silent 请求),失败静默——正式请求照常兜底。
+				// fire-and-forget:该组件声明的本地计算之外，只有显式预热器才运行。
 				try{ activeHook.prewarmRequests(fld); }catch(e){ /* 预热失败无害 */ }
+			}
+
+			// chartFree is a strict contract: this tab's component tree does not read the
+			// shared backend chart object. Run its local hook and stop here instead of
+			// issuing the legacy POST /chart just to fill an unused shared object.
+			if(chartFreePath){
+				if(!fastPath){
+					yield put({
+						type: 'save',
+						payload: { fields: fld },
+					});
+					pm.computed();
+					if(!values.nohook){
+						yield put({
+							type: 'doHook',
+							payload: { chartObj: astroState.chartObj, fields: fld },
+						});
+						pm.committed();
+					}
+				}
+				try{ saveBootChartSnapshot(fieldValues, astroState.currentTab); }catch(e){ /* local workspace backup is optional */ }
+				return;
 			}
 
 			let rsp;
 			try{
-				rsp = yield call(service.fetchChart, param, requestOptions);
+				rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState, requestOptions));
 			}catch(abortErr){
 				// [R4-B5b] 被新请求 abort 的旧主链:静默退场(新请求自有其成败路径)。
 				// 其它错误维持旧行为原样上抛(request 层早已按 silent 决定 surface 与否)。
@@ -1609,11 +1638,28 @@ export default {
 			if(fields === undefined || fields === null){
 				fields = newEmptyFields();
 			}
-			const param = fieldsToParams(fields);
 			const astroState = yield select((state)=>state.astro);
+			const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
+			if(activeHook && activeHook.chartFree === true){
+				// The current tab has a verified local engine and declares that it does not
+				// consume chartObj. Create/recalculate it directly from fields; never call /chart.
+				const drawer = closeAllDrawer('*nowChart-local');
+				yield put({
+					type: 'save',
+					payload: { fields, drawerVisible: drawer },
+				});
+				if(!values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: astroState.chartObj, fields },
+					});
+				}
+				return;
+			}
+			const param = fieldsToParams(fields);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState));
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;

@@ -22,4 +22,13 @@ describe('phase 4-G keep mobile layout', ()=>{
 		expect(css).toContain('.amap-container');
 		expect(css).toContain('chatSplit');
 	});
+	test('narrow header reserves intrinsic width for utility actions', ()=>{
+		const headerCss = fs.readFileSync(path.join(__dirname, '../../components/homepage/PageHeader.less'), 'utf8');
+		expect(headerCss).toContain('@media (max-width: 1100px)');
+		expect(headerCss).toContain('grid-template-columns: minmax(0, 1fr) max-content !important;');
+		expect(headerCss).toContain('grid-template-areas:');
+		expect(headerCss).toContain("'brand utilities'");
+		expect(headerCss).toContain("'module commands'");
+	});
+
 });

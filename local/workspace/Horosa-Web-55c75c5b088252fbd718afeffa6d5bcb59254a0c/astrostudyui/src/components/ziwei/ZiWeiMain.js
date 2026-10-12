@@ -727,28 +727,24 @@ export async function buildZiweiSnapshotForParams(params){
 		}
 		const data = await fetchZiweiBirth(p, { silent: true });
 		const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-		if(!result || !result.chart){
+		if(!result || !result.chart || !Array.isArray(result.chart.houses) || result.chart.houses.length !== 12){
 			return '';
 		}
-		// WP-F:挂载/导出快照与 live 同口径——传本开关非默认时,用本地引擎重排盘+重算格局,
-		// 使快照「传本设置」注记与实际盘数据一致(否则注记说局数年、盘却是 Java 默认 10 年)。失败回退 Java。
+		// 挂载/导出快照与 live 同口径——非默认传本选项必须本地重排盘并重算格局。
 		if(ziweiNeedsLocalEngine()){
-			try{
-				const birth = { date: params.date, time: params.time, zone: params.zone, lon: params.lon, lat: params.lat, gpsLon: params.gpsLon, gpsLat: params.gpsLat, ad: 1, gender: params.gender };
-				const opts = { timeAlg: params.timeAlg, after23NewDay: params.after23NewDay, lateZiHourUseNextDay: params.lateZiHourUseNextDay, lateZi: ZWEngineOptions.lateZi, yearBoundary: ZWEngineOptions.yearBoundary, ...collectEngineOpts(ZWEngineOptions), lifeMasterBy: ZWEngineOptions.lifeMasterBy || 'year_branch' };
-				// ⚠️ lifeMasterBy 显式选项(默认 'year_branch'=Java 同源;fallback 字面量保留防单例缺位)。
-				//    历史上此处钉死生年支防「翻拨开关误改命主」——现由显式选项+ziweiCalc 哨兵金标接防
-				//    (默认零回归;ming_branch=用户主动选,命主按天盘命宫支且不随观察盘移)。
-				let localChart = calcZiwei(birth, opts);
-				if(ZWEngineOptions.sanPan && ZWEngineOptions.sanPan !== 'tian'){ localChart = deriveSanPan(localChart, ZWEngineOptions.sanPan); }
-				if(localChart && Array.isArray(localChart.houses) && localChart.houses.length === 12){
-					result.chart = { ...result.chart, ...localChart };
-					try{ const lp = detectPatterns(result.chart); if(Array.isArray(lp)){ result.patterns = lp; } }catch(e3){ /* 保留 Java patterns */ }
-				}
-			}catch(e4){ /* 本地异常 → 保留 Java 盘 */ }
+			const birth = { date: params.date, time: params.time, zone: params.zone, lon: params.lon, lat: params.lat, gpsLon: params.gpsLon, gpsLat: params.gpsLat, ad: 1, gender: params.gender };
+			const opts = { timeAlg: params.timeAlg, after23NewDay: params.after23NewDay, lateZiHourUseNextDay: params.lateZiHourUseNextDay, lateZi: ZWEngineOptions.lateZi, yearBoundary: ZWEngineOptions.yearBoundary, ...collectEngineOpts(ZWEngineOptions), lifeMasterBy: ZWEngineOptions.lifeMasterBy || 'year_branch' };
+			// 命主取法作为显式本地引擎选项传入，默认 year_branch 与兼容基线一致。
+			let localChart = calcZiwei(birth, opts);
+			if(ZWEngineOptions.sanPan && ZWEngineOptions.sanPan !== 'tian'){ localChart = deriveSanPan(localChart, ZWEngineOptions.sanPan); }
+			if(!localChart || !Array.isArray(localChart.houses) || localChart.houses.length !== 12){
+				throw new Error('紫微本地引擎没有生成完整的十二宫命盘');
+			}
+			result.chart = { ...result.chart, ...localChart };
+			result.patterns = detectPatterns(result.chart);
 		}
-		// [P2a] 命主取法后处理:仅 Java 盘路径(本地引擎盘已按 ctx 算好且防观察盘错基,见函数头注)
-		if(!ziweiNeedsLocalEngine()){ applyLifeMasterOption(result.chart, ZWEngineOptions.lifeMasterBy); }
+		// 命主取法是本地派生选项，默认 year_branch 不改变盘；ming_branch 也作用于本地初始盘。
+		applyLifeMasterOption(result.chart, ZWEngineOptions.lifeMasterBy);
 		return buildZiWeiSnapshotText(params, result);
 	}finally{
 		if(customBrightness){ ZWBrightnessCustom.override = null; }
@@ -1023,29 +1019,44 @@ class ZiWeiMain extends Component{
 			return;
 		}
 		const params = this.genParams(fields);
+		const requestSeq = (this._ziweiRequestSeq || 0) + 1;
+		this._ziweiRequestSeq = requestSeq;
 
-		// 并行 + rules 会话缓存:rules 与本盘无关(body 恒 {}),原串行瀑布白付一次 RTT;
-		// 启动已 prime 缓存(models/app.js dispatch rules/ziwei),此处通常零成本命中。
-		// 任一失败整体 throw、不 setState,与原「串行中途失败不 setState」口径一致。
+		// 主盘与规则表都由浏览器本地计算/打包数据提供，不依赖服务端。
 		// WP-C/D 极速化:silent=不触发全局满屏 Spin(keep-stale:旧盘留存+「更新中…」角标,
 		// 新盘到达单次 setState 整体替换)。关 silentTechniquePanels 开关=旧全屏。
 		this.setState({ updating: true });
-		const [data, rules] = await Promise.all([
-			fetchZiweiBirth(params, { silent: silentTechniquePanelsEnabled() }),
-			Promise.resolve(getZiweiRulesEnvelope()),
-		]);
-		// 🔴 空载荷守卫:request() 网络层失败会吞错 resolve undefined(非 reject)。
-		// 缺守卫时 data[ResultKey]/rules[ResultKey] 直接崩(Unhandled Rejection)→ 生产白屏/选项永无反应。
-		// 口径与「失败不 setState」一致:人话提示 + return,后端就绪后用户重试即恢复。
+		let data;
+		let rules;
+		try{
+			[data, rules] = await Promise.all([
+				fetchZiweiBirth(params, { silent: silentTechniquePanelsEnabled() }),
+				Promise.resolve(getZiweiRulesEnvelope()),
+			]);
+		}catch(e){
+			if(!this.unmounted && requestSeq === this._ziweiRequestSeq){
+				this.setState({ updating: false });
+				message.error((e && e.message) || '紫微本地计算失败，请检查出生时间后重试');
+			}
+			return;
+		}
+		if(this.unmounted || requestSeq !== this._ziweiRequestSeq){
+			return;
+		}
+		// 本地打包规则或计算结果缺失时停止更新，不保留旧盘冒充新结果。
 		if(!data || !rules){
 			this.setState({ updating: false });
-			message.error('后端服务尚未就绪,请稍后重试');
+			message.error('紫微本地规则或计算结果不可用，请重试');
 			return;
 		}
 		const result = data[Constants.ResultKey]
+		if(!result || !result.chart || !Array.isArray(result.chart.houses) || result.chart.houses.length !== 12){
+			this.setState({ updating: false });
+			message.error('紫微本地计算没有生成完整的十二宫命盘');
+			return;
+		}
 
-		// 本地引擎双路(传本开关):任一开关非默认 → 用本地 ZiweiCalc 重排中盘(Java 不支持大限跨度/天马/星集/三盘等);
-		// 全默认 → 保留 Java 盘(逐宫零回归)。本地失败一律 try/catch 兜底回退 Java,默认/异常都不破坏现有盘。
+		// 非默认传本选项需要按当前设置本地重排。失败时清除更新状态并提示，避免显示未应用设置的旧盘。
 		if(result && result.chart && ziweiNeedsLocalEngine()){
 			try {
 				const birth = { date: params.date, time: params.time, zone: params.zone, lon: params.lon, lat: params.lat, gpsLon: params.gpsLon, gpsLat: params.gpsLat, ad: 1, gender: params.gender };
@@ -1063,19 +1074,27 @@ class ZiWeiMain extends Component{
 					if(ZWEngineOptions.sanPan && ZWEngineOptions.sanPan !== 'tian'){ localChart = deriveSanPan(localChart, ZWEngineOptions.sanPan); }
 					let localPatterns = null;
 					if(localChart && Array.isArray(localChart.houses) && localChart.houses.length === 12){
-						// WP-G:格局随本地盘重算(切开关后主星可移位/四化变,Java 默认盘 patterns 会失配)。失败回退 Java。
-						try{ const lp = detectPatterns({ ...result.chart, ...localChart }); if(Array.isArray(lp)){ localPatterns = lp; } }catch(e2){ /* 保留 Java patterns */ }
+						// 格局与重排后的本地盘同源，失败时不保留另一份盘的格局。
+						const lp = detectPatterns({ ...result.chart, ...localChart });
+						if(Array.isArray(lp)){ localPatterns = lp; }
 					}
 					memoVal = this._localEngineMemo.set(memoKey, { localChart, localPatterns });
 				}
-				if(memoVal.localChart && Array.isArray(memoVal.localChart.houses) && memoVal.localChart.houses.length === 12){
-					result.chart = { ...result.chart, ...memoVal.localChart };   // 保留 Java 顶层兼容字段、仅换排盘核心
-					if(Array.isArray(memoVal.localPatterns)){ result.patterns = memoVal.localPatterns; }
+				if(!memoVal.localChart || !Array.isArray(memoVal.localChart.houses) || memoVal.localChart.houses.length !== 12){
+					throw new Error('紫微本地引擎没有生成完整的十二宫命盘');
 				}
-			} catch(e){ /* 本地异常 → 保留 Java 盘(零回归兜底) */ }
+				result.chart = { ...result.chart, ...memoVal.localChart };
+				result.patterns = Array.isArray(memoVal.localPatterns) ? memoVal.localPatterns : [];
+			} catch(e){
+				if(!this.unmounted && requestSeq === this._ziweiRequestSeq){
+					this.setState({ updating: false });
+					message.error((e && e.message) || '紫微传本选项计算失败，未显示旧盘');
+				}
+				return;
+			}
 		}
-		// [P2a] 命主取法后处理:仅 Java 盘路径(本地盘已按 ctx.lifeMasterBy 以天盘命宫算好)
-		if(result && result.chart && !ziweiNeedsLocalEngine()){ applyLifeMasterOption(result.chart, ZWEngineOptions.lifeMasterBy); }
+		// 命主取法是本地派生选项，默认 year_branch 不改变盘；ming_branch 也需作用于本地初始盘。
+		if(result && result.chart){ applyLifeMasterOption(result.chart, ZWEngineOptions.lifeMasterBy); }
 
 		// 运限选择：仅当盘「身份」(生辰+性别+生年干+命宫)变 → 重置(新盘=本命四化+自化的经典盘)；
 		// 盘式(三合/四化)、流派等纯视图重排(同盘) → 保留 luckSel(其 mingIndex/gan 仍对当前盘有效)，避免误清用户所选运限。

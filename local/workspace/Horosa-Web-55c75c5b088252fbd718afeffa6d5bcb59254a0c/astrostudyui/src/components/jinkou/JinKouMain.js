@@ -3,7 +3,6 @@ import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
 import { sideSectionIcon } from '../../constants/sideSectionIcons'; // [观象P1]
 import { message, Modal } from 'antd';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import { fetchLiurengGods } from '../../utils/liurengGodsLocal';
 import * as LRConst from '../liureng/LRConst';
 import { ZSList, ZhangSheng, } from '../liureng/LRZhangSheng';
@@ -13,7 +12,7 @@ import DateTime from '../comp/DateTime';
 import QuickDockBar from '../common/QuickDockBar';
 import JinKouChart from './JinKouChart';
 import JinKouRelationMini from './JinKouRelationMini';
-import { buildJinKouData, fetchJinKouPan, normalizeKinjinkouData, resolveDiFenBySource, JINKOU_HEZHAN_FOCUS, JINKOU_HEZHAN_TIME } from './JinKouCalc';
+import { buildJinKouData, normalizeKinjinkouData, resolveDiFenBySource, JINKOU_HEZHAN_FOCUS, JINKOU_HEZHAN_TIME } from './JinKouCalc';
 import {
 	JINKOU_BASHE_DOC,
 	JINKOU_SIXIANG_SHU_COLS,
@@ -1028,9 +1027,7 @@ class JinKouMain extends Component{
 		}
 	}
 
-	// [R3-A4] 顺向 +1 步预取:genGodsParams→/liureng/gods(requestDedupe 缓存)→
-	// resolveJinKouDiFen(同款选项解析)→fetchJinKouPan(kentangCache)——与 requestGods
-	// 消费链逐环同源 → 键逐字节等。失败静默;开关关=零行为。
+	// [R3-A4] 顺向 +1 步预取：用本地六壬神将与金口诀引擎预热，不发起网络请求。
 	prefetchNextStepJinkou(baseFields, stepHint){
 		try{
 			if(!stepPrefetchEnabled() || !kentangCacheEnabled()){ return; }
@@ -1046,8 +1043,7 @@ class JinKouMain extends Component{
 		}catch(e){ /* 预取失败无害 */ }
 	}
 
-	// 取数内核:以 baseFields 时间为基走 1 步×dir,同源链(genGodsParams→/liureng/gods→
-	// fetchJinKouPan)预取该时刻课盘。settle 链(+1 同向)与选步长(±1 双向)共用。
+	// 取数内核：以 baseFields 时间为基走 1 步×dir，调用本地六壬神将与金口诀计算。
 	_prefetchJinkouAtStep(baseFields, unit, dir){
 		try{
 			const dt0 = baseFields && baseFields.date && baseFields.date.value;
@@ -1080,8 +1076,9 @@ class JinKouMain extends Component{
 					timeZi,
 					!!this.state.liureng
 				);
-				return fetchJinKouPan(flds2, result.liureng.nongli, {
-					diFen: diFen,
+				// Warm the frontend-only calculation path; do not request the retired remote pan.
+				return buildJinKouData(result.liureng, {
+					diFen,
 					yueJiang: this.state.yueJiang,
 					zhanShi: this.state.zhanShi,
 					timeBasis: this.state.timeBasis,
@@ -1526,7 +1523,17 @@ class JinKouMain extends Component{
 			if(godsKey){
 				this.godsInflight.set(godsKey, req);
 			}
-			result = await req;
+			try{
+				result = await req;
+			}catch(e){
+				if(!this.unmounted){
+					Modal.error({
+						title: '当前出生日期暂不支持本地六壬计算',
+						content: e && e.message ? e.message : '本地历法无法可靠计算该日期；未调用远程服务。',
+					});
+				}
+				return;
+			}
 			if(godsKey && result){
 				pushCache(this.godsCache, godsKey, clonePlain(result), 72);
 			}
@@ -1547,19 +1554,10 @@ class JinKouMain extends Component{
 		);
 		const calcIsDiurnal = resolveChartIsDiurnal(chartObj === undefined ? this.props.value : chartObj);
 		const appliedBirth = buildBirthFields(this.state.birth, new DateTime());
-		let jinkouPan = null;
-		let jinkouError = '';
-		try{
-			jinkouPan = await fetchJinKouPan(fields, result.liureng.nongli, {
-				diFen: diFen,
-				yueJiang: this.state.yueJiang,
-				zhanShi: this.state.zhanShi,
-				timeBasis: this.state.timeBasis,
-			});
-		}catch(e){
-			jinkouError = e && e.message ? e.message : '金口诀本地排盘服务尚未就绪';
-			console.warn('kinjinkou backend failed, falling back to local JinKouCalc', e);
-		}
+		// 主盘与断法由 assembleJinKouData/buildJinKouData 完成本地计算。
+		// 不再依赖旧服务端补充的三盘环 payload。
+		const jinkouPan = null;
+		const jinkouError = '';
 		const st = {
 			liureng: result.liureng,
 			calcBirth: appliedBirth,
@@ -1629,40 +1627,12 @@ class JinKouMain extends Component{
 
 		let result = fallbackRunYear ? { ...fallbackRunYear } : {};
 		const runyearKey = buildCacheKey(params);
+		// Browser-only行年:可复用已存本地计算结果，但不再请求 /liureng/runyear。
+		const localRunyearHit = runyearKey ? getLiurengRunyearLocalCache(runyearKey) : null;
+		if(localRunyearHit){
+			result = { ...clonePlain(localRunyearHit), ...result };
+		}
 		try{
-			let serverRes = {};
-			const localRunyearHit = runyearKey ? getLiurengRunyearLocalCache(runyearKey) : null;
-			if(runyearKey && this.runYearServerCache.has(runyearKey)){
-				serverRes = clonePlain(this.runYearServerCache.get(runyearKey)) || {};
-			}else if(runyearKey && this.runYearServerInflight.has(runyearKey)){
-				serverRes = clonePlain(await this.runYearServerInflight.get(runyearKey)) || {};
-			}else if(localRunyearHit){
-				serverRes = clonePlain(localRunyearHit) || {};
-				pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-			}else{
-				const req = request(`${Constants.ServerRoot}/liureng/runyear`, {
-					body: JSON.stringify(params),
-					silent: true,
-				}).then((data)=>{
-					return data && data[Constants.ResultKey] ? { ...data[Constants.ResultKey] } : {};
-				}).finally(()=>{
-					if(runyearKey){
-						this.runYearServerInflight.delete(runyearKey);
-					}
-				});
-				if(runyearKey){
-					this.runYearServerInflight.set(runyearKey, req);
-				}
-				serverRes = await req;
-				if(runyearKey){
-					pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-					setLiurengRunyearLocalCache(runyearKey, clonePlain(serverRes));
-				}
-			}
-			result = {
-				...serverRes,
-				...result,
-			};
 			const guaGanZi = extractGanZi(params.guaYearGanZi) || resolveGuaYearGanZi(this.state.liureng);
 			const birthGanZi = await this.requestBirthYearGanZi();
 			// 生年干支留档：金口诀行年（旬法）要以生年所在旬起一岁，与干支流年并存两法。
@@ -1677,22 +1647,13 @@ class JinKouMain extends Component{
 			if(!localRunYear && fallbackRunYear){
 				localRunYear = fallbackRunYear;
 			}
-			if(!localRunYear && serverRes.age !== undefined && serverRes.age !== null){
-				const age = Number(serverRes.age);
-				if(Number.isFinite(age)){
-					const ageCycle = ((age % 60) + 60) % 60;
-					const yearList = `${genderVal}` === '0' ? FemaleRunYearList : MaleRunYearList;
-					localRunYear = {
-						age: age,
-						ageCycle: ageCycle,
-						year: yearList[ageCycle] || serverRes.year || '',
-					};
-				}
-			}
 			if(localRunYear){
 				result.year = localRunYear.year;
 				result.age = localRunYear.age;
 				result.ageCycle = localRunYear.ageCycle;
+				if(runyearKey){
+					setLiurengRunyearLocalCache(runyearKey, clonePlain(result));
+				}
 			}
 		}catch(e){
 			if(fallbackRunYear){
@@ -2156,8 +2117,7 @@ class JinKouMain extends Component{
 		}
 		const params = chartFields ? this.genGodsParams(chartFields) : null;
 		const backend = jinkouData.backend || {};
-		// jinkouError 此前只写不读：后端排盘服务挂了就静默退回本地引擎，用户看不出盘换了源。
-		// 这里如实说明——本地引擎算得出四位，但三盘环等后端专有面会缺，不该让人蒙在鼓里。
+		// 主盘由本地引擎计算。已退役的旧服务端专有三盘环不作为运行依赖。
 		const top = jinkouData.topInfo || {};
 		// [BUG-2] 四柱/月将/占时此前只认后端 pan 的字段；流派偏离默认时走本地引擎、没有 backend，
 		// 概览就整排显示「无 无 无 无」。本地路径回落 liureng 四柱与引擎自算的月将/占时（同源自洽）。
@@ -2179,7 +2139,7 @@ class JinKouMain extends Component{
 			['用爻', jinkouData.yongYao ? `${jinkouData.yongYao.label || '—'}${jinkouData.yongYao.sign ? `(${jinkouData.yongYao.sign})` : ''}` : '—'],
 			// 跨日界两源不齐时明示所取日柱（否则用户看四柱是一天、看断法是另一天，无从察觉）。
 			...(jinkouData.daySourceNote ? [['日柱口径', jinkouData.daySourceNote]] : []),
-			...(this.state.jinkouError ? [['排盘来源', `后端排盘未就绪（${this.state.jinkouError}），已用本地引擎起课；四位与断法照常，三盘环等后端专有内容可能缺失。`]] : []),
+			
 			// 昼夜是贵神起例的分水岭,而两法(真实地平/时支粗判)在日出日落前后常打架 → 明写所依口径。
 			['昼夜', `${jinkouData.isDay ? '昼占' : '夜占'}（${fmtValue(jinkouData.dayBasisText)}）`],
 			['十二长生', `${this.state.wuxing}${this.state.wuxing === '土' ? `（${this.state.soilChangSheng === 'yin' ? '火土同宫·寅' : '水土同宫·申'}）` : ''}`],

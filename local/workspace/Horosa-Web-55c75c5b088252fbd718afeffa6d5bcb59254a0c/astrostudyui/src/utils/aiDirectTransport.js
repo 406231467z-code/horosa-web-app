@@ -22,12 +22,10 @@ const HOROSA_OPTION_KEYS = new Set([
 
 const CACHE_MARK = '[[__CACHE_BP__]]';
 
-export function resolveAiTransport(values){
-	const fromTop = values && values.aiTransport;
-	const fromOpts = values && values.providerOptions && values.providerOptions.aiTransport;
-	return fromTop === AI_TRANSPORT_DIRECT || fromOpts === AI_TRANSPORT_DIRECT
-		? AI_TRANSPORT_DIRECT
-		: AI_TRANSPORT_PROXY;
+// Pure-web builds must never depend on Horosa's Java AI proxy. Existing saved
+// profiles with a missing or legacy "proxy" setting are normalized to direct mode.
+export function resolveAiTransport(){
+	return AI_TRANSPORT_DIRECT;
 }
 
 export function stripAiTransport(values){
@@ -81,6 +79,8 @@ function authHeaders(providerType, apiKey, providerOptions){
 	if(providerType === 'anthropic'){
 		headers['x-api-key'] = key;
 		headers['anthropic-version'] = `${opts.apiVersion || '2023-06-01'}`.trim() || '2023-06-01';
+		// Anthropic explicitly requires this opt-in header for browser SDK/direct web calls.
+		headers['anthropic-dangerous-direct-browser-access'] = 'true';
 	}else if(key && providerType !== 'ollama' && providerType !== 'gemini'){
 		const name = `${opts.authHeaderName || 'Authorization'}`.trim() || 'Authorization';
 		const prefix = opts.authPrefix === undefined || opts.authPrefix === null
@@ -258,6 +258,38 @@ export function buildDirectChatRequest(values, stream){
 	};
 }
 
+/**
+ * Construct a provider's own model-list request. The browser calls the configured
+ * provider directly; no Horosa API proxy is involved.
+ */
+export function buildDirectModelListRequest(values){
+	const providerType = `${(values && values.providerType) || 'openai'}`.trim() || 'openai';
+	const preset = getProviderPreset(providerType);
+	const baseUrl = `${(values && values.baseUrl) || preset.baseUrl || ''}`.trim();
+	const apiKey = `${(values && values.apiKey) || ''}`.trim();
+	const providerOptions = (values && values.providerOptions) || {};
+	if(!baseUrl){
+		throw new Error('请先填写供应商 Base URL');
+	}
+	if(!apiKey && providerType !== 'ollama'){
+		throw new Error('获取模型列表需要 API Key');
+	}
+	let url;
+	if(providerType === 'gemini'){
+		url = joinUrl(baseUrl, `/models?key=${encodeURIComponent(apiKey)}`);
+	}else if(providerType === 'anthropic'){
+		url = joinUrl(baseUrl, '/v1/models');
+	}else{
+		url = joinUrl(baseUrl, '/models');
+	}
+	return {
+		url,
+		headers: authHeaders(providerType, apiKey, providerOptions),
+		providerType,
+		apiKey,
+	};
+}
+
 export function buildDirectEmbeddingRequest(values){
 	const providerType = `${(values && values.providerType) || 'openai'}`.trim() || 'openai';
 	const family = getProviderProtocolFamily(providerType);
@@ -295,26 +327,18 @@ export function buildDirectEmbeddingRequest(values){
 	};
 }
 
+// One-way pure-web transport contract: there is deliberately no Horosa-server branch.
+	// Legacy profiles may still store aiTransport="proxy"; resolveAiTransport() normalizes them
+	// to direct mode, so every chat/model/embedding request goes to the user's configured provider.
 export function buildAiTransportPlan(values, options = {}){
-	const mode = resolveAiTransport(values);
-	if(mode === AI_TRANSPORT_DIRECT){
-		const vendor = options.embedding
-			? null
-			: buildDirectChatRequest(values, !!options.stream);
-		return {
-			mode,
-			sealForJava: false,
-			proxyValues: null,
-			vendor,
-			embedding: options.embedding ? buildDirectEmbeddingRequest(values) : null,
-		};
-	}
+	const mode = AI_TRANSPORT_DIRECT;
+	const embedding = !!options.embedding;
 	return {
-		mode: AI_TRANSPORT_PROXY,
-		sealForJava: true,
-		proxyValues: stripAiTransport(values),
-		vendor: null,
-		embedding: null,
+		mode,
+		sealForJava: false,
+		proxyValues: null,
+		vendor: embedding ? null : buildDirectChatRequest(values, !!options.stream),
+		embedding: embedding ? buildDirectEmbeddingRequest(values) : null,
 	};
 }
 

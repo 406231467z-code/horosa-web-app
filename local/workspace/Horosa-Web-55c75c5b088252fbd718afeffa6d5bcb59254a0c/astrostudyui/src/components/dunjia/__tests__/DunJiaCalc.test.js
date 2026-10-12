@@ -1,4 +1,4 @@
-import { PAIPAN_OPTIONS, QIJU_METHOD_OPTIONS, SCHOOL_OPTIONS, calcDunJia, isKinqimenMode, birthToYearGan, buildDunJiaSnapshotText, buildQimenWangShuai, computeShuziYongShenGong, normalizeKinqimenData, panFeipan } from '../DunJiaCalc';
+import { PAIPAN_OPTIONS, QIJU_METHOD_OPTIONS, SCHOOL_OPTIONS, calcDunJia, isKinqimenMode, birthToYearGan, buildDunJiaSnapshotText, buildQimenWangShuai, computeShuziYongShenGong, panFeipan } from '../DunJiaCalc';
 import { buildLocalBaziResult } from '../../../utils/baziLunarLocal';
 import { buildLocalJieqiYearSeed } from '../../../utils/localNongliAdapter';
 
@@ -611,75 +611,28 @@ describe('DunJiaCalc · WP-A 飞盘排盘 + 九神', ()=>{
 		expect(legacy.juText).toContain('阳遁一局');
 	});
 
-	// 后端飞盘 routing:模拟后端 kinqimen pan_feipan 响应(EX1_fei,繁体卦键)经 normalizeKinqimenData
-	// 合并,须与本地 panFeipan 飞盘逐宫一致(九神含中宫、不替虎玄/禽芮)→ 飞盘走后端显示不瞎动。
-	test('后端飞盘 response → normalizeKinqimenData 与本地飞盘一致(不瞎动)', ()=>{
-		const backendFeiSelected = {
-			排盤方式: '拆補', 盤式: '飛盤', 干支: '丙午年癸巳月己丑日甲子時', 旬首: '庚',
-			旬空: { 日空: '午未', 時空: '戌亥' }, 排局: '陽遁七局下', 節氣: '立夏',
-			值符值使: { 值符天干: ['甲子', '戊'], 值符星宮: ['柱', '兌'], 值使門宮: ['驚', '兌'] },
-			天盤: { 坎: '辛', 坤: '壬', 震: '癸', 巽: '丁', 中: '丙', 乾: '乙', 兌: '戊', 艮: '己', 離: '庚' },
-			地盤: { 兌: '戊', 艮: '己', 離: '庚', 坎: '辛', 坤: '壬', 震: '癸', 巽: '丁', 中: '丙', 乾: '乙' },
-			門: { 坎: '休', 坤: '死', 震: '傷', 巽: '杜', 中: '中', 乾: '開', 兌: '驚', 艮: '生', 離: '景' }, // 九门含中门(统一9门飞,中5得中门)
-			星: { 坎: '蓬', 坤: '芮', 震: '沖', 巽: '輔', 中: '禽', 乾: '心', 兌: '柱', 艮: '任', 離: '英' },
-			神: { 坎: '合', 坤: '勾', 震: '常', 巽: '雀', 中: '地', 乾: '天', 兌: '符', 艮: '蛇', 離: '陰' },
-			馬星: { 天馬: '辰', 丁馬: '亥', 驛馬: '寅' },
-		};
-		const fields = makeFields('2026-05-15', '00:12:00');
-		const opts = makeOptions({ qijuMethod: 'chaibu', timeAlg: 1, school: '飞盘', paiPanType: 3 });
-		const localFei = calcDunJia(fields, feiNongli, opts, {});
-		const backendPan = { selected: backendFeiSelected, raw: backendFeiSelected, allRaw: {}, sections: [], mode: 'hour', modeLabel: '时家奇门', capabilities: null };
-		const merged = normalizeKinqimenData(backendPan, localFei, opts, feiNongli);
-		// 四盘逐宫与本地飞盘一致(不瞎动)
-		expect(merged.shenPan).toEqual(localFei.shenPan);
-		expect(merged.renPan).toEqual(localFei.renPan);
-		expect(merged.tianGan).toEqual(localFei.tianGan);
-		expect(pickMap(merged.diPan)).toEqual(pickMap(localFei.diPan));
-		// 九神含中宫地、有勾常雀、无虎玄
-		expect(merged.shenPan[5]).toEqual('地');
-		const gods = Object.keys(merged.shenPan).map((k)=>merged.shenPan[k]).join('');
-		expect(/[勾常雀]/.test(gods)).toBe(true);
-		expect(/[虎玄]/.test(gods)).toBe(false);
-		// cells 中宫保真 + 值符值使
-		const byNum = {};
-		merged.cells.forEach((c)=>{ byNum[c.palaceNum] = c; });
-		expect(byNum[5].god).toEqual('地');
-		expect(byNum[5].isFeipan).toBe(true);
-		expect(merged.zhiFu).toEqual(localFei.zhiFu);
-		expect(merged.zhiShi).toEqual(localFei.zhiShi);
-	});
+	test('飞盘与转盘都由浏览器本地引擎生成完整九宫', ()=>{
+		const feiFields = makeFields('2026-05-15', '00:12:00');
+		const feiOpts = makeOptions({ qijuMethod: 'chaibu', timeAlg: 1, school: '飞盘', paiPanType: 3 });
+		const fei = calcDunJia(feiFields, feiNongli, feiOpts, {});
+		expect(fei).toBeTruthy();
+		expect(fei.school).toEqual('飞盘');
+		expect(fei.cells).toHaveLength(9);
+		expect(Object.keys(fei.diPan)).toHaveLength(9);
+		expect(Object.keys(fei.tianPan)).toHaveLength(9);
+		expect(Object.keys(fei.shenPan)).toHaveLength(9);
+		expect(fei.shenPan[5]).toEqual('地');
+		expect(fei.cells.every((cell)=>cell && cell.palaceNum >= 1 && cell.palaceNum <= 9)).toBe(true);
 
-	// 后端转盘(时/刻/综合走 Ken):8 星天禽寄芮,后端给「禽/芮/禽芮」→ 显示层一律归「内」(天内)。
-	// 用户报障:时家(置闰·转盘)乾宫仍显「禽」+右栏旺相/值符未改 → 锁 normalizeKinqimenData 转盘归一。
-	test('后端转盘 response → 天禽/芮一律显「内」(board+旺相+值符),全盘无禽芮残留(用户:禽改内)', ()=>{
-		const backendZhuanSelected = {
-			排盤方式: '置閏', 盤式: '轉盤', 干支: '丙午年甲午月乙丑日壬午時', 旬首: '戊',
-			旬空: { 日空: '戌亥', 時空: '' }, 排局: '陰遁九局上元', 節氣: '夏至',
-			值符值使: { 值符天干: ['甲辰', '壬'], 值符星宮: ['芮', '坤'], 值使門宮: ['死', '兌'] }, // 中宫值符星=芮
-			天盤: { 巽: '癸', 離: '丁', 坤: '丙', 震: '乙', 中: '壬', 兌: '戊', 艮: '辛', 坎: '庚', 乾: '己' },
-			地盤: { 巽: '癸', 離: '丁', 坤: '丙', 震: '乙', 中: '壬', 兌: '戊', 艮: '辛', 坎: '庚', 乾: '己' },
-			門: { 巽: '杜', 離: '景', 坤: '死', 震: '傷', 中: '', 兌: '驚', 艮: '生', 坎: '休', 乾: '開' },
-			星: { 巽: '任', 離: '沖', 坤: '輔', 震: '蓬', 中: '', 兌: '英', 艮: '心', 坎: '柱', 乾: '禽' }, // 乾=禽(5星寄芮), 中空
-			神: { 巽: '符', 離: '蛇', 坤: '陰', 震: '合', 中: '', 兌: '虎', 艮: '地', 坎: '玄', 乾: '天' },
-			馬星: { 驛馬: '寅' },
-		};
-		const fields = makeFields('2026-06-20', '12:52:00');
-		const opts = makeOptions({ school: '转盘', paiPanType: 3, qijuMethod: 'zhirun' });
-		const localZhuan = calcDunJia(fields, makeNongli(), opts, {});
-		const backendPan = { selected: backendZhuanSelected, raw: backendZhuanSelected, allRaw: {}, sections: [], mode: 'minute', modeLabel: '刻家奇门', capabilities: null };
-		const merged = normalizeKinqimenData(backendPan, localZhuan, opts, makeNongli());
-		const byNum = {};
-		merged.cells.forEach((c)=>{ byNum[c.palaceNum] = c; });
-		// 乾9宫(后端星=禽)→显「内」,不留「禽」(用户截图 bug)
-		expect(byNum[9].tianXing).toEqual('内');
-		// 全盘任何宫不残留 禽/芮(转盘8星天禽寄芮一律内)
-		expect(/[禽芮]/.test(merged.cells.map((c)=>c.tianXing).join(''))).toBe(false);
-		// 中宫值符星=芮 → 值符显「天内」(非 芮禽)
-		expect(merged.zhiFu).toEqual('天内');
-		// 右栏旺相(读 c.tianXing)同步:乾宫星=内
-		const wsByNum = {};
-		buildQimenWangShuai(merged).palaces.forEach((p)=>{ wsByNum[p.palaceNum] = p; });
-		expect(wsByNum[9].star).toEqual('内');
+		const zhuanFields = makeFields('2026-06-20', '12:52:00');
+		const zhuanOpts = makeOptions({ school: '转盘', paiPanType: 3, qijuMethod: 'zhirun' });
+		const zhuan = calcDunJia(zhuanFields, makeNongli(), zhuanOpts, {});
+		expect(zhuan).toBeTruthy();
+		expect(zhuan.school).toEqual('转盘');
+		expect(zhuan.cells).toHaveLength(9);
+		expect(zhuan.zhiFu).toBeTruthy();
+		expect(zhuan.zhiShi).toBeTruthy();
+		expect(zhuan.cells.every((cell)=>cell && cell.palaceNum >= 1 && cell.palaceNum <= 9)).toBe(true);
 	});
 });
 

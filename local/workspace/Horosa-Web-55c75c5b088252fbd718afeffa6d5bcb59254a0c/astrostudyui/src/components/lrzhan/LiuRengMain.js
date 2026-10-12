@@ -8,7 +8,6 @@ import { Modal, message, Tag } from 'antd';
 import { XQButton as Button, XQCard as Card, XQSelect as Select, XQTabs as Tabs, XQSwitch as Switch, XQSideSection  } from '../xq-ui';
 import XQIcon from '../xq-icons';
 import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import { fetchLiurengGods } from '../../utils/liurengGodsLocal';
 import * as AstroConst from '../../constants/AstroConst';
 import {randomStr, randomNum, littleEndian,} from '../../utils/helper';
@@ -5414,43 +5413,15 @@ class LiuRengMain extends Component{
 			// 自带 try/catch 恒返 ''(绝不 reject);runyear 侧 reject 仍落本 catch 走 fallbackRunYear。
 			// 注意:外层 gods→requestRunYear 的先后是真数据依赖(本函数参数 guaYearGanZi 取自 gods
 			// 结果落的 state.liureng),不得并行,维持原序。
-			const serverResPromise = (async ()=>{
-				let serverRes = {};
-				const localRunyearHit = runyearKey ? getLiurengRunyearLocalCache(runyearKey) : null;
-				if(runyearKey && this.runYearServerCache.has(runyearKey)){
-					serverRes = clonePlain(this.runYearServerCache.get(runyearKey)) || {};
-				}else if(runyearKey && this.runYearServerInflight.has(runyearKey)){
-					serverRes = clonePlain(await this.runYearServerInflight.get(runyearKey)) || {};
-				}else if(localRunyearHit){
-					serverRes = clonePlain(localRunyearHit) || {};
-					pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-				}else{
-					const req = request(`${Constants.ServerRoot}/liureng/runyear`, {
-						body: JSON.stringify(params),
-						silent: true,
-					}).then((data)=>{
-						return data && data[Constants.ResultKey] ? { ...data[Constants.ResultKey] } : {};
-					}).finally(()=>{
-						if(runyearKey){
-							this.runYearServerInflight.delete(runyearKey);
-						}
-					});
-					if(runyearKey){
-						this.runYearServerInflight.set(runyearKey, req);
-					}
-					serverRes = await req;
-					if(runyearKey){
-						pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
-						setLiurengRunyearLocalCache(runyearKey, clonePlain(serverRes));
-					}
-				}
-				return serverRes;
-			})();
-			const [serverRes, birthGanZi] = await Promise.all([serverResPromise, this.requestBirthYearGanZi()]);
-			result = {
-				...serverRes,
-				...result,
-			};
+			// Browser-only run-year calculation: reuse only the local cache and derive current age/year below.
+			const localRunyearHit = runyearKey ? getLiurengRunyearLocalCache(runyearKey) : null;
+			if(localRunyearHit){
+				result = {
+					...clonePlain(localRunyearHit),
+					...result,
+				};
+			}
+			const birthGanZi = await this.requestBirthYearGanZi();
 			const guaGanZi = extractGanZi(params.guaYearGanZi) || resolveGuaYearGanZi(this.state.liureng);
 			let localRunYear = calcRunYearLocal(
 				birthGanZi,
@@ -5462,22 +5433,13 @@ class LiuRengMain extends Component{
 			if(!localRunYear && fallbackRunYear){
 				localRunYear = fallbackRunYear;
 			}
-			if(!localRunYear && serverRes.age !== undefined && serverRes.age !== null){
-				const age = Number(serverRes.age);
-				if(Number.isFinite(age)){
-					const ageCycle = ((age % 60) + 60) % 60;
-					const yearList = `${genderVal}` === '0' ? FemaleRunYearList : MaleRunYearList;
-					localRunYear = {
-						age: age,
-						ageCycle: ageCycle,
-						year: yearList[ageCycle] || serverRes.year || '',
-					};
-				}
-			}
 			if(localRunYear){
 				result.year = localRunYear.year;
 				result.age = localRunYear.age;
 				result.ageCycle = localRunYear.ageCycle;
+				if(runyearKey){
+					setLiurengRunyearLocalCache(runyearKey, clonePlain(result));
+				}
 			}
 		}catch(e){
 			if(fallbackRunYear){

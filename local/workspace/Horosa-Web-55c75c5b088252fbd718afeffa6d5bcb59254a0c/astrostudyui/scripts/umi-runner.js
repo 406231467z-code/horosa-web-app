@@ -85,6 +85,8 @@ function run() {
 
 	const env = {
 		...process.env,
+		// Preserve the requested Umi mode even when the parent shell exports NODE_ENV=production.
+		HOROSA_UMI_MODE: mode === 'dev' ? 'development' : 'production',
 		NODE_OPTIONS: '--openssl-legacy-provider',
 	};
 	if (forFile) {

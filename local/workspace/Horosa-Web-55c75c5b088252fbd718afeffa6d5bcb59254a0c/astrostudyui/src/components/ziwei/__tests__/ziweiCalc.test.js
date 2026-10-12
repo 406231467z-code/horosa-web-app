@@ -394,14 +394,14 @@ describe('[P2a] lifeMasterBy 命主取法', ()=>{
 		expect(applyLifeMasterOption(mk(), undefined).lifeMaster).toBe(LIFE_MASTER['子']);
 		expect(applyLifeMasterOption(null, 'ming_branch')).toBe(null);
 	});
-	test('🔴 [哨兵] 两处本地 opts 读选项且保留 fallback 字面量;Java 路径后处理带 needsLocalEngine 闸', ()=>{
+	test('🔴 [哨兵] 两处本地 opts 读选项且保留 fallback 字面量;初始本地盘也应用命主取法', ()=>{
 		const fs = require('fs'); const path = require('path');
 		const src = fs.readFileSync(path.resolve(__dirname, '..', 'ZiWeiMain.js'), 'utf8');
 		const hits = src.match(/lifeMasterBy: ZWEngineOptions\.lifeMasterBy \|\| 'year_branch'/g) || [];
 		expect(hits.length).toBe(2);                             // 禁区⑤有意识退役:显式选项+fallback
 		const apply = src.match(/applyLifeMasterOption\(/g) || [];
-		expect(apply.length).toBeGreaterThanOrEqual(2);          // 两条 Java 盘路径都接了后处理
-		expect(src).toMatch(/!ziweiNeedsLocalEngine\(\)\)\{ applyLifeMasterOption\(/);   // 只在 Java 盘路径跑(防观察盘错基)
+		expect(apply.length).toBeGreaterThanOrEqual(2);          // 快照和实时本地盘都接了后处理
+		expect(src).toMatch(/applyLifeMasterOption\(result\.chart, ZWEngineOptions\.lifeMasterBy\)/);
 		const { ZWEngineOptions: opts } = require('../ziweiOptions');
 		expect(opts.lifeMasterBy).toBe('year_branch');           // 默认值哨兵
 	});

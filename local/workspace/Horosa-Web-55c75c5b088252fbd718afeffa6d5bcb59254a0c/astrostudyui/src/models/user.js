@@ -1,25 +1,11 @@
 import { history } from 'umi';
 import { Modal, message } from 'antd';
-import * as service from '../services/user';
 import DateTime from '../components/comp/DateTime';
 import { DefLat, DefLon, DefGpsLat, DefGpsLon, } from '../utils/constants';
 import { getPagedLocalCharts, upsertLocalChart, removeLocalChart, listLocalCharts } from '../utils/localcharts';
 import { captureNonDefaultTechniqueFields } from '../utils/recordFieldsRestore';
 import { getPagedLocalCases, upsertLocalCase, removeLocalCase, getCaseTypeMeta } from '../utils/localcases';
 
-
-// 书架 catalog 字段为服务端存的 JSON 串;单本损坏不能拖垮整个书架列表(map 内裸 parse
-// 抛错会让 effect 在 save 前中断)。坏数据回退空目录,消费端 BookReader 同此口径。
-function parseBookCatalogs(books){
-	(books || []).forEach((book)=>{
-		try{
-			book.catalog = JSON.parse(book.catalog);
-		}catch(e){
-			book.catalog = [];
-		}
-	});
-	return books;
-}
 
 function newEmptyChartFields(){
 	let now = new DateTime();
@@ -1333,109 +1319,6 @@ export default {
 
 		},
 
-		*changePwd({ payload: values }, { call, put }){
-            let params = {
-                OldPwd: values.oldPwd,
-                NewPwd: values.newPwd,
-			};
-			
-			const { Result } = yield call(service.changepwd, params);
-
-            yield put({
-                type: 'astro/closeDrawer',
-                payload: {},
-            });
-
-		},
-
-		*changeParams({ payload: values }, { call, put }){
-			const param = {
-				...values,
-			};
-
-			const { Result } = yield call(service.changeparams, param);
-
-			yield put({
-                type: 'astro/closeDrawer',
-                payload: {},
-            });
-
-		},
-
-		*listBooks({ payload: values }, { call, put }){
-			const param = {
-				Name: values.name,
-			};
-
-			const { Result } = yield call(service.listBooks, param);
-			parseBookCatalogs(Result.Books);
-			yield put({
-                type: 'save',
-                payload: {  
-					bookshelf: Result.Books,
-                },
-            });
-		},
-
-		*deleteBook({ payload: values }, { call, put }){
-			const param = {
-				BookId: values.bookId,
-			};
-
-			const { Result } = yield call(service.deleteBook, param);
-			parseBookCatalogs(Result.Books);
-			yield put({
-                type: 'save',
-                payload: {  
-					bookshelf: Result.Books,
-                },
-            });
-		},
-
-		*removeBook({ payload: values }, { call, put }){
-			const param = {
-				BookId: values.bookId,
-			};
-
-			const { Result } = yield call(service.removeBook, param);
-			parseBookCatalogs(Result.Books);
-			yield put({
-                type: 'save',
-                payload: {  
-					bookshelf: Result.Books,
-                },
-            });
-		},
-
-		*updateBook({ payload: values }, { call, put, select }){
-			const userstate = yield select((s)=>s.user);
-			const fld = userstate.bookFields;
-            let params = {
-				BookId: fld.bookId.value,
-                Name: values.name,
-                Author: values.author,
-			};
-			
-			const { Result } = yield call(service.updateBook, params);
-			parseBookCatalogs(Result.Books);
-			yield put({
-                type: 'save',
-                payload: {  
-					bookshelf: Result.Books,
-                },
-			});
-
-		},
-
-		*readBook({ payload: values }, { call, put }){
-			yield put({
-                type: 'save',
-                payload: {  
-					currentBook: values,
-                },
-			});
-
-		},
 
 	}
 

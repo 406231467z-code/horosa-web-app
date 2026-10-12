@@ -1,7 +1,22 @@
 const buildForFile = process.env.BUILD_FOR_FILE === '1';
+// The runner sets HOROSA_UMI_MODE explicitly so inherited shell NODE_ENV cannot accidentally re-enable dev chunks.
+const requestedUmiMode = process.env.HOROSA_UMI_MODE;
+// The runner's explicit mode is authoritative in both directions; fall back to NODE_ENV only for direct Umi invocations.
+const isDevelopment = requestedUmiMode ? requestedUmiMode === 'development' : process.env.NODE_ENV === 'development';
 
 export default {
-	publicPath: buildForFile ? './' : '/static/',
+	// Bind the dev server for LAN testing; route JS/CSS chunks are disabled in dev below.
+	// These options affect only the development server; production build output is unchanged.
+	devServer: {
+		host: '0.0.0.0',
+		// Do not let mobile browsers reuse an old runtime/chunk pair after a dev restart.
+		headers: {
+			'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+			Pragma: 'no-cache',
+			Expires: '0',
+		},
+	},
+	publicPath: buildForFile ? './' : isDevelopment ? '/' : '/static/',
 	outputPath: buildForFile ? 'dist-file' : 'dist',
 	history: buildForFile ? { type: 'hash' } : undefined,
 	hash: true,
@@ -9,7 +24,10 @@ export default {
 		immer: false,
 	},
 	antd: {},
-	dynamicImport: {},
+	// Umi route chunks are useful in production, but make local phone debugging brittle
+	// when a runtime and its CSS/JS chunks are refreshed out of sync. Keep dev pages in
+	// the main bundle; production still uses the existing async route splitting.
+	dynamicImport: isDevelopment ? false : {},
 	// 性能分包:多个技法路由 chunk 曾各自内联同一批重依赖(three/lunar/kinastro 等被双份
 	// 打进 5.7MB+4.8MB 两个 chunk,双份下载双份解析)。把 ≥2 处引用的重库/重源码提成命名
 	// async vendor chunk;moment 裁掉未用 locale(zh-cn 在 layouts 显式 import 完整路径,

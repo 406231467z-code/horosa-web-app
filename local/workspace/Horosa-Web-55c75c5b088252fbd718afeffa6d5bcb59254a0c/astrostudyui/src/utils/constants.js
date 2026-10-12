@@ -1,15 +1,41 @@
+// Recognize private LAN hosts for stale-loopback checks. A LAN browser keeps the
+// original remote API by default; local host services require explicit opt-in.
+function isLanHostname(value){
+	const host = String(value || '').toLowerCase().replace(/^\[|\]$/g, '').trim();
+	if(!host || host === 'localhost' || host.endsWith('.localhost') || host === '127.0.0.1' || host === '::1'){
+		return false;
+	}
+	if(host.endsWith('.local') || /^fe80:/i.test(host) || /^(fc|fd)[0-9a-f]{2}:/i.test(host)){
+		return true;
+	}
+	const match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+	if(!match){
+		return false;
+	}
+	const octets = match.slice(1).map(Number);
+	if(octets.some((n)=>n < 0 || n > 255)){
+		return false;
+	}
+	const [a, b] = octets;
+	return a === 10 ||
+		(a === 172 && b >= 16 && b <= 31) ||
+		(a === 192 && b === 168) ||
+		(a === 169 && b === 254);
+}
 
+function isLoopbackRoot(value){
+	return /^https?:\/\/(?:localhost|[^/]*\.localhost|127\.0\.0\.1|\[?::1\]?)(?::\d+)?(?:\/|$)/i.test(String(value || ''));
+}
 
+// Ordinary browser sessions (including localhost development and LAN phones) must
+// not choose the Java/Python loopback services. Only legacy file:// launches retain
+// their old local-service compatibility path while the frontend calculations migrate.
 const isLocalHost =
 	typeof window !== 'undefined' &&
-	(
-		window.location.protocol === 'file:' ||
-		window.location.hostname === 'localhost' ||
-		window.location.hostname === '127.0.0.1'
-	);
+	window.location.protocol === 'file:';
 
 function isValidServerRootValue(val){
-	return !!(val && /^https?:\/\/.+/i.test(`${val}`));
+	return !!(val && /^https?:\/\/.+/i.test(String(val)));
 }
 
 function safeStorageGet(storage, key){
@@ -36,19 +62,13 @@ function deriveLocalRootFromPagePort(){
 		return null;
 	}
 	try{
-		const portTxt = `${window.location.port || ''}`.trim();
-		if(!/^\d+$/.test(portTxt)){
-			return null;
+		// For production/local file hosting use the host serving the UI, not a guessed
+		// webPort + 1999 (Umi may move from 8000 to 8001 when the default port is busy).
+		let hostname = String(window.location.hostname || '').trim() || '127.0.0.1';
+		if(hostname.indexOf(':') >= 0 && hostname.charAt(0) !== '['){
+			hostname = '[' + hostname + ']';
 		}
-		const webPort = parseInt(portTxt, 10);
-		if(!(webPort > 0)){
-			return null;
-		}
-		const backendPort = webPort + 1999;
-		if(!(backendPort > 0)){
-			return null;
-		}
-		return `http://127.0.0.1:${backendPort}`;
+		return 'http://' + hostname + ':9999';
 	}catch(e){
 		return null;
 	}
@@ -94,7 +114,11 @@ function resolveLocalServerRoot(){
 	const fromStorage = safeStorageGet(window.localStorage, storageKey);
 	const storageMode = safeStorageGet(window.localStorage, storageModeKey);
 	const fromPage = deriveFromPagePort();
-	const shouldPreferStorage = isValidServerRootValue(fromStorage) &&
+	// A loopback address persisted from desktop use cannot reach the host machine
+	// from a phone. In a LAN browser session prefer the same LAN host unless storage
+	// contains a non-loopback custom root. An explicit current ?srv= override was handled above.
+	const staleLoopbackForLan = isLanHostname(window.location.hostname) && isLoopbackRoot(fromStorage);
+	const shouldPreferStorage = isValidServerRootValue(fromStorage) && !staleLoopbackForLan &&
 		(
 			storageMode === 'query' ||
 			storageMode === 'pinned' ||

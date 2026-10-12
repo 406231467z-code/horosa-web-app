@@ -4,8 +4,6 @@ import { markPanelReady } from '../../utils/perfMark';
 import { safeLocalStorageSet } from '../../utils/safeStorage';
 import { XQTabs as Tabs } from '../xq-ui';
 import CnTraditionInput from './CnTraditionInput';
-import * as Constants from '../../utils/constants';
-import request from '../../utils/request';
 import PaiBaZi, { BAZI_CHART_STYLE_KEY } from './PaiBaZi';
 import Gods from './Gods';
 import GanHeCong from './GanHeCong';
@@ -35,8 +33,6 @@ const EMPTY_BAZI = {};
 const EMPTY_PARAMS = {};
 
 const BaZiOptKey = 'baziopt';
-const BAZI_CORE_ENDPOINT = '/bazi/birth';
-const BAZI_DIRECT_ENDPOINT = '/bazi/direct';
 
 function gzText(zhu){
 	if(!zhu){
@@ -709,34 +705,11 @@ async function fetchBaziCached(params, options){
 		const inflight = await baziInflight.get(key);
 		return clonePlain(inflight);
 	}
-	try{
-		const localResult = buildLocalBaziResult(params);
-		if(key && localResult){
-			pushCache(baziMem, key, clonePlain(localResult));
-		}
-		return clonePlain(localResult);
-	}catch(e){
-		// Fall through to the legacy service when the local Lunar calculator cannot parse old edge cases.
+	const localResult = buildLocalBaziResult(params);
+	if(key && localResult){
+		pushCache(baziMem, key, clonePlain(localResult));
 	}
-	const req = request(`${Constants.ServerRoot}${BAZI_CORE_ENDPOINT}`, {
-		body: JSON.stringify(params),
-		silent: opt.silent !== false,
-	}).then((data)=>{
-		const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-		if(key && result){
-			pushCache(baziMem, key, clonePlain(result));
-		}
-		return result;
-	}).finally(()=>{
-		if(key){
-			baziInflight.delete(key);
-		}
-	});
-	if(key){
-		baziInflight.set(key, req);
-	}
-	const result = await req;
-	return clonePlain(result);
+	return clonePlain(localResult);
 }
 
 async function fetchBaziDirectCached(params, options){
@@ -750,34 +723,11 @@ async function fetchBaziDirectCached(params, options){
 		const inflight = await baziDirectInflight.get(key);
 		return clonePlain(inflight);
 	}
-	try{
-		const localResult = buildLocalBaziResult(params);
-		if(key && localResult){
-			pushCache(baziDirectMem, key, clonePlain(localResult));
-		}
-		return clonePlain(localResult);
-	}catch(e){
-		// Fall through to the legacy service when the local Lunar calculator cannot parse old edge cases.
+	const localResult = buildLocalBaziResult(params);
+	if(key && localResult){
+		pushCache(baziDirectMem, key, clonePlain(localResult));
 	}
-	const req = request(`${Constants.ServerRoot}${BAZI_DIRECT_ENDPOINT}`, {
-		body: JSON.stringify(params),
-		silent: opt.silent !== false,
-	}).then((data)=>{
-		const result = data && data[Constants.ResultKey] ? data[Constants.ResultKey] : null;
-		if(key && result){
-			pushCache(baziDirectMem, key, clonePlain(result));
-		}
-		return result;
-	}).finally(()=>{
-		if(key){
-			baziDirectInflight.delete(key);
-		}
-	});
-	if(key){
-		baziDirectInflight.set(key, req);
-	}
-	const result = await req;
-	return clonePlain(result);
+	return clonePlain(localResult);
 }
 
 class BaZi extends Component{

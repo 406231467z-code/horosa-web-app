@@ -327,7 +327,7 @@ function buildProviderFormValues(profile){
 		providerType,
 		apiKey: profile ? profile.apiKey : '',
 		baseUrl: profile ? profile.baseUrl : preset.baseUrl,
-		aiTransport: providerOptions.aiTransport === 'direct' ? 'direct' : 'proxy',
+		aiTransport: 'direct',
 		manualModels: joinModelLines(manualModels),
 		embeddingModels: joinModelLines(embeddingModels),
 		extraHeadersText: JSON.stringify(providerOptions.extraHeaders || {}, null, 2),
@@ -377,9 +377,8 @@ function buildProviderOptionsFromForm(values){
 	if(streamMaxStreamMs){
 		providerOptions.streamMaxStreamMs = streamMaxStreamMs;
 	}
-	if(values.aiTransport === 'direct'){
-		providerOptions.aiTransport = 'direct';
-	}
+	// Pure browser mode has no Java AI proxy; normalize every saved/legacy profile to direct.
+	providerOptions.aiTransport = 'direct';
 	if(providerType === 'anthropic'){
 		const maxTokens = parseNumberText(values.anthropicMaxTokens, 'Anthropic max tokens', { integer: true });
 		const thinkingBudget = parseNumberText(values.anthropicThinkingBudget, 'Anthropic thinking budget', { integer: true });
@@ -2835,7 +2834,7 @@ function AIAnalysisMain(props){
 			return false;
 		}catch(e){
 			console.error(e);
-			message.error('资料导入失败');
+			message.error(formatImportError('资料导入失败', e));
 			return false;
 		}
 	}
@@ -3088,7 +3087,7 @@ function AIAnalysisMain(props){
 			message.success(`已替换文件：${material.name}`);
 		}catch(e){
 			console.error(e);
-			message.error('替换文件失败');
+			message.error(formatImportError('替换文件失败', e));
 		}
 		return false;
 	}
@@ -4946,7 +4945,7 @@ function AIAnalysisMain(props){
 						</Select>
 						<Space wrap>
 							<Button icon={<XQIcon name="plus" />} type="primary" onClick={()=>openMaterialEditor(null)}>新建资料</Button>
-							<Upload showUploadList={false} multiple beforeUpload={(file, fileList)=>{ /* 一次性接收整批 */ if(fileList[0] === file){ ingestFiles(fileList); } return false; }} accept=".txt,.md,.markdown,.doc,.docx,.pdf">
+							<Upload showUploadList={false} multiple beforeUpload={(file, fileList)=>{ /* 一次性接收整批 */ if(fileList[0] === file){ ingestFiles(fileList); } return false; }} accept=".txt,.md,.markdown,.docx">
 								<Button icon={<XQIcon name="import" />}>选文件上传</Button>
 							</Upload>
 							<Button icon={<XQIcon name="folder" />} onClick={()=>setFolderDrawerOpen(true)}>管理文件夹</Button>
@@ -4956,7 +4955,7 @@ function AIAnalysisMain(props){
 						</Space>
 					</div>
 					<div className={styles.materialHint}>
-						<XQIcon name="folder" /> 把文件直接拖到本面即上传（也可点「选文件上传」）。支持 TXT / Markdown / DOC / DOCX / PDF。
+						<XQIcon name="folder" /> 把文件直接拖到本面即上传（也可点「选文件上传」）。支持 TXT / Markdown / DOCX。PDF 与旧版 DOC 在纯浏览器模式下暂不可解析，请先转换为 TXT、Markdown 或 DOCX。
 					</div>
 					{materialIngestQueue.length ? (
 						<div className={styles.materialIngestBar}>
@@ -5076,7 +5075,7 @@ function AIAnalysisMain(props){
 					<div className={styles.materialDropOverlayInner}>
 						<div style={{ fontSize: 40, marginBottom: 8 }}>📁</div>
 						<div style={{ fontSize: 16, fontWeight: 600 }}>放下即上传</div>
-						<div className={styles.materialDropOverlayHint}>支持 TXT / Markdown / DOC / DOCX / PDF</div>
+						<div className={styles.materialDropOverlayHint}>支持 TXT / Markdown / DOCX。PDF 与旧版 DOC 在纯浏览器模式下暂不可解析，请先转换为 TXT、Markdown 或 DOCX</div>
 					</div>
 				</div>
 			) : null}
@@ -5299,7 +5298,7 @@ function AIAnalysisMain(props){
 				ref={desktopFileInputRef}
 				type="file"
 				multiple
-				accept=".txt,.md,.markdown,.doc,.docx,.pdf"
+				accept=".txt,.md,.markdown,.docx"
 				style={{ display: 'none' }}
 				onChange={handleDesktopFileInputChange}
 			/>
@@ -5307,7 +5306,7 @@ function AIAnalysisMain(props){
 				ref={desktopFolderInputRef}
 				type="file"
 				multiple
-				accept=".txt,.md,.markdown,.doc,.docx,.pdf"
+				accept=".txt,.md,.markdown,.docx"
 				webkitdirectory=""
 				directory=""
 				style={{ display: 'none' }}
@@ -5801,12 +5800,10 @@ function AIAnalysisMain(props){
 					<Form.Item name="baseUrl" label="Base URL">
 						<Input />
 					</Form.Item>
-					<Form.Item name="aiTransport" label="连接方式">
-						<Select>
-							<Select.Option value="proxy">经本机 Java 代理</Select.Option>
-							<Select.Option value="direct">浏览器直连供应商</Select.Option>
-						</Select>
-					</Form.Item>
+					<div className={styles.cardMeta}>
+						<div>连接方式：浏览器直连 AI 服务商</div>
+						<div>分析内容、相关命盘上下文与 API Key 会由当前浏览器直接发送给所配置的服务商，不经过 Horosa 后端代理。请只配置可信服务商，并确认其数据政策和浏览器跨域访问（CORS）设置。</div>
+					</div>
 					<Form.Item shouldUpdate noStyle>
 						{({ getFieldValue })=>(
 							<div className={styles.cardMeta}>
