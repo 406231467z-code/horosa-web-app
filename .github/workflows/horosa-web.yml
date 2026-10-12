@@ -2,13 +2,6 @@ name: Horosa Web validation
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - fix/mobile-devserver-host
-    paths:
-      - '.github/workflows/horosa-web.yml'
-      - 'local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/**'
   pull_request:
     paths:
       - '.github/workflows/horosa-web.yml'
@@ -18,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: horosa-web-${{ github.ref }}
+  group: horosa-web-validation
   cancel-in-progress: true
 
 jobs:
