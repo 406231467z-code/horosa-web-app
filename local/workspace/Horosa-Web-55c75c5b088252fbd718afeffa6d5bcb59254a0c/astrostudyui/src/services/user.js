@@ -14,12 +14,6 @@ export function changeparams(values){
     });
 }
 
-export function checkUser(values) {
-	return request(`${ServerRoot}/user/check`, {
-		body: JSON.stringify(values),
-	});
-}
-
 // [R4] 服务端命盘 CRUD 八函数已删(getUserCharts/addChart/updateChart/saveMemo/deleteChart/
 // fetchAllowedCharts/importChart/exportChart):models/user.js 从未 call 过任何一个(命盘
 // 全走本地 localcharts),属登录多用户时代残留。日后如做云同步按当时协议重写,不留假接口。
