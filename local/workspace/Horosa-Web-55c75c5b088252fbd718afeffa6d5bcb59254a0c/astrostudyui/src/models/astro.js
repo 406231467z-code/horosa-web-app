@@ -909,7 +909,8 @@ export default {
 				fun: null
 			},
 			dunjia:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			taiyi:{
 				fun: null
