@@ -200,11 +200,11 @@ export function extractDocxText(xmlText){
 	return paragraphs.map((paragraph)=>{
 		return Array.from(paragraph.getElementsByTagName('*')).map((node)=>{
 			if(node.localName === 't'){ return node.textContent || ''; }
-			if(node.localName === 'tab'){ return '\\t'; }
-			if(node.localName === 'br' || node.localName === 'cr'){ return '\\n'; }
+			if(node.localName === 'tab'){ return '\t'; }
+			if(node.localName === 'br' || node.localName === 'cr'){ return '\n'; }
 			return '';
 		}).join('');
-	}).join('\\n').trim();
+	}).join('\n').trim();
 }
 
 /**
