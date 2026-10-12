@@ -41,6 +41,7 @@ jobs:
           src/utils/__tests__/browserBootstrapNoLegacyBackend.test.js
           src/utils/__tests__/preciseCalcBridge.test.js
           src/utils/__tests__/browserNativeCalculationsNoRemoteFallback.test.js
+          src/utils/__tests__/browserChartEngine.test.js
           src/utils/__tests__/aiAnalysisMaterial.test.js
           src/utils/__tests__/divinationTimeDraft.test.js
           src/utils/__tests__/phase4cZiweiLiureng.test.js
