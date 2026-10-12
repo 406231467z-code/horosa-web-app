@@ -12,6 +12,10 @@ const isLocalHost =
 // Native wrappers opt in only when their bridge is present; web builds remain local-first.
 export function isBrowserOnlyEnv(){
 	try{
+		// Unit tests exercise legacy service contracts with jsdom; they are not a deployed browser app.
+		if(typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test'){
+			return false;
+		}
 		return typeof window !== 'undefined' && !window.__TAURI__ && !window.horosaDesktop;
 	}catch(e){
 		return false;
