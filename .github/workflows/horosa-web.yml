@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/horosa-web.yml'
       - 'local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/**'
+      - 'experiments/phase5b-caelus-parity/**'
 
 permissions:
   contents: read
@@ -61,3 +62,28 @@ jobs:
           src/constants/__tests__/ProductScope.test.js
       - name: Build browser application
         run: npm run build
+
+  chart-engine-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: experiments/phase5b-caelus-parity
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install isolated candidate
+        run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
+      - name: Compare candidate with the existing historical golden
+        run: npm test
+      - name: Keep machine-readable comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase5b-caelus-historical-parity
+          path: experiments/phase5b-caelus-parity/results/historical-1990.json
+          if-no-files-found: warn
