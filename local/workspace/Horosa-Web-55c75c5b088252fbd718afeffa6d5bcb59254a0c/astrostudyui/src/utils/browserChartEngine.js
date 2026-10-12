@@ -36,6 +36,7 @@ const BODY_DEFS = [
 	['neptune', 'Neptune'], ['pluto', 'Pluto'], ['chiron', 'Chiron'],
 	['ceres', 'Ceres'], ['pallas', 'Pallas'], ['juno', 'Juno'], ['vesta', 'Vesta'],
 	['pholus', 'Pholus'], ['intp_apog', 'Intp_Apog'],
+	['mean_lilith', 'Dark Moon'], ['true_lilith', 'True Lilith'],
 ];
 const ASPECTS = [
 	{ name: 'conjunction', deg: 0 }, { name: 'semisextile', deg: 30 },
@@ -527,6 +528,134 @@ function formatDate(birth){
 	return String(birth.year).padStart(4,'0') + '-' + String(birth.month).padStart(2,'0') + '-' + String(birth.day).padStart(2,'0');
 }
 
+function findPreviousSyzygy(engine, chart, jdUt, geo, houseSystem, zodiac){
+	const moon = chart.bodies && chart.bodies.moon;
+	const sun = chart.bodies && chart.bodies.sun;
+	if(!moon || !sun){ return null; }
+	const separation = mod(moon.lon - sun.lon,360);
+	const target = separation >= 180 ? 180 : 0;
+	const relativeSpeed = Number(moon.speed) - Number(sun.speed);
+	if(!Number.isFinite(relativeSpeed) || relativeSpeed <= 0){ return null; }
+	let candidate = jdUt - Math.max(0,(separation-target)/relativeSpeed);
+	let syzygyChart = null;
+	for(let iteration=0;iteration<4;iteration++){
+		syzygyChart = engine.chartAt(candidate,geo.lat,geo.lon,{
+			houseSystem,zodiac,bodies:['mean_lilith','true_lilith'],aspects:{},
+		});
+		const syzygyMoon = syzygyChart.bodies && syzygyChart.bodies.moon;
+		const syzygySun = syzygyChart.bodies && syzygyChart.bodies.sun;
+		if(!syzygyMoon || !syzygySun){ return null; }
+		const error = mod(syzygyMoon.lon - syzygySun.lon - target + 180,360) - 180;
+		const speed = Number(syzygyMoon.speed) - Number(syzygySun.speed);
+		if(Math.abs(error) < 0.000001 || !Number.isFinite(speed) || speed <= 0){ break; }
+		const next = candidate - error / speed;
+		if(!Number.isFinite(next) || next > jdUt){ break; }
+		candidate = next;
+	}
+	if(syzygyChart && Math.abs(Number(syzygyChart.jdUt)-candidate) > 1e-9){
+		syzygyChart = engine.chartAt(candidate,geo.lat,geo.lon,{
+			houseSystem,zodiac,bodies:['mean_lilith','true_lilith'],aspects:{},
+		});
+	}
+	if(!syzygyChart || !syzygyChart.bodies || !syzygyChart.bodies.moon){ return null; }
+	return { jdUt: candidate, lon: mod(syzygyChart.bodies.moon.lon,360) };
+}
+
+function legacyLotFormula(source, formula){
+	if(!formula || formula.some((key)=>source[key] === undefined || source[key] === null || !Number.isFinite(Number(source[key])))){ return null; }
+	const [a,b,c] = formula;
+	return mod(Number(source[b]) + Number(source[c]) - Number(source[a]),360);
+}
+
+function buildLegacyLots(bodyIndex, cusps, asc, isDiurnal, fortune, spirit, syzygyLon){
+	const source = {
+		Sun: bodyIndex.sun && bodyIndex.sun.lon,
+		Moon: bodyIndex.moon && bodyIndex.moon.lon,
+		Mercury: bodyIndex.mercury && bodyIndex.mercury.lon,
+		Venus: bodyIndex.venus && bodyIndex.venus.lon,
+		Mars: bodyIndex.mars && bodyIndex.mars.lon,
+		Jupiter: bodyIndex.jupiter && bodyIndex.jupiter.lon,
+		Saturn: bodyIndex.saturn && bodyIndex.saturn.lon,
+		Asc: asc,
+		'Pars Fortuna': fortune,
+		'Pars Spirit': spirit,
+		Syzygy: syzygyLon,
+		House2: cusps[1],
+		House8: cusps[7],
+		House9: cusps[8],
+		House12: cusps[11],
+	};
+	[2,9,12].forEach((houseNumber)=>{
+		const cusp = source['House'+houseNumber];
+		const ruler = Number.isFinite(Number(cusp)) ? RULERS[signOf(cusp)] : null;
+		source['LordHouse'+houseNumber] = ruler && bodyIndex[ruler.toLowerCase()] ? bodyIndex[ruler.toLowerCase()].lon : null;
+	});
+	const formulas = [
+		{ id: AstroConst.PARS_SPIRIT, day:['Moon','Sun','Asc'], night:['Sun','Moon','Asc'] },
+		{ id: AstroConst.PARS_FAITH, day:['Moon','Mercury','Asc'], night:['Mercury','Moon','Asc'] },
+		{ id: AstroConst.PARS_SUBSTANCE, day:['LordHouse2','House2','Asc'], night:['LordHouse2','House2','Asc'] },
+		{ id: AstroConst.PARS_WEDDING_MALE, day:['Saturn','Venus','Asc'], night:['Saturn','Venus','Asc'] },
+		{ id: AstroConst.PARS_WEDDING_FEMALE, day:['Venus','Saturn','Asc'], night:['Venus','Saturn','Asc'] },
+		{ id: AstroConst.PARS_SONS, day:['Jupiter','Saturn','Asc'], night:['Saturn','Jupiter','Asc'] },
+		{ id: AstroConst.PARS_FATHER, day:['Sun','Saturn','Asc'], night:['Saturn','Sun','Asc'] },
+		{ id: AstroConst.PARS_MOTHER, day:['Venus','Moon','Asc'], night:['Moon','Venus','Asc'] },
+		{ id: AstroConst.PARS_BROTHERS, day:['Saturn','Jupiter','Asc'], night:['Saturn','Jupiter','Asc'] },
+		{ id: AstroConst.PARS_DISEASES, day:['Saturn','Mars','Asc'], night:['Mars','Saturn','Asc'] },
+		{ id: AstroConst.PARS_DEATH, day:['Moon','House8','Saturn'], night:['Moon','House8','Saturn'] },
+		{ id: AstroConst.PARS_TRAVEL, day:['LordHouse9','House9','Asc'], night:['LordHouse9','House9','Asc'] },
+		{ id: AstroConst.PARS_FRIENDS, day:['Moon','Mercury','Asc'], night:['Moon','Mercury','Asc'] },
+		{ id: AstroConst.PARS_ENEMIES, day:['LordHouse12','House12','Asc'], night:['LordHouse12','House12','Asc'] },
+		{ id: AstroConst.PARS_SATURN, day:['Saturn','Pars Fortuna','Asc'], night:['Pars Fortuna','Saturn','Asc'] },
+		{ id: AstroConst.PARS_JUPITER, day:['Pars Spirit','Jupiter','Asc'], night:['Jupiter','Pars Spirit','Asc'] },
+		{ id: AstroConst.PARS_MARS, day:['Mars','Pars Fortuna','Asc'], night:['Pars Fortuna','Mars','Asc'] },
+		{ id: AstroConst.PARS_VENUS, day:['Pars Spirit','Venus','Asc'], night:['Venus','Pars Spirit','Asc'] },
+		{ id: AstroConst.PARS_MERCURY, day:['Mercury','Pars Fortuna','Asc'], night:['Pars Fortuna','Mercury','Asc'] },
+		{ id: AstroConst.PARS_HORSEMANSHIP, day:['Saturn','Moon','Asc'], night:['Moon','Saturn','Asc'] },
+		{ id: AstroConst.PARS_LIFE, day:['Syzygy','Moon','Asc'], night:['Syzygy','Moon','Asc'] },
+		{ id: AstroConst.PARS_RADIX, day:['Moon','Syzygy','Asc'], night:['Moon','Syzygy','Asc'] },
+		{ id: AstroConst.PARS_EROS, day:['Venus','Pars Spirit','Asc'], night:['Pars Spirit','Venus','Asc'] },
+		{ id: AstroConst.PARS_NECESSITY, day:['Mercury','Pars Fortuna','Asc'], night:['Pars Fortuna','Mercury','Asc'] },
+		{ id: AstroConst.PARS_COURAGE, day:['Mars','Pars Fortuna','Asc'], night:['Pars Fortuna','Mars','Asc'] },
+		{ id: AstroConst.PARS_VICTORY, day:['Jupiter','Pars Spirit','Asc'], night:['Pars Spirit','Jupiter','Asc'] },
+		{ id: AstroConst.PARS_NEMESIS, day:['Saturn','Pars Fortuna','Asc'], night:['Pars Fortuna','Saturn','Asc'] },
+		{ id: AstroConst.PARS_SONS_VALENS, day:['Jupiter','Mercury','Asc'], night:['Mercury','Jupiter','Asc'] },
+		{ id: AstroConst.PARS_DAUGHTERS, day:['Jupiter','Venus','Asc'], night:['Venus','Jupiter','Asc'] },
+		{ id: AstroConst.PARS_PRAXIS, day:['Mercury','Mars','Asc'], night:['Mars','Mercury','Asc'] },
+		{ id: AstroConst.PARS_WEDDING_DOROTHEAN, day:['Sun','Venus','Asc'], night:['Venus','Sun','Asc'] },
+	];
+	const byId = {};
+	formulas.forEach((definition)=>{
+		const formula = isDiurnal ? definition.day : definition.night;
+		const lon = legacyLotFormula(source,formula);
+		if(lon === null){ return; }
+		byId[definition.id] = {
+			id: definition.id, type: 'Arabic Part', lon, lat: 0, ra: 0, decl: 0,
+			sign: signOf(lon), signlon: mod(lon,30), azimuth: 0, altitudeTrue: 0, altitudeAppa: 0,
+			house: 'House'+houseIndex(lon,cusps), wholeSignHouse: wholeSignHouse(lon,asc),
+		};
+	});
+	if(Number.isFinite(Number(fortune)) && Number.isFinite(Number(spirit))){
+		const delta = mod(spirit-fortune+180,360)-180;
+		const basis = mod(asc + Math.abs(delta),360);
+		byId[AstroConst.PARS_BASIS] = {
+			id: AstroConst.PARS_BASIS, type:'Arabic Part', lon:basis, lat:0, ra:0, decl:0,
+			sign:signOf(basis), signlon:mod(basis,30), azimuth:0, altitudeTrue:0, altitudeAppa:0,
+			house:'House'+houseIndex(basis,cusps), wholeSignHouse:wholeSignHouse(basis,asc),
+		};
+	}
+	const exaltationBase = isDiurnal ? 19 : 33;
+	const exaltationLuminary = isDiurnal ? source.Sun : source.Moon;
+	const exaltationLon = Number.isFinite(Number(exaltationLuminary)) ? mod(asc + exaltationBase - Number(exaltationLuminary),360) : null;
+	if(exaltationLon !== null){
+		byId[AstroConst.PARS_EXALTATION] = {
+			id: AstroConst.PARS_EXALTATION, type:'Arabic Part', lon:exaltationLon, lat:0, ra:0, decl:0,
+			sign:signOf(exaltationLon), signlon:mod(exaltationLon,30), azimuth:0, altitudeTrue:0, altitudeAppa:0,
+			house:'House'+houseIndex(exaltationLon,cusps), wholeSignHouse:wholeSignHouse(exaltationLon,asc),
+		};
+	}
+	return (AstroConst.LOTS || []).map((id)=>byId[id]).filter(Boolean);
+}
+
 export function calculateBrowserChart(values){
 	const p = values || {};
 	const eligible = canCalculateBrowserChart(p);
@@ -538,7 +667,7 @@ export function calculateBrowserChart(values){
 	const jdUt = julianDay(birth.year,birth.month,birth.day,birth.hour-birth.zone,birth.minute,birth.second);
 	const jde = jdTT(jdUt);
 	const engine = getEngine();
-	const zodiacOptions = { houseSystem, zodiac: zodiac.zodiac, bodies: ['chiron','ceres','pallas','juno','vesta','pholus','intp_apog','mean_lilith'] };
+	const zodiacOptions = { houseSystem, zodiac: zodiac.zodiac, bodies: ['chiron','ceres','pallas','juno','vesta','pholus','intp_apog','mean_lilith','true_lilith'] };
 	const angleTable = {};
 	ASPECTS.forEach((a)=>{ angleTable[a.name] = a.deg; });
 	const chart = engine.chartAt(jdUt,geo.lat,geo.lon,{ ...zodiacOptions, aspects: angleTable });
@@ -570,21 +699,19 @@ export function calculateBrowserChart(values){
 	const sun = bodyIndex.sun, moon = bodyIndex.moon, ascLon = chart.angles.asc;
 	const fortune = day ? ascLon + moon.lon - sun.lon : ascLon + sun.lon - moon.lon;
 	const spirit = day ? ascLon + sun.lon - moon.lon : ascLon + moon.lon - sun.lon;
-	const lotsRaw = [
-		['Pars Fortuna',fortune],
-		['Pars Spirit',spirit],
-		['Pars Eros',ascLon+bodyIndex.venus.lon-spirit],
-		['Pars Necessity',ascLon+fortune-bodyIndex.mercury.lon],
-		['Pars Courage',ascLon+fortune-bodyIndex.mars.lon],
-		['Pars Victory',ascLon+bodyIndex.jupiter.lon-spirit],
-		['Pars Nemesis',ascLon+fortune-bodyIndex.saturn.lon],
-	];
-	const lots = lotsRaw.map(([id,longitude])=>{
-		const lon=mod(longitude,360), house=houseIndex(lon,cusps);
-		return { id, type:'Arabic Part', lon, lat:0, ra:0, decl:0, sign:signOf(lon), signlon:mod(lon,30), azimuth:0, altitudeTrue:0, altitudeAppa:0, house:'House'+house, wholeSignHouse:wholeSignHouse(lon,ascLon) };
-	});
-	const fortuna = lots.find((item)=>item.id==='Pars Fortuna');
-	objectRows.push({ ...fortuna, type:'Planet' });
+	const syzygy = findPreviousSyzygy(engine,chart,jdUt,geo,houseSystem,zodiac.zodiac);
+	if(syzygy){
+		const syzygyEq = equatorialFor(syzygy.lon,0,jdTT(syzygy.jdUt));
+		objectRows.push(createObject(AstroConst.SYZYGY,'Generic',syzygy.lon,0,syzygyEq.ra,syzygyEq.dec,0,cusps,ascLon,jdUt,geo,[]));
+	}
+	const lots = buildLegacyLots(bodyIndex,cusps,ascLon,day,fortune,spirit,syzygy ? syzygy.lon : null);
+	const fortuna = {
+		id: AstroConst.PARS_FORTUNA, type: 'Planet', lon: mod(fortune,360), lat: 0, ra: 0, decl: 0,
+		sign: signOf(fortune), signlon: mod(fortune,30), azimuth: 0, altitudeTrue: 0, altitudeAppa: 0,
+		house: 'House'+houseIndex(fortune,cusps), wholeSignHouse: wholeSignHouse(fortune,ascLon),
+	};
+	objectRows.push(fortuna);
+
 	const mids = [
 		['MoonSun','moon','sun'], ['JupiterVenus','jupiter','venus'], ['SaturnMars','saturn','mars'],
 	].map(([id,a,b])=>{
@@ -626,8 +753,8 @@ export function calculateBrowserChart(values){
 		browserEngine: {
 			name: 'Caelus', version: '0.25.0',
 			warnings: chart.warnings || [], unavailable: chart.unavailable || [],
-			features: ['core ephemeris', 'major aspects', 'supported quadrant/whole-sign houses', 'core lots and midpoints'],
-			notYetPorted: ['primary-direction PerChart data', 'Horosa 28-mansion star catalogs', 'full receptions/mutuals/surround/guoStarSect', 'custom aspects and dignity variants', 'sunrise/sunset selectors'],
+			features: ['browser-native ephemeris', 'major aspects', 'supported houses', 'classical dignity and degree tables', 'legacy Arabic lots', 'fixed-star conjunctions', 'syzygy point'],
+			notYetPorted: ['primary-direction PerChart data', 'Horosa Su28 / Beidou / Beiji catalogs', 'full receptions/mutuals/surround/guoStarSect parity', 'custom aspect/orb variants', 'sunrise/sunset and planetary-hour selectors'],
 		},
 	};
 	const birthText = formatDate(birth) + ' ' + String(birth.hour).padStart(2,'0') + ':' + String(birth.minute).padStart(2,'0') + ':' + String(Math.floor(birth.second)).padStart(2,'0');

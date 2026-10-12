@@ -52,6 +52,17 @@ describe('browser-native natal chart engine candidate', ()=>{
 			'House1','House2','House3','House4','House5','House6','House7','House8','House9','House10','House11','House12',
 		]));
 		expect(envelope.Result.chart.fixedStars.length).toBeGreaterThan(0);
+		expect(envelope.Result.chart.objects.find((row)=>row.id === 'Sun').mansion.cn).toBeTruthy();
+		expect(envelope.Result.chart.objects.find((row)=>row.id === 'Sun').monomoiria).toBeTruthy();
+		expect(envelope.Result.chart.objects.find((row)=>row.id === 'Sun').degreeQuality).toBeTruthy();
+		expect(envelope.Result.chart.objects.find((row)=>row.id === 'Syzygy')).toBeTruthy();
+		expect(envelope.Result.lots.length).toBe(GOLDEN.lots.length);
+		GOLDEN.lots.forEach((expectedLot)=>{
+			const actualLot = envelope.Result.lots.find((row)=>row.id === expectedLot.id);
+			expect(actualLot).toBeTruthy();
+			expect(angularDistance(expectedLot.lon,actualLot.lon)).toBeLessThan(1/3600);
+		});
+
 		expect(envelope.Result.aspects.normalAsp.Sun).toBeTruthy();
 
 		const source = GOLDEN.chart.objects;
