@@ -53,6 +53,10 @@ export const KEEP_DRAWER_KEYS = [
 	'chartlist',
 	'chartedit',
 	'chartadd',
+	'caselist',
+	'caseedit',
+	'caseadd',
+	'memo',
 	'homepage',
 ];
 
@@ -62,11 +66,7 @@ export const REMOVED_DRAWER_KEYS = [
 	'resetpwd',
 	'changepwd',
 	'changeparams',
-	'caselist',
-	'caseedit',
-	'caseadd',
 	'chartdeeplearn',
-	'memo',
 	'chartsgps',
 	'commtools',
 ];
