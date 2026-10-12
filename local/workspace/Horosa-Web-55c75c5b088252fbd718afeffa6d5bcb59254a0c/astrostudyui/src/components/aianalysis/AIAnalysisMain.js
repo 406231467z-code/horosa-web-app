@@ -2835,7 +2835,7 @@ function AIAnalysisMain(props){
 			return false;
 		}catch(e){
 			console.error(e);
-			message.error('资料导入失败');
+			message.error(formatImportError('资料导入失败', e));
 			return false;
 		}
 	}
@@ -3088,7 +3088,7 @@ function AIAnalysisMain(props){
 			message.success(`已替换文件：${material.name}`);
 		}catch(e){
 			console.error(e);
-			message.error('替换文件失败');
+			message.error(formatImportError('替换文件失败', e));
 		}
 		return false;
 	}
