@@ -412,7 +412,7 @@ function enrichClassicalPlanetData(objects, chart, jdUt){
 			: (obj.id === 'Moon' ? !isDay
 				: (obj.id === 'Jupiter' || obj.id === 'Saturn' ? isDay
 					: (obj.id === 'Venus' || obj.id === 'Mars' ? !isDay
-						: (sunLon === null ? false : mod(obj.lon - sunLon + 180,360) - 180 < 0)));
+						: (sunLon === null ? false : mod(obj.lon - sunLon + 180,360) - 180 < 0))));
 		if(obj.id !== 'Sun' && obj.id !== 'Moon' && sunLon !== null){
 			const elong = angularDistance(obj.lon,sunLon);
 			obj.phasisElong = elong;
