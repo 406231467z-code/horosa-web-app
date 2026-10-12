@@ -188,6 +188,26 @@ export async function diagnoseProvider(values){
 }
 
 /**
+ * Extract readable text from WordprocessingML. Keep DOCX control elements as real
+ * whitespace so downstream AI prompts receive paragraph breaks, tabs and line breaks.
+ */
+export function extractDocxText(xmlText){
+	const xml = new DOMParser().parseFromString(`${xmlText || ''}`, 'application/xml');
+	if(xml.getElementsByTagName('parsererror').length){
+		throw new Error('DOCX 文档 XML 格式无效');
+	}
+	const paragraphs = Array.from(xml.getElementsByTagName('*')).filter((node)=>node.localName === 'p');
+	return paragraphs.map((paragraph)=>{
+		return Array.from(paragraph.getElementsByTagName('*')).map((node)=>{
+			if(node.localName === 't'){ return node.textContent || ''; }
+			if(node.localName === 'tab'){ return '\\t'; }
+			if(node.localName === 'br' || node.localName === 'cr'){ return '\\n'; }
+			return '';
+		}).join('');
+	}).join('\\n').trim();
+}
+
+/**
  * Local material extraction. Text and Markdown are UTF-8. DOCX is unpacked and
  * parsed in-browser using the existing JSZip dependency. PDF and legacy .doc
  * need a dedicated binary document parser; fail honestly rather than forwarding
@@ -221,19 +241,7 @@ export async function extractMaterialContent(values){
 			throw new Error('DOCX 文件缺少 word/document.xml');
 		}
 		const xmlText = await documentFile.async('text');
-		const xml = new DOMParser().parseFromString(xmlText, 'application/xml');
-		if(xml.getElementsByTagName('parsererror').length){
-			throw new Error('DOCX 文档 XML 格式无效');
-		}
-		const paragraphs = Array.from(xml.getElementsByTagName('*')).filter((node)=>node.localName === 'p');
-		extractedText = paragraphs.map((paragraph)=>{
-			return Array.from(paragraph.getElementsByTagName('*')).map((node)=>{
-				if(node.localName === 't'){ return node.textContent || ''; }
-				if(node.localName === 'tab'){ return '\t'; }
-				if(node.localName === 'br' || node.localName === 'cr'){ return '\n'; }
-				return '';
-			}).join('');
-		}).join('\n').trim();
+		extractedText = extractDocxText(xmlText);
 		extractor = 'browser-docx-jszip';
 	}else if(ext === 'pdf'){
 		throw new Error('PDF 文本解析器尚未迁入浏览器；请先将 PDF 导出为 TXT、Markdown 或 DOCX，再添加资料。未上传到远程服务。');
