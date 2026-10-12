@@ -594,9 +594,12 @@ export default {
             let doch = document.documentElement.clientHeight;
             let mindim = Math.min(docw, doch);
             let platform = detectPlatform();
+            // Phones loading the local Umi development server via a LAN IP are
+            // still testing the local build; do not redirect them to the public mobile app.
             const isLocalHost = window.location.protocol === 'file:' ||
                 window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1';
+                window.location.hostname === '127.0.0.1' ||
+                process.env.NODE_ENV === 'development';
             if(platform === 'IPhone' || platform === 'IPod' || 
                 (platform === 'Android' && mindim < 600)){
                     if(!isLocalHost){
