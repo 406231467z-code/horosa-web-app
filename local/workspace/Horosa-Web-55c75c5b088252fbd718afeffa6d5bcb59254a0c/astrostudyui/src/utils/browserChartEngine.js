@@ -8,6 +8,7 @@ import ceresPack from 'caelus/data/ceres_cheb.json';
 import pholusPack from 'caelus/data/pholus_cheb.json';
 import intpApogPack from 'caelus/data/intp_apog_cheb.json';
 import * as AstroConst from '../constants/AstroConst';
+import { HELLENISTIC } from '../divination/data/hellenisticData';
 
 const DEG = Math.PI / 180;
 const SUPPORTED_HOUSES = {
@@ -36,8 +37,10 @@ const BODY_DEFS = [
 	['pholus', 'Pholus'], ['intp_apog', 'Intp_Apog'],
 ];
 const ASPECTS = [
-	{ name: 'conjunction', deg: 0 }, { name: 'sextile', deg: 60 },
+	{ name: 'conjunction', deg: 0 }, { name: 'semisextile', deg: 30 },
+	{ name: 'semisquare', deg: 45 }, { name: 'sextile', deg: 60 },
 	{ name: 'square', deg: 90 }, { name: 'trine', deg: 120 },
+	{ name: 'sesquiquadrate', deg: 135 }, { name: 'quincunx', deg: 150 },
 	{ name: 'opposition', deg: 180 },
 ];
 const RULERS = {
@@ -233,6 +236,136 @@ function mansion27(lon){
 	const rows = AstroConst.TERM_SU27 && AstroConst.TERM_SU27[sign];
 	const match = Array.isArray(rows) && rows.find((row)=>degree >= Number(row[1]) && degree < Number(row[2]));
 	return match ? match[0] : '';
+}
+
+function angularDistance(a,b){
+	const delta = mod(Math.abs(a-b),360);
+	return Math.min(delta,360-delta);
+}
+
+function classicalSignData(longitude, planetId){
+	const signIndex = Math.floor(mod(longitude,360)/30);
+	const signName = signOf(longitude);
+	const degree = mod(longitude,30);
+	const opposite = mod(signIndex+6,12);
+	const exaltEntry = Object.entries(HELLENISTIC.exaltation || {}).find((entry)=>entry[1] && Number(entry[1].sign) === signIndex);
+	const fallEntry = Object.entries(HELLENISTIC.exaltation || {}).find((entry)=>entry[1] && Number(entry[1].sign) === opposite);
+	const elementEntry = Object.entries(HELLENISTIC.elements || {}).find((entry)=>Array.isArray(entry[1]) && entry[1].includes(signIndex));
+	const tri = elementEntry && HELLENISTIC.triplicity && HELLENISTIC.triplicity.Dorothean
+		? HELLENISTIC.triplicity.Dorothean[elementEntry[0]] : null;
+	const termRows = HELLENISTIC.bounds_egyptian && HELLENISTIC.bounds_egyptian[String(signIndex)];
+	const term = Array.isArray(termRows) ? termRows.find((row)=>degree >= Number(row[1]) && degree < Number(row[2])) : null;
+	const faces = HELLENISTIC.faces_chaldean && HELLENISTIC.faces_chaldean[String(signIndex)];
+	const face = Array.isArray(faces) ? faces[Math.min(2,Math.floor(degree/10))] : null;
+	const dignities = {
+		ruler: (HELLENISTIC.domicile || [])[signIndex] || null,
+		exalt: exaltEntry ? exaltEntry[0] : null,
+		dayTrip: tri && tri.day || null,
+		nightTrip: tri && tri.night || null,
+		partTrip: tri && tri.participating || null,
+		term: term ? term[0] : null,
+		face: face || null,
+		exile: (HELLENISTIC.domicile || [])[opposite] || null,
+		fall: fallEntry ? fallEntry[0] : null,
+	};
+	const self = [];
+	const points = { ruler: 5, exalt: 4, dayTrip: 3, nightTrip: 3, partTrip: 3, term: 2, face: 1 };
+	let score = 0;
+	Object.keys(points).forEach((key)=>{
+		if(dignities[key] && dignities[key] === planetId){
+			self.push(key);
+			score += points[key];
+		}
+	});
+	if(dignities.exile === planetId){ score -= 5; }
+	if(dignities.fall === planetId){ score -= 4; }
+	const ninthIndex = mod(signIndex*9 + Math.floor(degree/(30/9)),12);
+	return {
+		signIndex, signName, degree, dignities, selfDignity: self, score,
+		degreeGender: (HELLENISTIC.sign_gender || [])[signIndex] === 'M' ? 'masculine' : 'feminine',
+		ninthPart: (HELLENISTIC.signs || [])[ninthIndex] || '',
+		joyHouse: (HELLENISTIC.joys || {})[planetId] || null,
+	};
+}
+
+function isClassicalPlanetId(id){
+	return ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'].includes(id);
+}
+
+function buildReceptions(objects){
+	const planets = objects.filter((obj)=>isClassicalPlanetId(obj.id));
+	const normal = [], abnormal = [];
+	const dignityKeys = ['ruler','exalt','dayTrip','nightTrip','partTrip','term','face','exile','fall'];
+	const majorKeys = ['ruler','exalt'];
+	planets.forEach((beneficiary)=>{
+		planets.forEach((supplier)=>{
+			if(beneficiary.id === supplier.id){ return; }
+			const supplierRulerShip = dignityKeys.filter((key)=>beneficiary.dignities && beneficiary.dignities[key] === supplier.id);
+			if(!supplierRulerShip.length){ return; }
+			const beneficiaryDignity = (beneficiary.selfDignity || []).slice();
+			const row = { beneficiary: beneficiary.id, supplier: supplier.id, beneficiaryDignity, supplierRulerShip };
+			if(supplierRulerShip.some((key)=>majorKeys.includes(key)) && beneficiaryDignity.length){
+				normal.push(row);
+			}else{
+				abnormal.push(row);
+			}
+		});
+	});
+	return { normal, abnormal };
+}
+
+function buildMutuals(objects){
+	const planets = objects.filter((obj)=>isClassicalPlanetId(obj.id));
+	const normal = [], abnormal = [];
+	const keys = ['ruler','exalt','dayTrip','nightTrip','partTrip','term','face','exile','fall'];
+	const hasMajor = (items)=>items.some((item)=>item === 'ruler' || item === 'exalt');
+	for(let i=0;i<planets.length;i++){
+		for(let j=i+1;j<planets.length;j++){
+			const a = planets[i], b = planets[j];
+			const aRulerShip = keys.filter((key)=>a.dignities && a.dignities[key] === b.id);
+			const bRulerShip = keys.filter((key)=>b.dignities && b.dignities[key] === a.id);
+			if(!aRulerShip.length || !bRulerShip.length){ continue; }
+			const row = { planetA: { id: a.id, rulerShip: aRulerShip }, planetB: { id: b.id, rulerShip: bRulerShip } };
+			if(hasMajor(aRulerShip) && hasMajor(bRulerShip)){ normal.push(row); }else{ abnormal.push(row); }
+		}
+	}
+	return { normal, abnormal };
+}
+
+function buildDeclParallel(objects){
+	const eligible = objects.filter((obj)=>obj && obj.type !== 'Arabic Part' && Number.isFinite(Number(obj.decl)));
+	const parallel = [], contraParallel = {};
+	for(let i=0;i<eligible.length;i++){
+		for(let j=i+1;j<eligible.length;j++){
+			const a=eligible[i], b=eligible[j];
+			if(Math.abs(Number(a.decl)-Number(b.decl)) <= 1){
+				parallel.push([a.id,b.id]);
+			}
+			if(Math.abs(Number(a.decl)+Number(b.decl)) <= 1){
+				if(!contraParallel[a.id]){ contraParallel[a.id]=[]; }
+				if(!contraParallel[b.id]){ contraParallel[b.id]=[]; }
+				contraParallel[a.id].push(b.id);
+				contraParallel[b.id].push(a.id);
+			}
+		}
+	}
+	return { parallel, contraParallel };
+}
+
+function buildSurroundPlanets(objects){
+	const ids=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
+	const planets=objects.filter((obj)=>ids.includes(obj.id) && Number.isFinite(Number(obj.lon))).sort((a,b)=>a.lon-b.lon);
+	const result={};
+	if(planets.length<3){ return result; }
+	planets.forEach((planet,index)=>{
+		const before=planets[(index-1+planets.length)%planets.length];
+		const after=planets[(index+1)%planets.length];
+		result[planet.id]=[
+			{ id: before.id, delta: angularDistance(planet.lon,before.lon) },
+			{ id: after.id, delta: angularDistance(planet.lon,after.lon) },
+		];
+	});
+	return result;
 }
 
 function createObject(id, type, lon, lat, ra, dec, speed, cusps, asc, jdUt, geo, dignity){
