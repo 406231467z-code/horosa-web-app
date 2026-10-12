@@ -1,4 +1,4 @@
-jest.mock('../../../services/aianalysis', ()=>({
+jest.mock('../../services/aianalysis', ()=>({
 	extractMaterialContent: jest.fn(),
 }));
 
