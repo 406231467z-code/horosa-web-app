@@ -12,6 +12,19 @@ import { normalizeAppearanceMode } from '../utils/appearance';
 import { normalizeDayBoundary, DAY_BOUNDARY_AFTER23, normalizeLateZiHourMode, LATE_ZI_HOUR_NEXT_DAY } from '../utils/dayBoundary';
 
 const MinWorkspaceHeight = 660;
+
+function getMinWorkspaceHeight(){
+    // Desktop keeps the existing minimum working area; narrow phones must be allowed to
+    // use their real viewport (especially landscape) instead of inheriting a 660px floor.
+    try{
+        const width = typeof window !== 'undefined'
+            ? (window.visualViewport && window.visualViewport.width) || document.documentElement.clientWidth
+            : 1024;
+        return Number(width) <= 760 ? 320 : MinWorkspaceHeight;
+    }catch(e){
+        return MinWorkspaceHeight;
+    }
+}
 // 页头预留量。**仅供兜底路径**(容器量不到时才按整窗视口减页头)——主路径已改为直接量
 // #mainContent,页头占位天然含在容器高度里,不再依赖这个魔数。
 // 保留它的历史教训:旧值 88 比容器多扣 16px,曾造成全站每页底部恒定 16px 空白栏。
@@ -35,11 +48,12 @@ const PlanetDisplayDefaultOffOptions = new Set([
 ]);
 
 function normalizeWorkspaceHeight(viewportHeight){
+    const minHeight = getMinWorkspaceHeight();
     const raw = Number(viewportHeight) - WorkspaceReservedHeight;
     if(!Number.isFinite(raw)){
-        return MinWorkspaceHeight;
+        return minHeight;
     }
-    return raw <= MinWorkspaceHeight ? MinWorkspaceHeight : raw;
+    return raw <= minHeight ? minHeight : raw;
 }
 
 function normalizeDisplayList(raw, fallback, allowSet, allowEmpty = false){
@@ -714,7 +728,7 @@ export default {
                 aspects = AstroConst.DEFAULT_ASPECTS;
             }
             const dispatchWorkspaceHeight = (h, extraPayload)=>{
-                if(h < MinWorkspaceHeight){
+                if(h < getMinWorkspaceHeight()){
                     return;
                 }
                 // 箭头函数内不可 yield;此处 getStore() 渲染期快照即可(下一行本就有 astro 存在性守卫)
@@ -759,7 +773,7 @@ export default {
                         layoutViewportHeight: vp ? vp.height : null,
                         physicalClientHeight: document.documentElement.clientHeight,
                         reserved: WorkspaceReservedHeight,
-                        min: MinWorkspaceHeight,
+                        min: getMinWorkspaceHeight(),
                     }), extraPayload);
                 }catch(e){ /* 模块异常时走下面老路径,不让版面因此整个失效 */ }
                 return dispatchWorkspaceHeight(
