@@ -7,7 +7,6 @@ jest.mock('js-rsa', ()=>({
 	},
 }));
 
-import { sealAiProxyBody } from '../../services/aianalysis';
 import {
 	AI_TRANSPORT_DIRECT,
 	AI_TRANSPORT_PROXY,
@@ -35,27 +34,24 @@ function sample(transport){
 }
 
 describe('phase 4-F AI transport', ()=>{
-	test('default stays on the Java proxy and still carries the key for that proxy', ()=>{
+	test('missing transport option defaults to direct vendor calls in pure-web mode', ()=>{
 		const plan = buildAiTransportPlan(sample(undefined), { stream: true });
-		expect(plan.mode).toBe(AI_TRANSPORT_PROXY);
-		expect(plan.sealForJava).toBe(true);
-		expect(plan.vendor).toBeNull();
-		expect(plan.proxyValues.apiKey).toBe(SECRET);
-		expect(plan.proxyValues.providerOptions.aiTransport).toBeUndefined();
-		expect(plan.proxyValues.providerOptions.temperature).toBe(0.2);
+		expect(plan.mode).toBe(AI_TRANSPORT_DIRECT);
+		expect(plan.sealForJava).toBe(false);
+		expect(plan.proxyValues).toBeNull();
+		expect(plan.vendor.url).toBe('https://api.deepseek.com/chat/completions');
+		expect(plan.vendor.headers.Authorization).toBe(`Bearer ${SECRET}`);
+		expect(plan.vendor.body.stream).toBe(true);
 	});
 
-	test('proxy wire body is sealed and does not contain the raw key', ()=>{
-		const plan = buildAiTransportPlan(sample(AI_TRANSPORT_PROXY));
-		const plain = JSON.stringify(plan.proxyValues);
-		expect(plain).toContain(SECRET);
-		const sealed = sealAiProxyBody(plain);
-		expect(sealed).not.toBe(plain);
-		expect(sealed.indexOf(SECRET)).toBe(-1);
-		const parts = sealed.split(',');
-		expect(parts.length).toBeGreaterThanOrEqual(2);
-		expect(parts[0].length).toBeGreaterThan(0);
-		expect(parts[1].length).toBeGreaterThan(0);
+	test('legacy saved proxy preference is normalized to direct mode', ()=>{
+		const plan = buildAiTransportPlan(sample(AI_TRANSPORT_PROXY), { stream: true });
+		expect(plan.mode).toBe(AI_TRANSPORT_DIRECT);
+		expect(plan.sealForJava).toBe(false);
+		expect(plan.proxyValues).toBeNull();
+		expect(plan.vendor.url).toBe('https://api.deepseek.com/chat/completions');
+		expect(plan.vendor.headers.Authorization).toBe(`Bearer ${SECRET}`);
+		expect(bodyHasSecret(plan.vendor.body, SECRET)).toBe(false);
 	});
 
 	test('direct chat posts to the vendor and keeps the key out of the body', ()=>{
