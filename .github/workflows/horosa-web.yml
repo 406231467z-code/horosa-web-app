@@ -66,6 +66,16 @@ jobs:
         run: npm run check:browser-build
       - name: Smoke-test mobile and desktop UI in Chromium
         run: npm run smoke:browser-ui
+      - name: Upload browser UI smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-ui-smoke-evidence
+          path: |
+            local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/browser-ui-mobile.png
+            local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/browser-ui-desktop.png
+            local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/artifacts/browser-ui-smoke.json
+          if-no-files-found: warn
       - name: Upload legacy endpoint inventory
         if: always()
         uses: actions/upload-artifact@v4
