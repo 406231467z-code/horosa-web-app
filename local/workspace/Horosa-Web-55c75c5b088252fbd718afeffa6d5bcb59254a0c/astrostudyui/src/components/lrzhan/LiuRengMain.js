@@ -5416,6 +5416,11 @@ class LiuRengMain extends Component{
 			// 结果落的 state.liureng),不得并行,维持原序。
 			const serverResPromise = (async ()=>{
 				let serverRes = {};
+				if(Constants.isBrowserOnlyEnv()){
+					// The birth/year branch is computed below by calcRunYearLocal + the local gods engine.
+					// Never issue /liureng/runyear in a browser build.
+					return serverRes;
+				}
 				const localRunyearHit = runyearKey ? getLiurengRunyearLocalCache(runyearKey) : null;
 				if(runyearKey && this.runYearServerCache.has(runyearKey)){
 					serverRes = clonePlain(this.runYearServerCache.get(runyearKey)) || {};

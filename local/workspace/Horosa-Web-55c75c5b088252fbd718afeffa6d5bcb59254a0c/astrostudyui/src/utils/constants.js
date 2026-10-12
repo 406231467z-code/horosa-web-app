@@ -8,6 +8,20 @@ const isLocalHost =
 		window.location.hostname === '127.0.0.1'
 	);
 
+// A normal browser must never fall back to the hosted Horosa service or localhost ports.
+// Native wrappers opt in only when their bridge is present; web builds remain local-first.
+export function isBrowserOnlyEnv(){
+	try{
+		// Unit tests exercise legacy service contracts with jsdom; they are not a deployed browser app.
+		if(typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test'){
+			return false;
+		}
+		return typeof window !== 'undefined' && !window.__TAURI__ && !window.horosaDesktop;
+	}catch(e){
+		return false;
+	}
+}
+
 function isValidServerRootValue(val){
 	return !!(val && /^https?:\/\/.+/i.test(`${val}`));
 }
@@ -136,10 +150,10 @@ export const IsLocalHostEnv = isLocalHost;
 export const LaunchSid = readLaunchSid();
 // 活绑定(let,2026-07-04 事故复盘:):backendIdentity 自愈换根时原地更新;babel CJS 下 import 方
 // 每次读取都是属性访问,取到最新值。本地服务地址永不盲信——地址可疑时经身份握手再协商。
-export let ServerRoot = isLocalHost ? resolveLocalServerRoot() : 'https://srv.horosa.com';
+export let ServerRoot = isBrowserOnlyEnv() ? '' : (isLocalHost ? resolveLocalServerRoot() : 'https://srv.horosa.com');
 // 服务地址自愈的唯一写入口:仅本地环境生效;写通过后同步持久化(mode 记录来源)。
 export function applyLocalServerRoot(root, mode){
-	if(!isLocalHost || !isValidServerRootValue(root)){
+	if(isBrowserOnlyEnv() || !isLocalHost || !isValidServerRootValue(root)){
 		return false;
 	}
 	const normalized = `${root}`.replace(/\/$/, '');
@@ -154,7 +168,7 @@ export function applyLocalServerRoot(root, mode){
 }
 // 自愈候选序(去重,含当前值):query > 存储 > 页面端口推导 > dev 默认 9999。仅本地环境使用。
 export function localServerRootCandidates(){
-	if(!isLocalHost){
+	if(isBrowserOnlyEnv() || !isLocalHost){
 		return [];
 	}
 	const list = [];

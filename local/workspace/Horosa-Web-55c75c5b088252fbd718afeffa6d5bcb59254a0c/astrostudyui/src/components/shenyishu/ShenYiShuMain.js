@@ -1,5 +1,6 @@
 import QuickDockBar from '../common/QuickDockBar';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
+import { notifyBrowserCalcUnavailable } from '../../utils/browserCalcStatus';
 import { Component } from 'react';
 import { InputNumber, Spin } from 'antd';
 import DateTime from '../comp/DateTime';
@@ -418,7 +419,7 @@ class ShenYiShuMain extends Component{
 				saveModuleAISnapshotLazy('shenyishu', ()=>buildSnapshotText(pan));
 			});
 		}catch(e){
-			console.warn('shenyishu backend failed', e);
+			if(!notifyBrowserCalcUnavailable('shenyishu', '神易数')) console.warn('shenyishu backend failed', e);
 			if(!this.unmounted && reqSeq === this.requestSeq){
 				this.setState({ loading: false });
 			}

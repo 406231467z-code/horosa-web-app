@@ -5,7 +5,6 @@ import {getStore, } from '../utils/storageutil';
 import * as Constants from '../utils/constants';
 import * as appService from '../services/app';
 import {setDispatch} from '../utils/request';
-import {detectPlatform} from '../utils/helper';
 import { loadBootChartSnapshot } from '../utils/bootChartRestore';
 import * as AstroConst from '../constants/AstroConst';
 import { setTmDelta } from '../utils/request';
@@ -13,6 +12,19 @@ import { normalizeAppearanceMode } from '../utils/appearance';
 import { normalizeDayBoundary, DAY_BOUNDARY_AFTER23, normalizeLateZiHourMode, LATE_ZI_HOUR_NEXT_DAY } from '../utils/dayBoundary';
 
 const MinWorkspaceHeight = 660;
+
+function getMinWorkspaceHeight(){
+    // Desktop keeps the existing minimum working area; narrow phones must be allowed to
+    // use their real viewport (especially landscape) instead of inheriting a 660px floor.
+    try{
+        const width = typeof window !== 'undefined'
+            ? document.documentElement.clientWidth || window.innerWidth || 1024
+            : 1024;
+        return Number(width) <= 760 ? 320 : MinWorkspaceHeight;
+    }catch(e){
+        return MinWorkspaceHeight;
+    }
+}
 // 页头预留量。**仅供兜底路径**(容器量不到时才按整窗视口减页头)——主路径已改为直接量
 // #mainContent,页头占位天然含在容器高度里,不再依赖这个魔数。
 // 保留它的历史教训:旧值 88 比容器多扣 16px,曾造成全站每页底部恒定 16px 空白栏。
@@ -36,11 +48,12 @@ const PlanetDisplayDefaultOffOptions = new Set([
 ]);
 
 function normalizeWorkspaceHeight(viewportHeight){
+    const minHeight = getMinWorkspaceHeight();
     const raw = Number(viewportHeight) - WorkspaceReservedHeight;
     if(!Number.isFinite(raw)){
-        return MinWorkspaceHeight;
+        return minHeight;
     }
-    return raw <= MinWorkspaceHeight ? MinWorkspaceHeight : raw;
+    return raw <= minHeight ? minHeight : raw;
 }
 
 function normalizeDisplayList(raw, fallback, allowSet, allowEmpty = false){
@@ -313,6 +326,40 @@ export default {
                     imgTokenListName: Result.ImgTokenListName,
                 },
             });
+        },
+
+        *restoreLocalSetup(_, { put }){
+            // The old account-check effect also loaded local preferences. Keep that local behavior
+            // after removing the network-bound /user/check startup path.
+            let setupJson = null;
+            try{
+                setupJson = typeof localStorage !== 'undefined'
+                    ? localStorage.getItem(Constants.GlobalSetupKey)
+                    : null;
+            }catch(e){
+                setupJson = null;
+            }
+            if(!setupJson){
+                return;
+            }
+            let json = null;
+            try{
+                json = normalizeGlobalSetup(JSON.parse(setupJson));
+            }catch(e){
+                json = null;
+            }
+            if(json && json.colorTheme !== undefined){
+                json.colorTheme = AstroConst.normalizeColorThemeIndex(json.colorTheme);
+            }
+            if(json && json.appearanceMode !== undefined){
+                json.appearanceMode = normalizeAppearanceMode(json.appearanceMode);
+            }
+            if(json){
+                yield put({
+                    type: 'save',
+                    payload: json,
+                });
+            }
         },
 
         *login({payload: values}, { call, put, select }){
@@ -694,30 +741,12 @@ export default {
 
     subscriptions: {
         setup({ dispatch, history }) {
-            let docw = document.documentElement.clientWidth;
-            let doch = document.documentElement.clientHeight;
-            let mindim = Math.min(docw, doch);
-            let platform = detectPlatform();
-            const isLocalHost = window.location.protocol === 'file:' ||
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1';
-            if(platform === 'IPhone' || platform === 'IPod' || 
-                (platform === 'Android' && mindim < 600)){
-                    if(!isLocalHost){
-                    window.location.href = Constants.MobileServer;
-                    }
-            }
-            // alert(platform + '; ' + mindim + '; ' + navigator.userAgent + '; ' + navigator.platform);
-
+            // This is a single responsive browser app; do not redirect phones to a separate legacy site.
+            // Local charts and preferences need no account service, so startup does not check a remote user.
             setDispatch(dispatch);
+            dispatch({ type: 'restoreLocalSetup' });
             const { location } = history;
             const { query } = location;
-            if(location.pathname === '/' || location.pathname === ''){
-                dispatch({
-                    type: 'checkUser',
-                    payload:{},
-                });                           
-            }
 
             let aspects = localStorage.getItem(AstroConst.AspKey);
             if(aspects === undefined || aspects === null){
@@ -734,7 +763,7 @@ export default {
                 aspects = AstroConst.DEFAULT_ASPECTS;
             }
             const dispatchWorkspaceHeight = (h, extraPayload)=>{
-                if(h < MinWorkspaceHeight){
+                if(h < getMinWorkspaceHeight()){
                     return;
                 }
                 // 箭头函数内不可 yield;此处 getStore() 渲染期快照即可(下一行本就有 astro 存在性守卫)
@@ -779,7 +808,7 @@ export default {
                         layoutViewportHeight: vp ? vp.height : null,
                         physicalClientHeight: document.documentElement.clientHeight,
                         reserved: WorkspaceReservedHeight,
-                        min: MinWorkspaceHeight,
+                        min: getMinWorkspaceHeight(),
                     }), extraPayload);
                 }catch(e){ /* 模块异常时走下面老路径,不让版面因此整个失效 */ }
                 return dispatchWorkspaceHeight(
@@ -844,15 +873,8 @@ export default {
                 payload: { aspects: aspects },
             });
 
-            dispatch({
-                type: 'getSysTime',
-                payload:{},
-            });                           
-
-            dispatch({
-                type: 'rules/ziwei',
-                payload:{},
-            });
+            // Browser-first startup stays usable without Java/Python. The remaining calculation
+            // adapters are migrated module-by-module; do not probe server time or remote Ziwei rules here.
 
             // horosa_boot_chart_restore_v1(PERF-R10 S2):温启恢复上次工作现场 —— 快照按
             // fetchByChartData 的 record 口径重放(与「手动载入命盘」逐字节同管线:选项条件

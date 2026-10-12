@@ -1,5 +1,6 @@
 import QuickDockBar from '../common/QuickDockBar';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
+import { notifyBrowserCalcUnavailable } from '../../utils/browserCalcStatus';
 import { sideSectionIcon } from '../../constants/sideSectionIcons'; // [观象P1]
 import { Component } from 'react';
 import { InputNumber, Spin } from 'antd';
@@ -590,7 +591,7 @@ class HuangJiMain extends Component{
 				saveModuleAISnapshotLazy('huangji', ()=>buildSnapshotText(pan, xinyi, snapOpts));
 			});
 		}catch(e){
-			console.warn('kinwangji backend failed', e);
+			if(!notifyBrowserCalcUnavailable('huangji', '皇极经世')) console.warn('kinwangji backend failed', e);
 			if(!this.unmounted && reqSeq === this.requestSeq){
 				this.setState({ loading: false });
 			}

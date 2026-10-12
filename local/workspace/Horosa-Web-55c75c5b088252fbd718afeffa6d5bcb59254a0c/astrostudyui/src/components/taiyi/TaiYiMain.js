@@ -3,6 +3,7 @@ import { message, Spin } from 'antd';
 import { XQButton as Button, XQSelect as Select, XQTabs as Tabs, XQSideSection } from '../xq-ui';
 import { saveModuleAISnapshotLazy, saveModuleAISnapshot } from '../../utils/moduleAiSnapshot';
 import { fetchPreciseNongli } from '../../utils/preciseCalcBridge';
+import { isBrowserOnlyEnv } from '../../utils/constants';
 import GeoCoordModal from '../amap/GeoCoordModal';
 import PlusMinusTime from '../astro/PlusMinusTime';
 import DateTime from '../comp/DateTime';
@@ -158,6 +159,8 @@ class TaiYiMain extends Component {
 				}
 				this.requestNongli(fields || this.props.fields);
 			};
+			// 太乙已有本地 Kintaiyi 立成表引擎，不依赖共享西洋 chartObj。
+			this.props.hook.chartFree = true;
 			// R4-B3(A6):太乙同为【两段式】—— stage-1(/nongli/time)先回来盘才能推。
 			// 与主 /chart 无关,在 /chart 返回之前并行发出即把 stage-1 摘出关键路径
 			// (latency sum→max)。闸:horosa.perf.prewarmRequests(关=此函数不被调用,逐字节旧序)。
@@ -572,6 +575,9 @@ class TaiYiMain extends Component {
 		}
 		if(this.unmounted || reqSeq !== this.taiyiRequestSeq){
 			return;
+		}
+		if(!pan && isBrowserOnlyEnv()){
+			message.warning('当前日期超出浏览器本地太乙历算覆盖范围；未连接后端，也未生成盘面。');
 		}
 		// P1 流派覆盖层:以 kintaiyi base pan 为底,按所选流派开关覆盖受影响神煞 + 几何重算主客算(默认=空操作,字节不变)。
 		const ov = pan ? applyTaiyiSchool(pan, nextOptions.school) : { pan, overrides: null };

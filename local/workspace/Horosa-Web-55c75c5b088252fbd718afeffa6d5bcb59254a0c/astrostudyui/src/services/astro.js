@@ -1,5 +1,5 @@
 import request from '../utils/request';
-import { ServerRoot } from '../utils/constants';
+import { ServerRoot, isBrowserOnlyEnv } from '../utils/constants';
 import { chartCloneLiteEnabled } from '../utils/perfFlags';
 
 // R4-B6:96 → 192。步进预取每 settle 最多灌数条 /chart,加上技法族的自有预取,
@@ -66,6 +66,10 @@ function markChartCacheHit(){
 }
 
 export function fetchChart(values, requestOptions){
+	if(isBrowserOnlyEnv()){
+		// No `/chart` proxy in a browser build; the UI will show the module migration status.
+		return Promise.resolve(null);
+	}
 	const opts = requestOptions || {};
 	const disableCache = opts.cache === false;
 	const key = disableCache ? '' : buildChartKey(values);

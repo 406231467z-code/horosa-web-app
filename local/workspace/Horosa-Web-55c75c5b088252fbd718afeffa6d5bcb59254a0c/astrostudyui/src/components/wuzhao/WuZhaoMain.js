@@ -1,5 +1,6 @@
 import QuickDockBar from '../common/QuickDockBar';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
+import { notifyBrowserCalcUnavailable } from '../../utils/browserCalcStatus';
 // 🔴 必须显式 import React:JSX 转译后是 React.createElement,webpack 下有自动注入
 // 兜着,但 jest 直测 render / SSR 场景会 ReferenceError(仓库既有教训)。
 import React, { Component } from 'react';
@@ -621,7 +622,7 @@ class WuZhaoMain extends Component{
 				saveModuleAISnapshotLazy('wuzhao', ()=>buildSnapshotText(pan));
 			});
 		}catch(e){
-			console.warn('kinwuzhao backend failed', e);
+			if(!notifyBrowserCalcUnavailable('wuzhao', '五兆')) console.warn('kinwuzhao backend failed', e);
 			if(!this.unmounted && reqSeq === this.requestSeq){
 				this.setState({ loading: false });
 			}

@@ -1509,6 +1509,8 @@ function AIAnalysisMain(props){
 
 	React.useEffect(()=>{
 		if(props.hook){
+			// AI 工作区读取本地资料/挂载快照，不消费共享 chartObj；网页模式不需要 /chart。
+			props.hook.chartFree = true;
 			props.hook.fun = ()=>{
 				// horosa_panel_ready_v1:AI 分析是流式输出,没有「一次 setState 画完」的点;
 				// 但 owner 要验收的那个动作(左栏切时间/改选项)在本技法上的完整语义就是

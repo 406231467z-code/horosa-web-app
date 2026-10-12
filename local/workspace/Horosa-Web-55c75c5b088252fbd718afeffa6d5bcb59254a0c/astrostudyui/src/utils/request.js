@@ -29,6 +29,20 @@ let lastErrorToast = {
 	ts: 0,
 };
 
+let lastBrowserOnlyWarningAt = 0;
+function denyServerApiInBrowser(options){
+	if(!Constants.isBrowserOnlyEnv()){
+		return false;
+	}
+	const silent = !!(options && (options.silent || options.disableLoading));
+	const now = Date.now();
+	if(!silent && now - lastBrowserOnlyWarningAt > 4000){
+		lastBrowserOnlyWarningAt = now;
+		message.warning('当前为纯前端浏览器模式；该功能的本地计算迁移尚未完成，未连接后端，也未生成伪结果。');
+	}
+	return true;
+}
+
 function getLocalStorageSafe(){
 	try{
 		if(typeof window !== 'undefined' && window.localStorage){
@@ -528,6 +542,9 @@ export async function healAndRetryOnce(url, options, err, replay){
  * @return {object}           An object containing either "data" or "err"
  */
 export default async function request(url, options) {
+	if(denyServerApiInBrowser(options)){
+		return undefined;
+	}
     // horosa_prefetch_runtime_whitelist_v1:仅当【步进预取任务正在同步起调】时才判定;
     // 白名单外的端点直接拒发(返回 undefined —— 与本函数既有「网络失败吞错 resolve undefined」
     // 同一语义,调用方既有空载荷守卫原样接住)。预取关闸/非预取路径:此判定恒 true,零影响。
@@ -690,6 +707,9 @@ async function requestCore(url, options) {
 }
 
 export async function requestRaw(url, options) {
+	if(denyServerApiInBrowser(options)){
+		return undefined;
+	}
     const silent = !!(options && (options.silent || options.disableLoading));
     if(dispatch && !silent){
         dispatch({
@@ -801,6 +821,11 @@ export async function requestRaw(url, options) {
 }
 
 export async function requestStream(url, options) {
+	if(denyServerApiInBrowser(options)){
+		const error = new Error('纯前端浏览器模式不支持该后端流接口。');
+		error.code = 'HOROSA_BROWSER_API_DISABLED';
+		throw error;
+	}
     const silent = !!(options && (options.silent || options.disableLoading));
     const suppressAbortError = !!(options && options.suppressAbortError);
     if(dispatch && !silent){
@@ -850,6 +875,9 @@ export async function requestStream(url, options) {
 }
 
 export async function uploadFile(obj, onUploadComplete){
+	if(denyServerApiInBrowser(null)){
+		return undefined;
+	}
     if(obj.file === undefined || obj.file === null){
         return;
     }

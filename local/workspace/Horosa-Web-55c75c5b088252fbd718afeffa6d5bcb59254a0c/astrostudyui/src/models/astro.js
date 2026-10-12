@@ -4,7 +4,7 @@ import { Modal, } from 'antd';
 import DateTime from '../components/comp/DateTime';
 import * as service from '../services/astro';
 import {randomStr,} from '../utils/helper';
-import { DefLat, DefLon, DefGpsLat, DefGpsLon, ServerRoot, } from '../utils/constants';
+import { DefLat, DefLon, DefGpsLat, DefGpsLon, ServerRoot, isBrowserOnlyEnv } from '../utils/constants';
 import { showChartServiceError as showChartServiceErrorRich } from '../components/common/ChartServiceErrorModal';
 import { saveAstroAISnapshotLazy, } from '../utils/astroAiSnapshot';
 import { hookRafEnabled, fieldsFastCommitEnabled, prewarmRequestsEnabled, stepPrefetchArmEnabled, stepPrefetchDepth, mainChainAbortEnabled, stepPrefetchSkewEnabled, speculativePrecomputeEnabled } from '../utils/perfFlags';
@@ -573,6 +573,13 @@ function isValidChartResponse(rsp){
 // (dva 的 model parser 不支持 JSX,所以 React 端必须放独立组件文件)。
 // fallback 用经典 Modal.error 防止任何加载/导入异常导致用户拿不到反馈。
 function showChartServiceError(extraDetail){
+	if(isBrowserOnlyEnv()){
+		Modal.error({
+			title: '该排盘模块尚未完成纯前端迁移',
+			content: '此浏览器版本不会连接 Java、Python 或远程排盘服务。当前模块尚不能在本机独立计算，因此没有生成结果。命盘本地管理不受影响。',
+		});
+		return;
+	}
 	// 先探活再定弹窗:服务在线但本次计算失败(如参数异常/超出星历数据域)≠「服务未就绪」。
 	// 误报「未就绪」会把用户引向重启/防火墙排查,掩盖真实原因(全年份域工程实测坑)。
 	try {
@@ -841,15 +848,19 @@ export default {
 
 		deeplearn: null,
 
+		// 浏览器原生模块的 chartFree 标记在初始 state 预先声明，而不是等 lazy 页面挂载后再设置；
+		// 否则第一次点开页面会先触发 /chart，造成错误提示或空白。页面随后仍可注入 hook.fun。
 		predictHook:{
 			astrochart:{
 				fun: null
 			},
 			bazi:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			ziwei:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			direction:{
 				fun: null
@@ -888,25 +899,31 @@ export default {
 				fun: null
 			},
 			cnyibu:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			guazhan:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			liureng:{
 				fun: null
 			},
 			dunjia:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			taiyi:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			shusuan:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			mingother:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			otherbu:{
 				fun: null
@@ -915,7 +932,8 @@ export default {
 				fun: null
 			},
 			aianalysis:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			guolao:{
 				fun: null
@@ -1241,6 +1259,33 @@ export default {
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
+			if(isBrowserOnlyEnv()){
+				const current = yield select((allState)=>allState.astro);
+				const localFields = current && current.fields ? current.fields : null;
+				const drawer = closeAllDrawer('*fetch');
+				yield put({
+					type: 'save',
+					payload: {
+						chartObj: null,
+						...(localFields ? { fields: localFields } : {}),
+						drawerVisible: drawer,
+					},
+				});
+				try{ if(localFields){ saveBootChartSnapshot(localFields, current.currentTab); } }catch(e){ /* local snapshot only */ }
+				if(localFields && !values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: null, fields: localFields },
+					});
+				}
+				markChartRefreshEnd();
+				const activeHook = current && current.predictHook && current.predictHook[current.currentTab];
+				if(!(activeHook && activeHook.chartFree === true)){
+					showChartServiceError();
+				}
+				return;
+			}
+
 			const rsp = yield call(service.fetchChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
@@ -1308,6 +1353,52 @@ export default {
 			const param = fieldsToParams(fields);
 			const astroState = yield select((allState)=>allState.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
+			if(isBrowserOnlyEnv()){
+				// A local chart record stores inputs/options, not a guaranteed fresh ephemeris result.
+				// Restore all saved fields and notes locally; never pretend the missing Western chart exists.
+				setF('memo74', values.memo74);
+				setF('memoBaZi', values.memoBaZi);
+				setF('memoZiWei', values.memoZiWei);
+				setF('memoAstro', values.memoAstro);
+				setF('memoGua', values.memoGua);
+				setF('memoLiuReng', values.memoLiuReng);
+				setF('memoQiMeng', values.memoQiMeng);
+				setF('memoSuZhan', values.memoSuZhan);
+				const type = state.memoType;
+				let memo = '';
+				if(type === 0){ memo = fields.memoAstro.value; }
+				else if(type === 1){ memo = fields.memoBaZi.value; }
+				else if(type === 2){ memo = fields.memoZiWei.value; }
+				else if(type === 3){ memo = fields.memo74.value; }
+				else if(type === 4){ memo = fields.memoGua.value; }
+				else if(type === 5){ memo = fields.memoLiuReng.value; }
+				else if(type === 6){ memo = fields.memoQiMeng.value; }
+				else if(type === 7){ memo = fields.memoSuZhan.value; }
+				yield put({
+					type: 'save',
+					payload: {
+						chartObj: null,
+						fields,
+						byChartData: true,
+						memo,
+						memoType: type,
+					},
+				});
+				markChartRefreshEnd();
+				try{ saveBootChartSnapshot(fields, state.currentTab); }catch(e){ /* local-only restore */ }
+				if(!values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: null, fields },
+					});
+				}
+				const activeHook = state.predictHook && state.predictHook[state.currentTab];
+				if(!(activeHook && activeHook.chartFree === true)){
+					showChartServiceError();
+				}
+				return;
+			}
+
 			const rsp = yield call(service.fetchChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
@@ -1446,7 +1537,7 @@ export default {
 				requestOptions = { ...requestOptions, signal: chartMainAbortCtl.signal };
 			}
 			const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
-			const fastPath = fastCommitOn && !!(activeHook && activeHook.chartFree === true);
+			const fastPath = !!(activeHook && activeHook.chartFree === true && (isBrowserOnlyEnv() || fastCommitOn));
 
 			let fld = {
 				...fieldValues,
@@ -1456,20 +1547,45 @@ export default {
 			if(fastPath){
 				yield put({
 					type: 'save',
-					payload: { fields: fld },
+					payload: {
+						fields: fld,
+						...(isBrowserOnlyEnv() ? { chartObj: null } : {}),
+					},
 				});
 				pm.computed();
 				if(!values.nohook){
 					// 喂旧 chartObj:chartFree 契约=hook 不读它(有静态哨兵守),只用 fields。
 					yield put({
 						type: 'doHook',
-						payload: { chartObj: astroState.chartObj, fields: fld },
+						payload: { chartObj: isBrowserOnlyEnv() ? null : astroState.chartObj, fields: fld },
 					});
 					pm.committed();
 				}
 			}else if(fastCommitOn && prewarmRequestsEnabled() && activeHook && typeof activeHook.prewarmRequests === 'function'){
 				// fire-and-forget:组件自述的预热函数(silent 请求),失败静默——正式请求照常兜底。
 				try{ activeHook.prewarmRequests(fld); }catch(e){ /* 预热失败无害 */ }
+			}
+
+			if(isBrowserOnlyEnv()){
+				// chartFree pages have already committed fields and run their own browser calculators.
+				if(fastPath){
+					try{ saveBootChartSnapshot(fieldValues, astroState.currentTab); }catch(e){ /* local snapshot only */ }
+					return;
+				}
+				// A blocked chart calculation must still preserve the user's changed birth fields.
+				// Clear any old chart object so new inputs are never shown beside stale positions.
+				yield put({
+					type: 'save',
+					payload: {
+						fields: fld,
+						chartObj: null,
+					},
+				});
+				try{ saveBootChartSnapshot(fieldValues, astroState.currentTab); }catch(e){ /* local snapshot only */ }
+				pm.computed();
+				pm.committed();
+				showChartServiceError();
+				return;
 			}
 
 			let rsp;
@@ -1612,6 +1728,33 @@ export default {
 			const param = fieldsToParams(fields);
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
+
+			if(isBrowserOnlyEnv()){
+				// New/recalculated charts must update the local form even while the Western
+				// ephemeris migration is incomplete. Never leave the prior chart beside new inputs.
+				const drawer = closeAllDrawer('*nowChart');
+				yield put({
+					type: 'save',
+					payload: {
+						fields,
+						chartObj: null,
+						drawerVisible: drawer,
+					},
+				});
+				try{ saveBootChartSnapshot(fields, astroState.currentTab); }catch(e){ /* local snapshot only */ }
+				if(!values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: null, fields },
+					});
+				}
+				markChartRefreshEnd();
+				const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
+				if(!(activeHook && activeHook.chartFree === true)){
+					showChartServiceError();
+				}
+				return;
+			}
 
 			const rsp = yield call(service.fetchChart, param);
 			if(!isValidChartResponse(rsp)){

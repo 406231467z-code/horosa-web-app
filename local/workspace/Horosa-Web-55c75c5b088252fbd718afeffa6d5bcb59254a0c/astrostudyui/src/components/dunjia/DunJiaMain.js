@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { isBrowserOnlyEnv } from '../../utils/constants';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
 import { getLayoutViewportHeight } from '../../utils/shellZoom';
 import { stepPrefetchEnabled, kentangCacheEnabled, stepSelectPrefetchEnabled, stepPrefetchDepth } from '../../utils/perfFlags';
@@ -790,6 +791,8 @@ class DunJiaMain extends Component {
 					this.prefetchNongliForFields(fields);
 				}
 			};
+			// 遁甲盘由 DunJiaCalc.calcDunJia 本地构建；不消费共享西洋星盘 chartObj。
+			this.props.hook.chartFree = true;
 			// R4-B2(horosa_prefetch_registry_v1):只登记 stage-1(确定性历法计算)。
 			// 🔴 绝不预取 /qimen/pan 本身:它吃 stage-1 结果 + 组件态(流派/排盘法),
 			//    强行预取要么构不出同键、要么把中间态钉进缓存。stage-1 暖了,用户点下一步时
@@ -872,8 +875,19 @@ class DunJiaMain extends Component {
 	async getResolvedPan(fields, nongli, options, displaySolarTime){
 		const ctx = this.getContext(fields, displaySolarTime);
 		const fallbackPan = this.getCachedPan(fields, nongli, options, displaySolarTime);
-		// 飞盘(飞宫九神)/混合(飞转结合)/数字起局(报数定局)均走本地 calcDunJia——后端不支持(飞盘/混合 须重启:8899 才认 school;
-		// 数字报数定局后端无此入参,走后端会被节气定局覆盖)。转盘等仍走后端(时/刻/综合)。
+		// 纯浏览器：直接使用已存在并覆盖年/月/日/时/刻、转/飞/混合等盘式的本地引擎。
+		// 不把远程盘或历史缓存冒充实时结果；本地计算失败时原样返回 null。
+		if(isBrowserOnlyEnv()){
+			// Require an actual local four-pillar result before showing a locally calculated board.
+			// Unsupported dates return null rather than a board built from empty calendar fields.
+			const four = nongli && nongli.bazi && nongli.bazi.fourColumns;
+			const hasPillars = four && ['year', 'month', 'day', 'time'].every((key)=>{
+				const item = four[key];
+				return !!(item && (item.ganzi || item.ganZhi || item.text));
+			});
+			return hasPillars ? fallbackPan : null;
+		}
+		// 桌面壳暂保留与既有后端的对拍路径；飞盘/混合/数字起局优先本地。
 		if(!fallbackPan || !isKinqimenMode(options && options.paiPanType) || (options && (options.school === '飞盘' || options.school === '混合' || options.qijuMethod === 'shuzi'))){
 			return fallbackPan;
 		}
@@ -1618,6 +1632,9 @@ class DunJiaMain extends Component {
 		}
 		try{
 			const pan = await this.getResolvedPan(flds, nongli || this.state.nongli, fixedOptions, displaySolar);
+			if(!pan && isBrowserOnlyEnv()){
+				message.warning('当前日期超出浏览器本地遁甲历算范围；未连接后端，也未生成盘面。');
+			}
 			this.applyFaRelatedToPan(pan);
 			// 单一真值：把当前「盘类（命/事）」戳进 pan.options，供 AI 快照(无 ctx 路径)与用神/化解命事局语义同源。
 			if(pan && pan.options){ pan.options.chartCategory = this.state.chartCategory; }

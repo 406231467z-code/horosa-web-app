@@ -1,5 +1,5 @@
 import request from './request';
-import { ServerRoot, ResultKey } from './constants';
+import { ServerRoot, ResultKey, isBrowserOnlyEnv } from './constants';
 import {
 	getNongliLocalCache,
 	setNongliLocalCache,
@@ -389,6 +389,14 @@ export async function fetchPreciseNongli(params){
 	if(key && nongliInflight.has(key)){
 		return nongliInflight.get(key);
 	}
+	if(isBrowserOnlyEnv()){
+		const fallback = buildLocalNongliFallback(reqParams);
+		if(fallback){
+			pushCache(nongliMem, key, fallback);
+			setNongliLocalCache(reqParams, fallback);
+		}
+		return fallback;
+	}
 	const req = (async()=>{
 		try{
 			const rsp = await request(`${ServerRoot}/nongli/time`, {
@@ -458,6 +466,9 @@ export async function fetchPreciseJieqiYear(params){
 	}
 	if(key && jieqiYearInflight.has(key)){
 		return jieqiYearInflight.get(key);
+	}
+	if(isBrowserOnlyEnv()){
+		return null;
 	}
 	const req = (async()=>{
 		try{

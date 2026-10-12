@@ -1,4 +1,5 @@
 import { Component, memo } from 'react';
+import { message } from 'antd';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
 import { markPanelReady } from '../../utils/perfMark';
 import { safeLocalStorageSet } from '../../utils/safeStorage';
@@ -716,7 +717,10 @@ async function fetchBaziCached(params, options){
 		}
 		return clonePlain(localResult);
 	}catch(e){
-		// Fall through to the legacy service when the local Lunar calculator cannot parse old edge cases.
+		// Old calendar edge cases still need porting; a browser build must not fall back to a server.
+		if(Constants.isBrowserOnlyEnv()){
+			return null;
+		}
 	}
 	const req = request(`${Constants.ServerRoot}${BAZI_CORE_ENDPOINT}`, {
 		body: JSON.stringify(params),
@@ -757,7 +761,10 @@ async function fetchBaziDirectCached(params, options){
 		}
 		return clonePlain(localResult);
 	}catch(e){
-		// Fall through to the legacy service when the local Lunar calculator cannot parse old edge cases.
+		// Do not substitute a remote result when running as a pure frontend.
+		if(Constants.isBrowserOnlyEnv()){
+			return null;
+		}
 	}
 	const req = request(`${Constants.ServerRoot}${BAZI_DIRECT_ENDPOINT}`, {
 		body: JSON.stringify(params),
@@ -1020,7 +1027,14 @@ class BaZi extends Component{
 			silent: opt.silent !== false,
 		});
 		const result = normalizeBaziResult(rawResult, params);
-		if(!result || this.unmounted || seq !== this.baziReqSeq){
+		if(this.unmounted || seq !== this.baziReqSeq){
+			return;
+		}
+		if(!result){
+			if(Constants.isBrowserOnlyEnv() && this._lastUnsupportedBaziKey !== currentBaziKey){
+				this._lastUnsupportedBaziKey = currentBaziKey;
+				message.warning('当前日期或历法条件超出浏览器本地八字计算范围；未连接后端，也未生成结果。');
+			}
 			return;
 		}
 
@@ -1091,7 +1105,9 @@ class BaZi extends Component{
 				directResult: result,
 				directKey: key,
 				directLoading: false,
-				directError: null,
+				directError: !result && Constants.isBrowserOnlyEnv()
+					? '当前时间超出浏览器本地行运计算范围；未连接后端。'
+					: null,
 			});
 		}catch(e){
 			if(this.unmounted){

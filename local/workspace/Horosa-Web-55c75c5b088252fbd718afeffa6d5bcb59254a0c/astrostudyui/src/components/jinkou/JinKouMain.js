@@ -1532,6 +1532,16 @@ class JinKouMain extends Component{
 			}
 		}
 		if(!result || !result.liureng){
+			if(Constants.isBrowserOnlyEnv()){
+				const dateValue = fields && fields.date ? fields.date.value : null;
+				const key = dateValue && typeof dateValue.format === 'function'
+					? dateValue.format('YYYY-MM-DD HH:mm:ss')
+					: 'unknown';
+				if(this._lastJinKouLocalFailureKey !== key){
+					this._lastJinKouLocalFailureKey = key;
+					message.warning('当前日期超出浏览器本地历法覆盖范围，金口诀未连接后端，也未生成盘面。');
+				}
+			}
 			return;
 		}
 
@@ -1549,17 +1559,20 @@ class JinKouMain extends Component{
 		const appliedBirth = buildBirthFields(this.state.birth, new DateTime());
 		let jinkouPan = null;
 		let jinkouError = '';
-		try{
-			jinkouPan = await fetchJinKouPan(fields, result.liureng.nongli, {
-				diFen: diFen,
-				yueJiang: this.state.yueJiang,
-				zhanShi: this.state.zhanShi,
-				timeBasis: this.state.timeBasis,
-			});
-		}catch(e){
-			jinkouError = e && e.message ? e.message : '金口诀本地排盘服务尚未就绪';
-			console.warn('kinjinkou backend failed, falling back to local JinKouCalc', e);
+		if(!Constants.isBrowserOnlyEnv()){
+			try{
+				jinkouPan = await fetchJinKouPan(fields, result.liureng.nongli, {
+					diFen: diFen,
+					yueJiang: this.state.yueJiang,
+					zhanShi: this.state.zhanShi,
+					timeBasis: this.state.timeBasis,
+				});
+			}catch(e){
+				jinkouError = e && e.message ? e.message : '金口诀排盘服务尚未就绪';
+				console.warn('kinjinkou service failed; local JinKouCalc will be used', e);
+			}
 		}
+		// 浏览器模式不请求 /jinkou/pan；assembleJinKouData 会通过 buildJinKouData 使用上面的本地六壬历法结果。
 		const st = {
 			liureng: result.liureng,
 			calcBirth: appliedBirth,
@@ -1639,6 +1652,9 @@ class JinKouMain extends Component{
 			}else if(localRunyearHit){
 				serverRes = clonePlain(localRunyearHit) || {};
 				pushCache(this.runYearServerCache, runyearKey, clonePlain(serverRes), 96);
+			}else if(Constants.isBrowserOnlyEnv()){
+				// 本地年差/干支路径在下方统一计算，不探测 /liureng/runyear。
+				serverRes = {};
 			}else{
 				const req = request(`${Constants.ServerRoot}/liureng/runyear`, {
 					body: JSON.stringify(params),

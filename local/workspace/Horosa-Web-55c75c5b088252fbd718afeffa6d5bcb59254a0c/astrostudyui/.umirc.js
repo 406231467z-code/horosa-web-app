@@ -1,7 +1,10 @@
 const buildForFile = process.env.BUILD_FOR_FILE === '1';
+// Umi dev serves async chunks from the origin root (e.g. /layouts__index.js).
+// Production hosting intentionally mounts the web bundle under /static/; file bundles stay relative.
+const isDevServer = process.env.NODE_ENV === 'development';
 
 export default {
-	publicPath: buildForFile ? './' : '/static/',
+	publicPath: buildForFile ? './' : (isDevServer ? '/' : '/static/'),
 	outputPath: buildForFile ? 'dist-file' : 'dist',
 	history: buildForFile ? { type: 'hash' } : undefined,
 	hash: true,
