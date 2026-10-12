@@ -127,5 +127,38 @@
 			overflow: auto !important;
 			-webkit-overflow-scrolling: touch;
 		}
+
+		/* HOROSA_WEB_NARROW_LAYOUT_GUARD_V1 */
+		.horosa-workspace-shell,
+		.horosa-workspace-shell .ant-layout,
+		.horosa-workspace-shell .ant-layout-content,
+		.horosa-workspace-shell .workspaceOuter,
+		.horosa-workspace-shell .workspaceInner {
+			min-width: 0;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .mainRootTabs,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-nav,
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-content-holder {
+			min-width: 0;
+			max-width: 100%;
+		}
+
+		.horosa-workspace-shell .mainRootTabs > .ant-tabs-nav .ant-tabs-nav-wrap {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+
+		.horosa-workspace-shell .ant-form,
+		.horosa-workspace-shell .ant-row,
+		.horosa-workspace-shell .ant-col,
+		.horosa-workspace-shell .ant-input,
+		.horosa-workspace-shell .ant-select,
+		.horosa-workspace-shell .ant-picker {
+			min-width: 0;
+			max-width: 100%;
+		}
+
 	}
 }
