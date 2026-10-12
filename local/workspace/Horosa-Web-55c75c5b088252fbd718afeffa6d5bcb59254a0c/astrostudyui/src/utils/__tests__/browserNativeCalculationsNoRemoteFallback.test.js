@@ -17,11 +17,16 @@ describe('browser-native calculation paths do not fall back to remote services',
 	test('AI analysis transport is browser-to-provider only, including legacy proxy profiles', ()=>{
 		const transport = withoutComments(read('utils/aiDirectTransport.js'));
 		const service = withoutComments(read('services/aianalysis.js'));
+		const settings = withoutComments(read('components/aianalysis/AIAnalysisMain.js'));
 		expect(transport).toContain('const mode = AI_TRANSPORT_DIRECT');
 		expect(transport).not.toMatch(/mode:\s*AI_TRANSPORT_PROXY|proxyValues:\s*stripAiTransport/);
 		expect(service).toContain('fetch(plan.url, {');
 		expect(service).toContain('fetch(vendor.url, {');
 		expect(service).not.toMatch(/ServerRoot|\/aianalysis\/(chat|chat\/stream|diagnose|providers\/models|embeddings|materials\/extract)/);
+		expect(settings).toContain("aiTransport: 'direct'");
+		expect(settings).toContain("providerOptions.aiTransport = 'direct'");
+		expect(settings).not.toContain('经本机 Java 代理');
+		expect(settings).toContain('浏览器跨域访问（CORS）设置');
 	});
 
 	test('Qimen main path calculates with calcDunJia and has no Kentang/ServerRoot transport', ()=>{
