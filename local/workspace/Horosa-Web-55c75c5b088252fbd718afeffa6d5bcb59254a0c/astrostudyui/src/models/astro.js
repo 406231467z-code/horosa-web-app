@@ -1415,7 +1415,7 @@ export default {
 			// 病根:此前 fields 的 save 排在 /chart 网络之后 → 纯本地技法(八字/数算/风水…)
 			// 也被迫等一次网络(实测热态 229ms 占总延迟 70%),网络失败则 fields 根本不更新。
 			// 修法:当前 tab 的 hook 自述 chartFree(=本页中右栏不消费 chartObj)时,fields 立即
-			// 提交+立即 doHook —— 本地技法一次性整体出(<100ms);/chart 照发,回来单独补 chartObj。
+			// 提交+立即 doHook —— 本地技法一次性整体出;chartFree 不消费 chartObj,因此不发 /chart。
 			// 非 chartFree 页维持「到齐才 save{fields+chartObj}」的原子性(逐字节旧序),但先把
 			// 本页的请求集并行预热(prewarm,silent,经 requestDedupe 在途共享)→ latency=max 而非 sum。
 			const fastCommitOn = fieldsFastCommitEnabled();
@@ -1446,7 +1446,8 @@ export default {
 				requestOptions = { ...requestOptions, signal: chartMainAbortCtl.signal };
 			}
 			const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
-			const fastPath = fastCommitOn && !!(activeHook && activeHook.chartFree === true);
+			const chartFreePath = !!(activeHook && activeHook.chartFree === true);
+			const fastPath = fastCommitOn && chartFreePath;
 
 			let fld = {
 				...fieldValues,
@@ -1468,8 +1469,30 @@ export default {
 					pm.committed();
 				}
 			}else if(fastCommitOn && prewarmRequestsEnabled() && activeHook && typeof activeHook.prewarmRequests === 'function'){
-				// fire-and-forget:组件自述的预热函数(silent 请求),失败静默——正式请求照常兜底。
+				// fire-and-forget:该组件声明的本地计算之外，只有显式预热器才运行。
 				try{ activeHook.prewarmRequests(fld); }catch(e){ /* 预热失败无害 */ }
+			}
+
+			// chartFree is a strict contract: this tab's component tree does not read the
+			// shared backend chart object. Run its local hook and stop here instead of
+			// issuing the legacy POST /chart just to fill an unused shared object.
+			if(chartFreePath){
+				if(!fastPath){
+					yield put({
+						type: 'save',
+						payload: { fields: fld },
+					});
+					pm.computed();
+					if(!values.nohook){
+						yield put({
+							type: 'doHook',
+							payload: { chartObj: astroState.chartObj, fields: fld },
+						});
+						pm.committed();
+					}
+				}
+				try{ saveBootChartSnapshot(fieldValues, astroState.currentTab); }catch(e){ /* local workspace backup is optional */ }
+				return;
 			}
 
 			let rsp;
