@@ -32,7 +32,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Generate legacy endpoint inventory
-        run: node scripts/audit-legacy-endpoints.js --out artifacts/legacy-endpoint-audit.json
+        run: node scripts/audit-browser-endpoints.js --json-out artifacts/legacy-endpoint-audit.json --summary-only
       - name: Run browser migration regression suite
         run: >-
           npm test -- --runInBand --forceExit --testTimeout=30000 --runTestsByPath
@@ -59,7 +59,7 @@ jobs:
           src/utils/__tests__/phase4iInstallerExit.test.js
           src/utils/__tests__/umiDevChunkMode.test.js
           src/constants/__tests__/ProductScope.test.js
-          scripts/__tests__/audit-legacy-endpoints.test.js
+          scripts/__tests__/audit-browser-endpoints.test.js
       - name: Build browser application
         run: npm run build
       - name: Upload legacy endpoint inventory
