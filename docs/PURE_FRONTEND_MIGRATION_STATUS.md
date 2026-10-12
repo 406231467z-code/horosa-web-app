@@ -2,6 +2,7 @@
 
 更新日期：2026-10-12  
 工作分支：`feat/pure-frontend-web-migration`  
+草稿 PR：[#2](https://github.com/406231467z-code/horosa-web-app/pull/2)（未合并）  
 目标：桌面浏览器、iOS Safari、Android Chrome 使用同一套 Web UI；网页运行不依赖 Java、Python、JAR、EXE 或 Electron。
 
 ## 本批已落地
@@ -40,6 +41,9 @@
 - 独立 Swiss Ephemeris WASM 试验尚有分发/许可证审查和完整字段对拍问题，未接入生产构建。
 
 ## 验收门槛
+
+**当前验证状态：** 已做 GitHub 源码内容与迁移闸门的静态复核；本会话没有可用的本地仓库副本/依赖安装环境，尚未执行 `npm test`、`npm run build` 或 iOS/Android 真机验证。新增测试尚未运行，不能把它记为测试通过。
+
 
 1. `astrostudyui` 生产构建成功，并检查静态产物没有 Java/Python/JAR/EXE 运行依赖。
 2. 对生成的 JS/CSS chunk 做 404 检查，验证开发服务器与部署子路径；手机 Safari 与 Android Chrome 都能从首屏进入。
