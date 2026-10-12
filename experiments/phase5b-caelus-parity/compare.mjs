@@ -94,6 +94,14 @@ async function main() {
     { houseSystem: 'regiomontanus', zodiac: 'tropical' },
   );
 
+  // Horosa exposes wholeSignHouse independently of its selected quadrant house system.
+  const candidateWholeSign = engine.chartAt(
+    chart.date.jd,
+    chart.geo.lat,
+    chart.geo.lon,
+    { houseSystem: 'whole_sign', zodiac: 'tropical' },
+  );
+
   const fields = [];
   const productionObjects = chart.objects || [];
   for (const [horosaId, engineId] of CORE) {
@@ -115,6 +123,20 @@ async function main() {
       status: productionHouse === null || candidateHouse === null
         ? 'MISSING'
         : productionHouse === candidateHouse ? 'PASS' : 'FAIL',
+    });
+    const productionWholeSignHouse = houseNumber(production.wholeSignHouse);
+    const candidateWholeSignHouse = houseNumber(
+      candidateWholeSign.bodies && candidateWholeSign.bodies[engineId]
+        ? candidateWholeSign.bodies[engineId].house
+        : null,
+    );
+    fields.push({
+      field: `${horosaId}.wholeSignHouse`,
+      production: productionWholeSignHouse,
+      candidate: candidateWholeSignHouse,
+      status: productionWholeSignHouse === null || candidateWholeSignHouse === null
+        ? 'MISSING'
+        : productionWholeSignHouse === candidateWholeSignHouse ? 'PASS' : 'FAIL',
     });
   }
 
