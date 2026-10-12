@@ -40,9 +40,15 @@ These paths must be migrated to browser-native calculation or explicitly removed
 | Precisely bounded nongli/other calendars | unsupported dates now reject locally; no fallback | `src/utils/preciseCalcBridge.js` | Extend local calendar algorithms/data for BCE and out-of-domain years. |
 | Jieqi-year outside local JS support | unsupported years now reject locally; no fallback | `src/utils/preciseCalcBridge.js` | Port verified astronomical/calendar support for BCE and out-of-domain years. |
 | Ziwei dates outside the tested local lunar domain | unsupported dates now reject locally; no fallback | `src/utils/ziweiBirthLocal.js` | Extend and parity-test the browser algorithm to restore old date coverage. |
-| Qizheng / Kinastro-related retained techniques | `/qizheng/moira`, `/qizhengkin/pan`, `/qizhengelection/*` | `src/services/qizheng.js` | Port retained algorithms and their inputs/outputs to JS/WASM; confirm licensing. |
-| 2D primary-direction pole calculations | `/predict/pdpoles` | `src/services/astroPd3d.js` | Port this calculation; do not confuse it with removed 3D rendering. |
-| AI models/providers/chat/extraction/embeddings | `/aianalysis/*` API paths; some providers are direct fetches | `src/services/aianalysis.js` | Remove own-server proxy/config dependency and handle provider keys safely in-browser; retain AI only with a real provider path. |
+| Main Western/natal astrology, chart-dependent pages, relative/auxiliary charts | `POST /chart` | `src/services/astro.js` | Implement a production browser chart engine; match PerChart response schema and golden parity before switching callers. |
+| India/Jyotish charts, divisional charts, dasha, prashna | `POST /india/chart` | `src/components/astro/IndiaChart.js` | Port IndiaChartKernel and Jyotish/divisional chart engines; reuse the production browser ephemeris once approved. |
+| India birth-time rectification | `POST /india/rectify` | `src/components/astro/IndiaChartMain.js` | Port the scan kernel, sunrise/ruling-planet inputs, and event scoring; the pure scoring module alone is insufficient. |
+| Primary-direction event tables and directed charts | `POST /predict/pd`, `POST /predict/pdchart` | `src/components/astro/AstroPrimaryDirectionChart.js`, `src/components/direction/AstroDirectMain.js` | Port the complete PerPredict/pd_engine pipeline and compare multiple historical goldens. |
+| Qizheng / Kinastro retained techniques and election | `/qizheng/moira`, `/qizhengkin/pan`, `/qizhengelection/*`, plus Kentang endpoints assembled per engine | `src/services/qizheng.js`, `src/integrations/kentang/serviceRoot.js`, retained component call sites | Port retained algorithms and response contracts to JS/WASM; audit vendor source licences before moving source into the bundle. |
+| AI provider model lists, chat, streaming, embeddings | Direct browser provider APIs (no Horosa AI proxy) | `src/services/aianalysis.js`, `src/utils/aiDirectTransport.js` | Verify each provider protocol/CORS in browser; keys must be treated as public client-side secrets, and users must configure their own keys. |
+| AI material extraction | `.txt`, `.md`, `.docx` local; PDF and legacy `.doc` explicitly unsupported in the browser | `src/services/aianalysis.js` | Add a locally bundled PDF text parser and test scanned/document edge cases, or constrain the input UI. |
+| Main chart/predictive calculations outside validated calendar domain | Unsupported dates now reject locally; no fallback | `src/utils/preciseCalcBridge.js`, local lunar guards | Extend and parity-test browser calendars for BCE/extended domain before claiming the former server range. |
+| Optional 2D primary-direction Pole column | Browser-local computation; old `/predict/pdpoles` wrapper deleted | `src/utils/pdPolesLocal.js`, `src/components/astro/AstroPrimaryDirection.js` | Port/test pole formulas and verify all projections/significator options. This does not migrate `/predict/pd` or `/predict/pdchart`. |
 
 The list above is the **confirmed set**, not a claim that every remaining API reference in the repository has been enumerated. Run a full static endpoint scan and call-site audit before deleting any backend directory.
 
@@ -62,9 +68,15 @@ The backend deletion is allowed only when all of these are true:
 4. Production and file builds succeed, and the app starts under static hosting without Java, Python, a proxy, or a desktop shell.
 5. Browser network inspection shows no calls to the removed Horosa API paths; desktop and mobile smoke tests pass.
 
+## Latest incremental verification
+
+- Removed the optional primary-direction Pole HTTP request; the component now calculates this column locally and the unused `src/services/astroPd3d.js` wrapper is deleted.
+- Added `src/utils/pdPolesLocal.js` and tests, including a real historical chart fixture with seven Placidus planetary pole reference values. A direct static JavaScript execution matched those values within 0.0003 degrees. This check is not a full Jest run or live-service verification.
+- AI analysis now calls configured provider APIs directly instead of Horosa's `/aianalysis/*` proxy. Text/Markdown/DOCX extraction is local; PDF/legacy DOC remain explicitly unsupported rather than uploaded to a backend.
+
 ## Verification for this branch
 
 - Source files were re-fetched after edits.
 - Static syntax checks passed for the edited Umi config, user model, migration tests, rules service/models, astro service, and precise calculation bridge test.
 - No CI status/workflow was available for the current PR head.
-- The frontend build and iOS Safari / Android Chrome were not run in the Trea environment as part of this update.
+- The frontend build, full Jest suite, and iOS Safari / Android Chrome were not run in the Trea environment as part of this update.
