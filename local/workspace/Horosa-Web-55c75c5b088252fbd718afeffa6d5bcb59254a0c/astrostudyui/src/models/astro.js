@@ -5,7 +5,6 @@ import DateTime from '../components/comp/DateTime';
 import * as service from '../services/astro';
 import {randomStr,} from '../utils/helper';
 import { DefLat, DefLon, DefGpsLat, DefGpsLon, } from '../utils/constants';
-import { showChartServiceError as showChartServiceErrorRich } from '../components/common/ChartServiceErrorModal';
 import { saveAstroAISnapshotLazy, } from '../utils/astroAiSnapshot';
 import { hookRafEnabled, fieldsFastCommitEnabled, prewarmRequestsEnabled, stepPrefetchArmEnabled, stepPrefetchDepth, mainChainAbortEnabled, stepPrefetchSkewEnabled, speculativePrecomputeEnabled } from '../utils/perfFlags';
 import { submitStepPrefetch, getStepPrefetcher, registerStepSelectHandler } from '../utils/stepPrefetch';
