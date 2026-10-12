@@ -4,7 +4,7 @@ import { Modal, } from 'antd';
 import DateTime from '../components/comp/DateTime';
 import * as service from '../services/astro';
 import {randomStr,} from '../utils/helper';
-import { DefLat, DefLon, DefGpsLat, DefGpsLon, ServerRoot, } from '../utils/constants';
+import { DefLat, DefLon, DefGpsLat, DefGpsLon, } from '../utils/constants';
 import { showChartServiceError as showChartServiceErrorRich } from '../components/common/ChartServiceErrorModal';
 import { saveAstroAISnapshotLazy, } from '../utils/astroAiSnapshot';
 import { hookRafEnabled, fieldsFastCommitEnabled, prewarmRequestsEnabled, stepPrefetchArmEnabled, stepPrefetchDepth, mainChainAbortEnabled, stepPrefetchSkewEnabled, speculativePrecomputeEnabled } from '../utils/perfFlags';
@@ -573,24 +573,13 @@ function isValidChartResponse(rsp){
 // (dva 的 model parser 不支持 JSX,所以 React 端必须放独立组件文件)。
 // fallback 用经典 Modal.error 防止任何加载/导入异常导致用户拿不到反馈。
 function showChartServiceError(extraDetail){
-	// 先探活再定弹窗:服务在线但本次计算失败(如参数异常/超出星历数据域)≠「服务未就绪」。
-	// 误报「未就绪」会把用户引向重启/防火墙排查,掩盖真实原因(全年份域工程实测坑)。
-	try {
-		fetch(`${ServerRoot}/horosaIdentity`, { method: 'GET' }).then((r) => {
-			if(r && r.ok){
-				Modal.error({
-					title: '排盘失败：该时刻或参数计算失败',
-					content: '本地服务在线,但此次排盘未能完成。常见原因:日期超出星历数据域(公元前 12999 ~ 公元 16799)、参数组合异常。请调整时间/参数后重试;若反复失败请反馈该时刻。',
-				});
-			}else{
-				showChartServiceErrorRich(extraDetail);
-			}
-		}).catch(() => {
-			showChartServiceErrorRich(extraDetail);
-		});
-	} catch(e) {
-		Modal.error({ title: '排盘失败：本地排盘服务未就绪。请确认 Horosa 本地服务仍在运行后重试。' });
-	}
+	const detail = extraDetail && (extraDetail.message || extraDetail.detail || extraDetail);
+	Modal.error({
+		title: '浏览器排盘失败',
+		content: detail
+			? `本次没有生成命盘。计算引擎返回：${String(detail)}`
+			: '本次没有生成命盘。请检查出生日期、时间、地点及所选宫制/黄道设置；当前输入无法可靠计算时，系统不会使用占位数据。',
+	});
 }
 
 
