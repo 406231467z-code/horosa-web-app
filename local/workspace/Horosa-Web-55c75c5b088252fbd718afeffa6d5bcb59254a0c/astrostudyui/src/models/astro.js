@@ -1491,11 +1491,21 @@ export default {
 			}
 
 			if(isBrowserOnlyEnv()){
-				// chartFree pages (BaZi / ZiWei and other self-contained panels) have already run
-				// their own browser calculators above. All other pages must stop before /chart.
+				// chartFree pages have already committed fields and run their own browser calculators.
 				if(fastPath){
 					return;
 				}
+				// A blocked chart calculation must still preserve the user's changed birth fields.
+				// Clear any old chart object so new inputs are never shown beside stale positions.
+				yield put({
+					type: 'save',
+					payload: {
+						fields: fld,
+						chartObj: null,
+					},
+				});
+				pm.computed();
+				pm.committed();
 				showChartServiceError();
 				return;
 			}
