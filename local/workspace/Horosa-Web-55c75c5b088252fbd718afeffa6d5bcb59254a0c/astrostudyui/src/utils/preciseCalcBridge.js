@@ -386,6 +386,18 @@ export async function fetchPreciseNongli(params){
 		}
 		return localHit;
 	}
+	// Browser-first migration: the existing local BaZi/lunar engine is the primary
+	// source for dates in its tested domain. Do not issue /nongli/time for ordinary
+	// dates when the complete local envelope can be built. Unsupported date domains
+	// still fall through below until their calendar algorithms are ported and tested.
+	const localComputed = buildLocalNongliFallback(reqParams);
+	if(localComputed){
+		if(key){
+			pushCache(nongliMem, key, localComputed);
+		}
+		setNongliLocalCache(reqParams, localComputed);
+		return localComputed;
+	}
 	if(key && nongliInflight.has(key)){
 		return nongliInflight.get(key);
 	}
