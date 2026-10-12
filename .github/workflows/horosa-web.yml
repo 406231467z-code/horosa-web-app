@@ -62,6 +62,8 @@ jobs:
           scripts/__tests__/audit-browser-endpoints.test.js
       - name: Build browser application
         run: npm run build
+      - name: Smoke-check static browser output
+        run: npm run check:browser-build
       - name: Upload legacy endpoint inventory
         if: always()
         uses: actions/upload-artifact@v4
