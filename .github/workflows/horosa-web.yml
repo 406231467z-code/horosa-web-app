@@ -50,6 +50,9 @@ jobs:
           src/components/jinkou/JinKouCalc.test.js
           src/components/jinkou/JinKouMain.test.js
           src/components/kinastro/__tests__/cetianTextsLocal.test.js
+          src/components/jinkou/__tests__/jinkouSchoolGolden.test.js
+          src/components/liureng/__tests__/liurengSanChuanGolden.test.js
+          src/divination/engine/__tests__/resultShapes.contract.test.js
           src/components/taiyi/__tests__/TaiYiCore.test.js
           src/utils/__tests__/localchartsBcAd.test.js
           src/utils/__tests__/phase4hDeadDeps.test.js
