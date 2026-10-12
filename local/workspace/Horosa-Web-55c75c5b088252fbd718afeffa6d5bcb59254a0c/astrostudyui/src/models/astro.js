@@ -1658,7 +1658,7 @@ export default {
 			const param = fieldsToParams(fields);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState));
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;
