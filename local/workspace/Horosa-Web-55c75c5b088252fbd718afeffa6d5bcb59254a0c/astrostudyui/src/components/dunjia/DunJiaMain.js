@@ -878,7 +878,14 @@ class DunJiaMain extends Component {
 		// 纯浏览器：直接使用已存在并覆盖年/月/日/时/刻、转/飞/混合等盘式的本地引擎。
 		// 不把远程盘或历史缓存冒充实时结果；本地计算失败时原样返回 null。
 		if(isBrowserOnlyEnv()){
-			return fallbackPan;
+			// Require an actual local four-pillar result before showing a locally calculated board.
+			// Unsupported dates return null rather than a board built from empty calendar fields.
+			const four = nongli && nongli.bazi && nongli.bazi.fourColumns;
+			const hasPillars = four && ['year', 'month', 'day', 'time'].every((key)=>{
+				const item = four[key];
+				return !!(item && (item.ganzi || item.ganZhi || item.text));
+			});
+			return hasPillars ? fallbackPan : null;
 		}
 		// 桌面壳暂保留与既有后端的对拍路径；飞盘/混合/数字起局优先本地。
 		if(!fallbackPan || !isKinqimenMode(options && options.paiPanType) || (options && (options.school === '飞盘' || options.school === '混合' || options.qijuMethod === 'shuzi'))){
@@ -1625,6 +1632,9 @@ class DunJiaMain extends Component {
 		}
 		try{
 			const pan = await this.getResolvedPan(flds, nongli || this.state.nongli, fixedOptions, displaySolar);
+			if(!pan && isBrowserOnlyEnv()){
+				message.warning('当前日期超出浏览器本地遁甲历算范围；未连接后端，也未生成盘面。');
+			}
 			this.applyFaRelatedToPan(pan);
 			// 单一真值：把当前「盘类（命/事）」戳进 pan.options，供 AI 快照(无 ctx 路径)与用神/化解命事局语义同源。
 			if(pan && pan.options){ pan.options.chartCategory = this.state.chartCategory; }
