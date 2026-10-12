@@ -848,15 +848,19 @@ export default {
 
 		deeplearn: null,
 
+		// 浏览器原生模块的 chartFree 标记在初始 state 预先声明，而不是等 lazy 页面挂载后再设置；
+		// 否则第一次点开页面会先触发 /chart，造成错误提示或空白。页面随后仍可注入 hook.fun。
 		predictHook:{
 			astrochart:{
 				fun: null
 			},
 			bazi:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			ziwei:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			direction:{
 				fun: null
@@ -898,7 +902,8 @@ export default {
 				fun: null
 			},
 			guazhan:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			liureng:{
 				fun: null
@@ -910,10 +915,12 @@ export default {
 				fun: null
 			},
 			shusuan:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			mingother:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			otherbu:{
 				fun: null
@@ -922,7 +929,8 @@ export default {
 				fun: null
 			},
 			aianalysis:{
-				fun: null
+				fun: null,
+				chartFree: true,
 			},
 			guolao:{
 				fun: null
