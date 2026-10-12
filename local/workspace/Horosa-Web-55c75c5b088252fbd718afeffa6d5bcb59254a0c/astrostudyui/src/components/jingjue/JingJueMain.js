@@ -1,5 +1,6 @@
 import QuickDockBar from '../common/QuickDockBar';
 import { wrapperPropsEqual } from '../../utils/chartUpdateGuard';
+import { notifyBrowserCalcUnavailable } from '../../utils/browserCalcStatus';
 import { Component } from 'react';
 import { InputNumber, Spin } from 'antd';
 import DateTime from '../comp/DateTime';
@@ -346,7 +347,7 @@ class JingJueMain extends Component{
 				saveModuleAISnapshotLazy('jingjue', ()=>buildSnapshotText(pan));
 			});
 		}catch(e){
-			console.warn('jingjue backend failed', e);
+			if(!notifyBrowserCalcUnavailable('jingjue', '荆诀')) console.warn('jingjue backend failed', e);
 			if(!this.unmounted && reqSeq === this.requestSeq){
 				this.setState({ loading: false });
 			}
