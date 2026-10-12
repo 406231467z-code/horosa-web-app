@@ -28,13 +28,30 @@ function isLoopbackRoot(value){
 	return /^https?:\/\/(?:localhost|[^/]*\.localhost|127\.0\.0\.1|\[?::1\]?)(?::\d+)?(?:\/|$)/i.test(String(value || ''));
 }
 
+// LAN browser visits use the same remote API as the original browser build by default.
+// Opt into the host computer's loopback-only Java/Python services with ?localBackend=1.
+function hasLocalBackendOptIn(){
+	if(typeof window === 'undefined'){
+		return false;
+	}
+	try{
+		const params = new URLSearchParams(window.location.search || '');
+		if(params.get('localBackend') === '1'){
+			return true;
+		}
+		return window.localStorage && window.localStorage.getItem('horosaUseLocalBackend') === '1';
+	}catch(e){
+		return false;
+	}
+}
+
 const isLocalHost =
 	typeof window !== 'undefined' &&
 	(
 		window.location.protocol === 'file:' ||
 		window.location.hostname === 'localhost' ||
 		window.location.hostname === '127.0.0.1' ||
-		isLanHostname(window.location.hostname)
+		hasLocalBackendOptIn()
 	);
 
 function isValidServerRootValue(val){
