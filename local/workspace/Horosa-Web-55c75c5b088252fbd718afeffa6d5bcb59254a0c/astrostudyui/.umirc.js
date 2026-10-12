@@ -1,6 +1,8 @@
 const buildForFile = process.env.BUILD_FOR_FILE === '1';
 // The runner sets HOROSA_UMI_MODE explicitly so inherited shell NODE_ENV cannot accidentally re-enable dev chunks.
-const isDevelopment = process.env.HOROSA_UMI_MODE === 'development' || process.env.NODE_ENV === 'development';
+const requestedUmiMode = process.env.HOROSA_UMI_MODE;
+// The runner's explicit mode is authoritative in both directions; fall back to NODE_ENV only for direct Umi invocations.
+const isDevelopment = requestedUmiMode ? requestedUmiMode === 'development' : process.env.NODE_ENV === 'development';
 
 export default {
 	// Bind the dev server for LAN testing; route JS/CSS chunks are disabled in dev below.
