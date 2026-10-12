@@ -71,9 +71,14 @@ describe('browser-native calculation paths do not fall back to remote services',
 
 	test('Ziwei birth calculation has no remote birth endpoint fallback', ()=>{
 		const source = withoutComments(read('utils/ziweiBirthLocal.js'));
+		const main = withoutComments(read('components/ziwei/ZiWeiMain.js'));
 		expect(source).toContain('const local = localZiweiBirthEnvelope(params)');
 		expect(source).toContain('未请求远程服务');
 		expect(source).not.toMatch(/ServerRoot|request\s*\(|cachedPost|\/ziwei\/birth/);
+		expect(main).toContain('紫微本地计算失败');
+		expect(main).toContain('if(this.unmounted || requestSeq !== this._ziweiRequestSeq)');
+		expect(main).not.toMatch(/ServerRoot|request\s*\(|后端服务尚未就绪/);
+		expect(main).toContain('applyLifeMasterOption(result.chart, ZWEngineOptions.lifeMasterBy)');
 	});
 
 	test('precise calendar bridge only computes locally and rejects unsupported domains', ()=>{
