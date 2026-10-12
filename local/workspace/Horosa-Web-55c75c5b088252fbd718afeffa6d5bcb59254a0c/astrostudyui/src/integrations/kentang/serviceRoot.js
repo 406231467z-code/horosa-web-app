@@ -1,4 +1,4 @@
-import { ServerRoot } from '../../utils/constants';
+import { ServerRoot, IsLocalHostEnv } from '../../utils/constants';
 
 export const KENTANG_SERVICE_CONFIG = {
 	taiyi: {
@@ -188,7 +188,8 @@ export function resolveKentangServiceRoot(moduleKey){
 	}
 	// In development, route browser chart requests through the Umi server. This keeps
 	// the Python chart service bound to 127.0.0.1 while allowing phones on the LAN to use it.
-	if(process.env.NODE_ENV === 'development' &&
+	if(IsLocalHostEnv &&
+		process.env.NODE_ENV === 'development' &&
 		typeof window !== 'undefined' &&
 		window.location &&
 		/^https?:$/.test(window.location.protocol) &&
