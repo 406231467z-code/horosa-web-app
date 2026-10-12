@@ -327,26 +327,18 @@ export function buildDirectEmbeddingRequest(values){
 	};
 }
 
+// One-way pure-web transport contract: there is deliberately no Horosa-server branch.
+	// Legacy profiles may still store aiTransport="proxy"; resolveAiTransport() normalizes them
+	// to direct mode, so every chat/model/embedding request goes to the user's configured provider.
 export function buildAiTransportPlan(values, options = {}){
-	const mode = resolveAiTransport(values);
-	if(mode === AI_TRANSPORT_DIRECT){
-		const vendor = options.embedding
-			? null
-			: buildDirectChatRequest(values, !!options.stream);
-		return {
-			mode,
-			sealForJava: false,
-			proxyValues: null,
-			vendor,
-			embedding: options.embedding ? buildDirectEmbeddingRequest(values) : null,
-		};
-	}
+	const mode = AI_TRANSPORT_DIRECT;
+	const embedding = !!options.embedding;
 	return {
-		mode: AI_TRANSPORT_PROXY,
-		sealForJava: true,
-		proxyValues: stripAiTransport(values),
-		vendor: null,
-		embedding: null,
+		mode,
+		sealForJava: false,
+		proxyValues: null,
+		vendor: embedding ? null : buildDirectChatRequest(values, !!options.stream),
+		embedding: embedding ? buildDirectEmbeddingRequest(values) : null,
 	};
 }
 
