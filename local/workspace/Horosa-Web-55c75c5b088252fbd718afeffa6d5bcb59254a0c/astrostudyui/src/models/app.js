@@ -3,7 +3,6 @@ import { safeLocalStorageSet } from '../utils/safeStorage';
 import { Modal,  } from 'antd';
 import {getStore, } from '../utils/storageutil';
 import * as Constants from '../utils/constants';
-import * as appService from '../services/app';
 import {setDispatch} from '../utils/request';
 import {detectPlatform} from '../utils/helper';
 import { loadBootChartSnapshot } from '../utils/bootChartRestore';
@@ -136,24 +135,6 @@ function normalizeUserHouseSystem(hsys){
     const normalized = shouldMigrateHouseSystemDefault(hsys) || !Number.isFinite(numeric) ? DefaultHouseSystem : numeric;
     markHouseSystemDefaultMigrated();
     return normalized;
-}
-
-function userInfoToFields(flds, userInfo){
-    flds.doubingSu28.value = userInfo.doubingSu28;
-    flds.simpleAsp.value = userInfo.simpleAsp;
-    flds.strongRecption.value = userInfo.strongRecption;
-    flds.virtualPointReceiveAsp.value = userInfo.virtualPntReceiveAsp;
-    flds.hsys.value = normalizeUserHouseSystem(userInfo.hsys);
-    flds.zodiacal.value = userInfo.zodiacal;
-    flds.predictive.value = userInfo.predictive;
-    flds.tradition.value = userInfo.tradition;
-    flds.gpsLon.value = userInfo.gpsLon;
-    flds.gpsLat.value = userInfo.gpsLat;
-    flds.lat.value = userInfo.lat;
-    flds.lon.value = userInfo.lon;    
-    if(userInfo.pdaspects){
-        flds.pdaspects.value = userInfo.pdaspects;
-    }
 }
 
 function applyPredictiveSetupToFields(flds, appst){
@@ -303,140 +284,37 @@ export default {
     },
 
     effects: {
-        *fetchImgToken({payload: values}, {call, put}){
-            const {Result} = yield call(appService.getImgToken);
-
+        // Cloud account flows were removed from the web product scope. Keep compatibility
+        // action names for any stale view, but never request a remote account service.
+        *fetchImgToken({ payload: values }, { put }) {
             yield put({
                 type: 'save',
-                payload: {
-                    tokenImg: 'data:image/jpeg;base64,' + Result.TokenImg,
-                    imgTokenListName: Result.ImgTokenListName,
-                },
+                payload: { tokenImg: null, imgTokenListName: null },
             });
+            Modal.info({ title: '此版本使用本地工作区，云账号验证码功能已移除。' });
         },
 
-        *login({payload: values}, { call, put, select }){
-            if(values.rememberMe){
-                safeLocalStorageSet(Constants.LoginIdKey, values.loginId);
-            }else{
-                localStorage.removeItem(Constants.LoginIdKey);
-            }
-
-            let params = {
-                LoginId: values.loginId,
-                Pwd: values.pwd,
-            };
-            const {Result} = yield call(appService.login, params);
- 
-            safeLocalStorageSet(Constants.TokenKey, Result.Token);
-
-            const usrdata = {
-                token: Result.Token,
-                userInfo: Result.User,
-                charts: Result.Charts,
-                total: Result.ChartsTotal,
-                admin: Result.IsAdmin ? true : false,
-            };
-
-            const store = yield select((s)=>s);
-            const astrost = store.astro;
-            const appst = store.app;
-
-            const fld = {
-                ...astrost.fields,                
-            }
-            userInfoToFields(fld, Result.User);
-            applyPredictiveSetupToFields(fld, appst);
-            
-            yield put({
-                type: 'astro/save',
-                payload: {
-                    fields: fld,
-                },
-            });
-
-            yield put({
-                type: 'astro/closeDrawer',
-                payload: {},
-            });
-
+        *login({ payload: values }, { put }) {
+            localStorage.removeItem(Constants.TokenKey);
             yield put({
                 type: 'user/save',
-                payload: {
-                    ...usrdata,
-                },
+                payload: { token: null, charts: [], userInfo: null, admin: false },
             });
-
-            yield put({
-                type: 'astro/doHook',
-                payload: {
-                    fields: fld,
-                },
-            });    
-
-       },
-
-        *register({payload: values}, { call, put, select }){
-            const store = yield select((s)=>s);
-            const state = store.app;
-
-            let params = {
-                LoginId: values.loginId,
-                Pwd: values.pwd,
-                ImgToken: values.imgToken,
-            };
-            let headers = {
-                ImgTokenListName: state.imgTokenListName,
-            };
-            const {Result} = yield call(appService.register, params, headers);
-
-            safeLocalStorageSet(Constants.TokenKey, Result.Token);
-
-            const usrdata = {
-                token: Result.Token,
-                userInfo: Result.User,
-            };
-
-            yield put({
-                type: 'astro/closeDrawer',
-                payload: {},
-            });
-
-            yield put({
-                type: 'user/save',
-                payload: {
-                    ...usrdata,
-                },
-            });
-            
+            yield put({ type: 'astro/closeDrawer', payload: {} });
+            Modal.info({ title: '云账号登录已移除。请通过“管理命盘”管理本地保存的命盘。' });
         },
 
-		*resetPwd({ payload: values }, { call, put, select }){
-            let params = {
-				LoginId: values.loginId,
-                ImgToken: values.imgToken,
-			};
-			
-            const store = yield select((s)=>s);
-            const state = store.app;
+        *register({ payload: values }, { put }) {
+            yield put({ type: 'astro/closeDrawer', payload: {} });
+            Modal.info({ title: '云账号注册已移除；命盘可直接保存在本机浏览器。' });
+        },
 
-            let headers = {
-                ImgTokenListName: state.imgTokenListName,
-            };
-			const { Result } = yield call(appService.resetpwd, params, headers);
+        *resetPwd({ payload: values }, { put }) {
+            yield put({ type: 'astro/closeDrawer', payload: {} });
+            Modal.info({ title: '云账号密码重置已移除。此版本不再使用云账号。' });
+        },
 
-            yield put({
-                type: 'astro/closeDrawer',
-                payload: {},
-            });
-
-            Modal.success({
-                title: '新密码已发送到您的邮箱，请尽快修改密码。'
-            });
-		},
-
-
-        *checkUser({ payload: values }, { put, select }) {
+                *checkUser({ payload: values }, { put, select }) {
             // Pure-Web migration: there is no remote login/session validation at boot.
             // Restore user preferences locally and initialize an anonymous local workspace.
             let setupJson = localStorage.getItem(Constants.GlobalSetupKey);
@@ -515,26 +393,12 @@ export default {
             });
         },
 
-        *logout({ payload:values }, { put, call }){
-            const usrToken = localStorage.getItem(Constants.TokenKey);
-            const skipRemote = !!(values && values.skipRemote);
+        *logout({ payload: values }, { put }) {
             localStorage.removeItem(Constants.TokenKey);
-            try{
-                if(!skipRemote && usrToken){
-                    yield call(appService.logout);
-                }
-            }catch(e){
-            }
             yield put({
                 type: 'user/save',
-                payload: {
-                    token: null,
-                    charts: [],
-                    userInfo: null,
-                    admin: false,
-                },
+                payload: { token: null, charts: [], userInfo: null, admin: false },
             });
-
         },
 
         *menuClick({ payload:values }, { put, call }){
