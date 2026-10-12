@@ -111,6 +111,10 @@ const App = ({children, dispatch, app, user, astro, })=>{
 
     AstroConst.setColorTheme(resolvedAppearance === APPEARANCE_DARK ? 8 : AstroConst.DefaultColorTheme);
 
+    // Browser mode is no longer supposed to supervise a local Java/Python runtime.
+    // The service recovery UI stays available only in the native desktop shell.
+    const desktopCalcShell = typeof window !== 'undefined' && (!!window.__TAURI__ || !!window.horosaDesktop);
+
     let mainstyle = {
         position: 'fixed',
         inset: 0,
@@ -179,11 +183,11 @@ const App = ({children, dispatch, app, user, astro, })=>{
 
             <div id='globalFooter' style={{height: 0, overflow: 'hidden'}} />
             <UpdateNotifier />
-            <ServiceStatusBanner />
+            {desktopCalcShell ? <ServiceStatusBanner /> : null}
             <LocalStoreHealthBanner />
             <MultiInstanceNotice />
-            <BackendStatusDot />
-            <StartupGate />
+            {desktopCalcShell ? <BackendStatusDot /> : null}
+            {desktopCalcShell ? <StartupGate /> : null}
         </Layout>
     );
 };
