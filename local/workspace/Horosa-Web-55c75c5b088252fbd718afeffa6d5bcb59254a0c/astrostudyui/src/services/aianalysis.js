@@ -4,6 +4,7 @@ import {
 	ClientVer,
 	ServerRoot,
 	TokenKey,
+	isBrowserOnlyEnv,
 } from '../utils/constants';
 import { signRequest } from '../utils/request';
 import { encryptRSA } from '../utils/rsahelper';
@@ -182,6 +183,9 @@ function withTimeout(promiseFactory, timeoutMs, externalSignal){
 }
 
 async function requestJson(url, values, options = {}){
+	if(isBrowserOnlyEnv()){
+		throw new Error('浏览器纯前端模式不提供 AI 代理服务；请在 AI 分析设置中配置可直连的模型提供商。');
+	}
 	return withTimeout(async (signal)=>{
 		const bodyText = JSON.stringify(stripProxyValues(values));
 		const response = await fetch(url, {
@@ -315,6 +319,9 @@ async function requestDirectChat(vendor, values){
 
 export async function requestAIAnalysisChatStream(values, handlers = {}){
 	const plan = buildAiTransportPlan(values, { stream: true });
+	if(isBrowserOnlyEnv() && plan.mode !== 'direct'){
+		throw new Error('浏览器纯前端模式不提供 AI 代理服务；请在 AI 分析设置中切换为直连提供商。');
+	}
 	const response = await withTimeout(async (signal)=>{
 		if(plan.mode === 'direct'){
 			const rsp = await fetch(plan.vendor.url, {
