@@ -15,7 +15,7 @@ export default {
 
 	effects: {
 		// 紫微规则是随前端发布的静态表。启动时直接读本地 JSON，不再请求 /ziwei/rules。
-		*ziwei({ payload: values }, { put }) {
+		*loadZiweiRulesLocal({ payload: values }, { put }) {
 			const data = getZiweiRulesEnvelope();
 			yield put({
 				type: 'save',
