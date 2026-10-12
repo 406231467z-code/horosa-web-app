@@ -115,12 +115,7 @@ export function fetchChart(values, requestOptions){
 	return req.then((rsp)=>clonePlain(rsp));
 }
 
-export function fetchAllowedCharts(values){
-    return request(`${ServerRoot}/allowedcharts`, {
-        body: JSON.stringify(values),
-    });
-}
-
+// The legacy cloud entitlement wrapper was retired; saved charts use localcharts.js.
 // [R4] fetchFateEvents/dlTrain 已删:唯一调用方是 models/astro 里 `localOnly=true` 写死的
 // 永不可达分支(登录多用户时代残留),分支收敛后此处零引用。人生事件走本地存储。
 
