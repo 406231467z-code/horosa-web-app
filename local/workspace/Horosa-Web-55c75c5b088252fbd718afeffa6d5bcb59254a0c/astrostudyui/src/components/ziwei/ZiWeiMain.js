@@ -1039,7 +1039,7 @@ class ZiWeiMain extends Component{
 		// 口径与「失败不 setState」一致:人话提示 + return,后端就绪后用户重试即恢复。
 		if(!data || !rules){
 			this.setState({ updating: false });
-			message.error('后端服务尚未就绪,请稍后重试');
+			message.error(Constants.isBrowserOnlyEnv() ? '此出生年份超出当前浏览器历算范围；未连接后端，也未生成结果。' : '后端服务尚未就绪,请稍后重试');
 			return;
 		}
 		const result = data[Constants.ResultKey]
