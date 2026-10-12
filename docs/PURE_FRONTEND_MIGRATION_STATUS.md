@@ -79,6 +79,7 @@ The backend deletion is allowed only when all of these are true:
 ## Verification for this branch
 
 - Source files were re-fetched after edits.
-- Static syntax checks passed for the edited Umi config, user model, migration tests, rules service/models, astro service, and precise calculation bridge test.
-- No CI status/workflow was available for the current PR head.
-- The frontend build, full Jest suite, and iOS Safari / Android Chrome were not run in the Trea environment as part of this update.
+- Static syntax checks previously passed for the edited Umi config, user model, migration tests, rules service/models, astro service, and precise calculation bridge test. These checks are not substitutes for Jest or a production build.
+- `src/utils/docxText.js` isolates local DOCX paragraph/tab/newline extraction from the AI service module. `src/services/__tests__/aianalysisDocxExtraction.test.js` covers paragraph and explicit line breaks, malformed XML rejection, and empty documents.
+- `.github/workflows/horosa-web.yml` now runs four focused regression files (DOCX extraction, responsive mobile layout, browser bootstrap/no-legacy-backend, and precise calendar bridge), then the browser production build. The workflow has been created; the current run is queued and the earlier run has not yet reported a conclusion. Do not treat CI as passed until the run reports success.
+- The frontend production build, full Jest suite, and real iOS Safari / Android Chrome smoke tests have not been confirmed successful. Device validation still needs to happen after Trea dev-server and chunk loading are checked.
