@@ -1259,6 +1259,32 @@ export default {
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
+			if(isBrowserOnlyEnv()){
+				const current = yield select((allState)=>allState.astro);
+				const localFields = current && current.fields ? current.fields : null;
+				const drawer = closeAllDrawer('*fetch');
+				yield put({
+					type: 'save',
+					payload: {
+						chartObj: null,
+						...(localFields ? { fields: localFields } : {}),
+						drawerVisible: drawer,
+					},
+				});
+				if(localFields && !values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: null, fields: localFields },
+					});
+				}
+				markChartRefreshEnd();
+				const activeHook = current && current.predictHook && current.predictHook[current.currentTab];
+				if(!(activeHook && activeHook.chartFree === true)){
+					showChartServiceError();
+				}
+				return;
+			}
+
 			const rsp = yield call(service.fetchChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
