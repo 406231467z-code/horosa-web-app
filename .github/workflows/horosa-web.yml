@@ -1,0 +1,42 @@
+name: Horosa Web validation
+
+on:
+  push:
+    branches:
+      - main
+      - fix/mobile-devserver-host
+    paths:
+      - '.github/workflows/horosa-web.yml'
+      - 'local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/**'
+  pull_request:
+    paths:
+      - '.github/workflows/horosa-web.yml'
+      - 'local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/**'
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui
+    env:
+      NODE_OPTIONS: --openssl-legacy-provider
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run DOCX extraction regression tests
+        run: npm test -- --runInBand --testPathPattern=services/__tests__/aianalysisDocxExtraction.test.js
+      - name: Build browser application
+        run: npm run build
