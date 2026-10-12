@@ -29,6 +29,15 @@ describe('PHASE 4-B jieqi local table', ()=>{
 		expect(result && result.bazi && result.bazi.fourColumns && result.bazi.fourColumns.day.ganzi).toBeTruthy();
 		expect(result && result.bazi && result.bazi.nongli).toBeTruthy();
 	});
+	test('超出本地历法范围时农历桥明确拒绝，不回连 /nongli/time', async()=>{
+		await expect(fetchPreciseNongli({
+			date: '12000/05/27',
+			time: '12:00:00',
+			zone: '+08:00',
+			ad: 1,
+		})).rejects.toThrow('未请求远程排盘服务');
+		expect(request).not.toHaveBeenCalled();
+	});
 
 	test('公元可靠域走本地 24 节气表，不请求后端', async()=>{
 		const year = await fetchPreciseJieqiYear({
@@ -65,50 +74,34 @@ describe('PHASE 4-B jieqi local table', ()=>{
 		expect(seed.大雪.dayGanzhi).toBeTruthy();
 	});
 
-	test('域外年份才请求 /jieqi/year，并保留后端时刻', async()=>{
-		request.mockResolvedValue({
-			Result: {
-				year: 12000,
-				jieqi24: [{ jieqi: '大雪', time: '12000-12-07 13:11:06' }],
-			},
-		});
-		const seed = await fetchPreciseJieqiSeed({
+	test('域外年份无法由本地节气表可靠计算时明确拒绝，不请求后端', async()=>{
+		await expect(fetchPreciseJieqiSeed({
 			year: '12000',
 			ad: 1,
 			zone: '+08:00',
 			jieqis: ['大雪'],
-		});
-		expect(request).toHaveBeenCalled();
-		expect(String(request.mock.calls[0][0])).toContain('/jieqi/year');
-		expect(seed.大雪.time).toBe('12000-12-07 13:11:06');
+		})).rejects.toThrow('未请求远程排盘服务');
+		expect(request).not.toHaveBeenCalled();
 	});
 
-	test('公元前不拿公元表冒充，仍走后端', async()=>{
-		request.mockResolvedValue({
-			Result: {
-				year: 500,
-				jieqi24: [{ jieqi: '立春', time: '-0500-02-08 00:00:00' }],
-			},
-		});
-		const seed = await fetchPreciseJieqiSeed({
+	test('公元前日期不拿公元表冒充，也不回连后端', async()=>{
+		await expect(fetchPreciseJieqiSeed({
 			year: '500',
 			ad: 'BC',
 			zone: '+08:00',
 			jieqis: ['立春'],
-		});
-		expect(request).toHaveBeenCalled();
-		expect(seed.立春.time).toBe('-0500-02-08 00:00:00');
+		})).rejects.toThrow('未请求远程排盘服务');
+		expect(request).not.toHaveBeenCalled();
 		const ad500 = buildLocalJieqiYearSeed(500, '+08:00');
-		expect(seed.立春.time).not.toBe(ad500.立春.time);
+		expect(ad500).toBeTruthy();
 	});
 
-	test('域外后端无结果时不编造节气表', async()=>{
-		request.mockResolvedValue(undefined);
-		const year = await fetchPreciseJieqiYear({
+	test('域外无本地表时不编造节气结果，也不发请求', async()=>{
+		await expect(fetchPreciseJieqiYear({
 			year: '12000',
 			ad: 1,
 			zone: '+08:00',
-		});
-		expect(year).toBeFalsy();
+		})).rejects.toThrow('未请求远程排盘服务');
+		expect(request).not.toHaveBeenCalled();
 	});
 });
