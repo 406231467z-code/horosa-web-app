@@ -1,62 +1,41 @@
-import request from '../utils/request';
-import {ServerRoot} from '../utils/constants';
-
-
-export function changepwd(values){
-    return request(`${ServerRoot}/user/changepwd`, {
-        body: JSON.stringify(values),
-    });
+// Legacy cloud-account and AstroReader services are outside the local-first web scope.
+// Keep compatibility exports for old views, but never send requests to the old backend.
+function removedLegacyService(){
+	return Promise.reject(new Error('此版本已移除云账号/星阅云服务；命盘请使用本地管理。'));
 }
 
-export function changeparams(values){
-    return request(`${ServerRoot}/user/changeparams`, {
-        body: JSON.stringify(values),
-    });
+export function changepwd(){
+	return removedLegacyService();
 }
 
-// [R4] 服务端命盘 CRUD 八函数已删(getUserCharts/addChart/updateChart/saveMemo/deleteChart/
-// fetchAllowedCharts/importChart/exportChart):models/user.js 从未 call 过任何一个(命盘
-// 全走本地 localcharts),属登录多用户时代残留。日后如做云同步按当时协议重写,不留假接口。
-
-
-export function listBooks(values){
-    return request(`${ServerRoot}/astroreader/listbooks`, {
-        body: JSON.stringify(values),
-    });
+export function changeparams(){
+	return removedLegacyService();
 }
 
-export function allBooks(values){
-    return request(`${ServerRoot}/astroreader/allbooks`, {
-        body: JSON.stringify(values),
-    });
+export function listBooks(){
+	return removedLegacyService();
 }
 
-export function getChapter(values){
-    return request(`${ServerRoot}/astroreader/getchapter`, {
-        body: JSON.stringify(values),
-    });
+export function allBooks(){
+	return removedLegacyService();
 }
 
-export function updateBook(values){
-    return request(`${ServerRoot}/astroreader/updatebook`, {
-        body: JSON.stringify(values),
-    });
+export function getChapter(){
+	return removedLegacyService();
 }
 
-export function deleteBook(values){
-    return request(`${ServerRoot}/astroreader/deletebook`, {
-        body: JSON.stringify(values),
-    });
+export function updateBook(){
+	return removedLegacyService();
 }
 
-export function removeBook(values){
-    return request(`${ServerRoot}/astroreader/removebook`, {
-        body: JSON.stringify(values),
-    });
+export function deleteBook(){
+	return removedLegacyService();
 }
 
-export function readprogress(values){
-    return request(`${ServerRoot}/astroreader/readprogress`, {
-        body: JSON.stringify(values),
-    });
+export function removeBook(){
+	return removedLegacyService();
+}
+
+export function readprogress(){
+	return removedLegacyService();
 }
