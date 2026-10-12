@@ -19,6 +19,7 @@ import {
 	ServerRoot,
 	LaunchSid,
 	IsLocalHostEnv,
+	isBrowserOnlyEnv,
 	applyLocalServerRoot,
 	localServerRootCandidates,
 } from './constants';
@@ -30,6 +31,9 @@ const RENEGOTIATE_THROTTLE_MS = 5000;
 const KNOWN_APP_MARKS = ['horosa-backend', 'horosa-chart'];
 
 export function identityCheckDisabled(){
+	if(isBrowserOnlyEnv()){
+		return true;
+	}
 	try{
 		return typeof window !== 'undefined'
 			&& window.localStorage
@@ -54,6 +58,9 @@ function fetchWithTimeout(url, ms){
 // 对 root 做身份握手。返回 {ok, reason, app, nonce};网络失败/超时/非 JSON/标记不符/
 // nonce 不符一律 ok:false(fail-closed:识别不了 = 不是我们的后端)。
 export async function verifyBackendIdentity(root, opts){
+	if(isBrowserOnlyEnv()){
+		return { ok: false, reason: 'browser-only' };
+	}
 	const options = opts || {};
 	const expectSid = options.expectSid !== undefined ? `${options.expectSid || ''}` : `${LaunchSid || ''}`;
 	const base = `${root || ''}`.replace(/\/$/, '');
@@ -169,7 +176,7 @@ export function __resetBackendIdentityForTests(){
 
 // 启动静默自检:页面就绪后核一次当前根;不过则再协商(成功=后续请求全部落在正确地址,
 // 用户完全无感)。verify-to-switch 语义下,旧运行时/慢启动都只是「原地不换」。
-if(typeof window !== 'undefined' && IsLocalHostEnv){
+if(typeof window !== 'undefined' && IsLocalHostEnv && !isBrowserOnlyEnv()){
 	setTimeout(()=>{
 		try{
 			if(identityCheckDisabled()){
