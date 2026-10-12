@@ -328,6 +328,40 @@ export default {
             });
         },
 
+        *restoreLocalSetup(_, { put }){
+            // The old account-check effect also loaded local preferences. Keep that local behavior
+            // after removing the network-bound /user/check startup path.
+            let setupJson = null;
+            try{
+                setupJson = typeof localStorage !== 'undefined'
+                    ? localStorage.getItem(Constants.GlobalSetupKey)
+                    : null;
+            }catch(e){
+                setupJson = null;
+            }
+            if(!setupJson){
+                return;
+            }
+            let json = null;
+            try{
+                json = normalizeGlobalSetup(JSON.parse(setupJson));
+            }catch(e){
+                json = null;
+            }
+            if(json && json.colorTheme !== undefined){
+                json.colorTheme = AstroConst.normalizeColorThemeIndex(json.colorTheme);
+            }
+            if(json && json.appearanceMode !== undefined){
+                json.appearanceMode = normalizeAppearanceMode(json.appearanceMode);
+            }
+            if(json){
+                yield put({
+                    type: 'save',
+                    payload: json,
+                });
+            }
+        },
+
         *login({payload: values}, { call, put, select }){
             if(values.rememberMe){
                 safeLocalStorageSet(Constants.LoginIdKey, values.loginId);
@@ -710,6 +744,7 @@ export default {
             // This is a single responsive browser app; do not redirect phones to a separate legacy site.
             // Local charts and preferences need no account service, so startup does not check a remote user.
             setDispatch(dispatch);
+            dispatch({ type: 'restoreLocalSetup' });
             const { location } = history;
             const { query } = location;
 
