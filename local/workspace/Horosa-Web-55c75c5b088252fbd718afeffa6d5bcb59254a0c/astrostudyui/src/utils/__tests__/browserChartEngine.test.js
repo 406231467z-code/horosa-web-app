@@ -88,9 +88,9 @@ describe('browser-native natal chart engine candidate', ()=>{
 
 	test('does not claim support for primary directions or unsupported house systems', ()=>{
 		const params = simpleParams();
-		expect(canCalculateBrowserChart({ ...params, predictive: 1 }).ok).toBe(false);
+		expect(canCalculateBrowserChart({ ...params, includePrimaryDirection: 1 }).ok).toBe(false);
 		expect(canCalculateBrowserChart({ ...params, hsys: 7 }).ok).toBe(false);
-		expect(()=>calculateBrowserChart({ ...params, predictive: 1 })).toThrow('主限预测');
+		expect(()=>calculateBrowserChart({ ...params, includePrimaryDirection: 1 })).toThrow('主限预测');
 	});
 
 	test('refuses out-of-range birth years instead of fabricating a local chart', ()=>{
