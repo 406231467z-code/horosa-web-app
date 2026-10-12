@@ -3,7 +3,7 @@ import taisui from './data/taisui.json';
 import { buildLocalNongliLite } from './baziLunarLocal';
 import { isLunarJsYearReliable } from './lunarDomainGuard';
 import request from './request';
-import { ServerRoot, ResultKey } from './constants';
+import { ServerRoot, ResultKey, isBrowserOnlyEnv } from './constants';
 
 // PHASE 4-C: 六壬神煞与旬日。公式对齐 LiuReng.fillGods / fillXun 与 GodsHelper.findGods、findTaiSuiGods。
 // 四柱来自既有本地农历。域外抛错则返回 null，由调用方改走 /liureng/gods。
@@ -185,6 +185,11 @@ export function fetchLiurengGods(params, requestOpts){
 	const local = buildLocalLiureng(params);
 	if(local){
 		return Promise.resolve({ [ResultKey]: { liureng: local } });
+	}
+	// Browser-only mode must never fall back to a server request when the local
+	// calendar does not cover the requested date. Return an explicit empty result.
+	if(isBrowserOnlyEnv()){
+		return Promise.resolve({ [ResultKey]: null, localUnsupported: true });
 	}
 	const opts = {
 		body: JSON.stringify(params || {}),
