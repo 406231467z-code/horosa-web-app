@@ -4946,7 +4946,7 @@ function AIAnalysisMain(props){
 						</Select>
 						<Space wrap>
 							<Button icon={<XQIcon name="plus" />} type="primary" onClick={()=>openMaterialEditor(null)}>新建资料</Button>
-							<Upload showUploadList={false} multiple beforeUpload={(file, fileList)=>{ /* 一次性接收整批 */ if(fileList[0] === file){ ingestFiles(fileList); } return false; }} accept=".txt,.md,.markdown,.doc,.docx,.pdf">
+							<Upload showUploadList={false} multiple beforeUpload={(file, fileList)=>{ /* 一次性接收整批 */ if(fileList[0] === file){ ingestFiles(fileList); } return false; }} accept=".txt,.md,.markdown,.docx">
 								<Button icon={<XQIcon name="import" />}>选文件上传</Button>
 							</Upload>
 							<Button icon={<XQIcon name="folder" />} onClick={()=>setFolderDrawerOpen(true)}>管理文件夹</Button>
@@ -4956,7 +4956,7 @@ function AIAnalysisMain(props){
 						</Space>
 					</div>
 					<div className={styles.materialHint}>
-						<XQIcon name="folder" /> 把文件直接拖到本面即上传（也可点「选文件上传」）。支持 TXT / Markdown / DOC / DOCX / PDF。
+						<XQIcon name="folder" /> 把文件直接拖到本面即上传（也可点「选文件上传」）。支持 TXT / Markdown / DOCX。PDF 与旧版 DOC 在纯浏览器模式下暂不可解析，请先转换为 TXT、Markdown 或 DOCX。
 					</div>
 					{materialIngestQueue.length ? (
 						<div className={styles.materialIngestBar}>
@@ -5076,7 +5076,7 @@ function AIAnalysisMain(props){
 					<div className={styles.materialDropOverlayInner}>
 						<div style={{ fontSize: 40, marginBottom: 8 }}>📁</div>
 						<div style={{ fontSize: 16, fontWeight: 600 }}>放下即上传</div>
-						<div className={styles.materialDropOverlayHint}>支持 TXT / Markdown / DOC / DOCX / PDF</div>
+						<div className={styles.materialDropOverlayHint}>支持 TXT / Markdown / DOCX。PDF 与旧版 DOC 在纯浏览器模式下暂不可解析，请先转换为 TXT、Markdown 或 DOCX</div>
 					</div>
 				</div>
 			) : null}
@@ -5299,7 +5299,7 @@ function AIAnalysisMain(props){
 				ref={desktopFileInputRef}
 				type="file"
 				multiple
-				accept=".txt,.md,.markdown,.doc,.docx,.pdf"
+				accept=".txt,.md,.markdown,.docx"
 				style={{ display: 'none' }}
 				onChange={handleDesktopFileInputChange}
 			/>
@@ -5307,7 +5307,7 @@ function AIAnalysisMain(props){
 				ref={desktopFolderInputRef}
 				type="file"
 				multiple
-				accept=".txt,.md,.markdown,.doc,.docx,.pdf"
+				accept=".txt,.md,.markdown,.docx"
 				webkitdirectory=""
 				directory=""
 				style={{ display: 'none' }}
