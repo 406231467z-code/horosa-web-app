@@ -436,12 +436,12 @@ export default {
 		},
 
 
-        *checkUser({ payload: values }, { call, put, select }) {
-            const param = {};
+        *checkUser({ payload: values }, { put, select }) {
+            // Pure-Web migration: there is no remote login/session validation at boot.
+            // Restore user preferences locally and initialize an anonymous local workspace.
             let setupJson = localStorage.getItem(Constants.GlobalSetupKey);
             if(setupJson){
                 let json = null;
-                // 本地 globalSetup 损坏不能炸掉本 effect:它在 token 校验之前,炸了 = 每次启动静默登出 + 全局设置全不生效
                 try{ json = normalizeGlobalSetup(JSON.parse(setupJson)); }catch(e){ json = null; }
                 if(json && json.colorTheme !== undefined){
                     json.colorTheme = AstroConst.normalizeColorThemeIndex(json.colorTheme);
@@ -457,159 +457,62 @@ export default {
                 }
             }
 
-            const rsp = yield call(appService.checkUser, param);
-            if(!rsp || !rsp.Result){
-                localStorage.removeItem(Constants.TokenKey);
-                const store = yield select((s)=>s);
-                const astrost = store.astro;
-                const appst = store.app;
-                const fld = {
-                    ...astrost.fields,
-                };
-                applyPredictiveSetupToFields(fld, appst);
-                yield put({
-                    type: 'user/save',
-                    payload: {
-                        token: null,
-                        charts: [],
-                        userInfo: null,
-                        admin: false,
-                    },
-                });
-                yield put({
-                    type: 'astro/nowChart',
-                    payload: {
-                        fields: fld,
-                    },
-                });
-                return;
-            }
-            const Result = rsp.Result;
-
-            if(Result.Token === undefined || Result.Token === null){
-                const store = yield select((s)=>s);
-                const astrost = store.astro;
-                const appst = store.app;
-                const fld = {
-                    ...astrost.fields,
-                };
-                applyPredictiveSetupToFields(fld, appst);
-                yield put({
-                    type: 'astro/nowChart',
-                    payload: {
-                        fields: fld,
-                    },
-                });    
-                return;
-            }
-            
-            safeLocalStorageSet(Constants.TokenKey, Result.Token);
-
-            const usrdata = {
-                token: Result.Token,
-                userInfo: Result.User,
-                charts: Result.Charts,
-                total: Result.ChartsTotal,
-                admin: Result.IsAdmin ? true : false,
+            localStorage.removeItem(Constants.TokenKey);
+            const store = yield select((s)=>s);
+            const astroState = store.astro || {};
+            const appState = store.app || {};
+            const fields = {
+                ...(astroState.fields || {}),
             };
+            applyPredictiveSetupToFields(fields, appState);
 
-            const store = yield select((s)=>s);            
-            const astrost = store.astro;
-            const appst = store.app;
-
-            const fld = {
-                ...astrost.fields,                
-            }
-            userInfoToFields(fld, Result.User);
-            applyPredictiveSetupToFields(fld, appst);
-            
             yield put({
                 type: 'user/save',
                 payload: {
-                    ...usrdata,
+                    token: null,
+                    charts: [],
+                    userInfo: null,
+                    admin: false,
                 },
             });
-
-            yield put({
-                type: 'astro/nowChart',
-                payload: {
-                    fields: fld,
-                },
-            });
-
-        },
-
-        *checkOnlyUser({ payload: values }, { call, put, select }) {
-            const param = {
-                PageIndex: 1,
-                PageSize: 30,
-            };
-            let setupJson = localStorage.getItem(Constants.GlobalSetupKey);
-            if(setupJson){
-                let json = null;
-                try{ json = normalizeGlobalSetup(JSON.parse(setupJson)); }catch(e){ json = null; }
-                if(json && json.colorTheme !== undefined){
-                    json.colorTheme = AstroConst.normalizeColorThemeIndex(json.colorTheme);
-                }
-                if(json && json.appearanceMode !== undefined){
-                    json.appearanceMode = normalizeAppearanceMode(json.appearanceMode);
-                }
-                if(json){
-                    yield put({
-                        type: 'save',
-                        payload: json,
-                    });
-                }
-            }
-
-            const rsp = yield call(appService.checkUser, param);
-            if(!rsp || !rsp.Result){
-                localStorage.removeItem(Constants.TokenKey);
-                yield put({
-                    type: 'user/save',
-                    payload: {
-                        token: null,
-                        charts: [],
-                        userInfo: null,
-                        admin: false,
-                    },
-                });
-                return;
-            }
-            const Result = rsp.Result;
-            
-            safeLocalStorageSet(Constants.TokenKey, Result.Token);
-
-            const usrdata = {
-                token: Result.Token,
-                userInfo: Result.User,
-                admin: Result.IsAdmin ? true : false,
-            };
-
-            const store = yield select((s)=>s);
-            const astrost = store.astro;
-            const appst = store.app;
-
-            const fld = {
-                ...astrost.fields,                
-            }
-            userInfoToFields(fld, Result.User);
-            applyPredictiveSetupToFields(fld, appst);
-            
+            // Do not dispatch astro/nowChart here: that effect still runs the legacy
+            // remote /chart engine. The browser chart engine must supply this action
+            // before a real chart can be calculated without a server.
             yield put({
                 type: 'astro/save',
-                payload: {
-                    fields: fld,
-                },
+                payload: { fields },
             });
+        },
 
-           yield put({
+        *checkOnlyUser({ payload: values }, { put }) {
+            // Guest-mode equivalent of the old cloud account probe. No /user/check call.
+            let setupJson = localStorage.getItem(Constants.GlobalSetupKey);
+            if(setupJson){
+                let json = null;
+                try{ json = normalizeGlobalSetup(JSON.parse(setupJson)); }catch(e){ json = null; }
+                if(json && json.colorTheme !== undefined){
+                    json.colorTheme = AstroConst.normalizeColorThemeIndex(json.colorTheme);
+                }
+                if(json && json.appearanceMode !== undefined){
+                    json.appearanceMode = normalizeAppearanceMode(json.appearanceMode);
+                }
+                if(json){
+                    yield put({
+                        type: 'save',
+                        payload: json,
+                    });
+                }
+            }
+            localStorage.removeItem(Constants.TokenKey);
+            yield put({
                 type: 'user/save',
                 payload: {
-                    ...usrdata,
+                    token: null,
+                    charts: [],
+                    userInfo: null,
+                    admin: false,
                 },
             });
-
         },
 
         *logout({ payload:values }, { put, call }){
