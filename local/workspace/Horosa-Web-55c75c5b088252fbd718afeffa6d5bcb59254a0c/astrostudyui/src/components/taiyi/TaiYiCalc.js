@@ -7,7 +7,7 @@ import {
 	getTaiyiAccumLabel,
 } from './core/TaiYiCore';
 import request from '../../utils/request';
-import { ServerRoot, ResultKey } from '../../utils/constants';
+import { ServerRoot, ResultKey, isBrowserOnlyEnv } from '../../utils/constants';
 import { buildKentangEndpoint } from '../../integrations/kentang/serviceRoot';
 import { cachedKentangFetch } from '../../utils/kentangCache';
 import buildLocalBaziResult from '../../utils/baziLunarLocal';
@@ -300,6 +300,11 @@ async function fetchTaiyiPanRaw(payload){
 }
 
 export async function fetchTaiyiPan(fields, nongli, options){
+	// Pure-browser build uses the checked-in Kintaiyi-derived local calculation engine.
+	// Never make a backend request or substitute a historic result in browser mode.
+	if(isBrowserOnlyEnv()){
+		return calcTaiyi(fields, nongli, options || {});
+	}
 	const dt = resolveCalculationDateTime(fields, nongli, options || {});
 	if(!dt){
 		return null;
