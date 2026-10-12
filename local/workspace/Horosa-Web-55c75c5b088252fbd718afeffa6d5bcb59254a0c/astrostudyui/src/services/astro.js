@@ -70,12 +70,23 @@ export function fetchChart(values, requestOptions){
 	// Explicit local-only path for the browser-native natal engine. It is opt-in while
 	// parity/feature coverage is being expanded; it never falls back to Java/Python.
 	if(opts.browserNative === true){
+		const key = buildChartKey(values);
+		const localKey = key ? 'browser:' + key : '';
+		if(localKey && chartMem.has(localKey)){
+			markChartCacheHit();
+			return Promise.resolve(clonePlain(chartMem.get(localKey)));
+		}
 		return import('../utils/browserChartEngine').then((module)=>{
 			const calculate = module.calculateBrowserChart || module.default;
 			if(typeof calculate !== 'function'){
 				throw new Error('浏览器占星引擎未能加载。');
 			}
 			return calculate(values || {});
+		}).then((rsp)=>{
+			if(localKey && rsp && rsp.Result && rsp.Result.params){
+				pushCache(chartMem, localKey, clonePlain(rsp));
+			}
+			return clonePlain(rsp);
 		});
 	}
 
