@@ -13,7 +13,7 @@
 //   · 纯函数 + L3 信封 rev(&rv= 掺 runtime 版本)+ 24h TTL —— 陈果已被上游闭环;
 //   · 7 天窗:更久前的现场按无快照处理(用户预期已换);
 //   · fieldsEpoch:用户启动瞬间手动出盘会作废恢复响应(latest-wins,天然兜底);
-//   · 仅桌面壳(__HOROSA_DESKTOP_CONFIG__)+ kill-switch horosa.perf.bootChartRestore(默认开)。
+//   · Web 与桌面壳均可恢复本机 localStorage 快照 + kill-switch horosa.perf.bootChartRestore(默认开)。
 import { RECORD_FIELDS_RESTORE_MANIFEST } from './recordFieldsRestore';
 import { scheduleStorageWrite } from './deferredStorage';
 import { bootChartRestoreEnabled } from './perfFlags';
@@ -78,13 +78,13 @@ export function saveBootChartSnapshot(fields, currentTab){
 	});
 }
 
-/** 启动恢复读取:开关关/非桌面壳/无快照/超 7 天/坏档 一律 null。 */
+/** 启动恢复读取:开关关/无快照/超 7 天/坏档 一律 null；Web 只读本机 localStorage。 */
 export function loadBootChartSnapshot(){
 	if(!bootChartRestoreEnabled()){
 		return null;
 	}
 	try{
-		if(typeof window === 'undefined' || !window.__HOROSA_DESKTOP_CONFIG__){
+		if(typeof window === 'undefined' || !window.localStorage){
 			return null;
 		}
 		const raw = window.localStorage ? window.localStorage.getItem(STORE_KEY) : null;
