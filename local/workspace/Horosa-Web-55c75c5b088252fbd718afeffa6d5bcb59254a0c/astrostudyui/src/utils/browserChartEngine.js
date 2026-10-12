@@ -401,8 +401,6 @@ function createObject(id, type, lon, lat, ra, dec, speed, cusps, asc, jdUt, geo,
 		dignities: meta.dignities,
 		selfDignity: meta.selfDignity,
 		score: meta.score,
-		degreeGender: meta.degreeGender,
-		ninthPart: meta.ninthPart,
 		joyHouse: meta.joyHouse,
 		joy: !!meta.joyHouse && houseIndex(lon,cusps) === Number(meta.joyHouse),
 	};
