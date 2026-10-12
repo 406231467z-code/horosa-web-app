@@ -1,5 +1,6 @@
 import React, { Component, Suspense } from 'react';   // React/Suspense:神数正传组件级 lazy 所需
 import { defaultAfter23NewDay, defaultLateZiHourUseNextDay } from '../../utils/dayBoundary';
+import { notifyBrowserCalcUnavailable } from '../../utils/browserCalcStatus';
 import { Checkbox, Collapse, Input, InputNumber, Modal, Spin, Switch } from 'antd';
 import DateTime from '../comp/DateTime';
 import { convertLatToStr, convertLonToStr, formatLonDms, formatLatDms } from '../astro/AstroHelper';
@@ -1720,7 +1721,7 @@ class KinAstroMain extends Component{
 			if(this._inFlightSig === sig){
 				this._inFlightSig = null;
 			}
-			console.warn('kinastro backend failed', this.config.serviceKey, e);
+			if(!notifyBrowserCalcUnavailable(this.config.serviceKey, this.config.techniqueLabel || this.config.pageTitle || '数算模块')) console.warn('kinastro backend failed', this.config.serviceKey, e);
 			if(!this.unmounted && reqSeq === this.requestSeq){
 				this.setState({ loading: false });
 			}
