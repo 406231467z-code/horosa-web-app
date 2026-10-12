@@ -1547,14 +1547,17 @@ export default {
 			if(fastPath){
 				yield put({
 					type: 'save',
-					payload: { fields: fld },
+					payload: {
+						fields: fld,
+						...(isBrowserOnlyEnv() ? { chartObj: null } : {}),
+					},
 				});
 				pm.computed();
 				if(!values.nohook){
 					// 喂旧 chartObj:chartFree 契约=hook 不读它(有静态哨兵守),只用 fields。
 					yield put({
 						type: 'doHook',
-						payload: { chartObj: astroState.chartObj, fields: fld },
+						payload: { chartObj: isBrowserOnlyEnv() ? null : astroState.chartObj, fields: fld },
 					});
 					pm.committed();
 				}
