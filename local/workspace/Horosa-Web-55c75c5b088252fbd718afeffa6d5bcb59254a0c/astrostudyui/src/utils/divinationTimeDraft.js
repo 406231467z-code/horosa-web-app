@@ -163,9 +163,6 @@ export function snapshotMetaFromFields(fields, extra){
 // 口径:干支连续循环纪年(公元 4 年甲子,BC 按天文年连续回推);proleptic 现行规则。
 // ───────────────────────────────────────────────────────────────────────────
 import { getOnlyDateNum, getDayGanZhi } from './localNongliAdapter';
-import { parseDateParts, parseYearFromDateStr } from './dateStrSafe';
-import { buildKentangEndpoint } from '../integrations/kentang/serviceRoot';
-import { cachedKentangFetch } from './kentangCache';
 import { isLunarJsYearReliable } from './lunarDomainGuard';
 
 const GAN_LIST = '甲乙丙丁戊己庚辛壬癸'.split('');
@@ -285,62 +282,21 @@ export function assembleNongliFromTables(target, months, jieqiList, birthJDN){
 	};
 }
 
-async function postJieqi(action, payload){
-	const rsp = await cachedKentangFetch(buildKentangEndpoint('jieqi', action), {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json; charset=UTF-8' },
-		body: JSON.stringify(payload),
-	}, { retries: 0 });
-	const text = await rsp.text();
-	const obj = text ? JSON.parse(text) : null;
-	if(!obj || obj.err){ throw new Error((obj && obj.err) || 'jieqi.fetch.failed'); }
-	return obj;
-}
-
-/** 域外农历派生:后端朔表+节表实算拼装。失败返回 null(调用方提示)。 */
+/**
+ * 纯浏览器时间桥。
+ *
+ * 公元 1–9999 年且 lunar-javascript 处于可靠范围时，deriveLocalNongli 返回真实本地计算。
+ * 超出可靠范围时当前版本没有随包发布对应的完整朔表/节气星历数据，因此返回 null；
+ * 不再通过远程 Horosa /jieqi 接口补算，也不会拿现代历表冒充历史年份。
+ * assembleNongliFromTables 保留用于今后接入经过验证的本地历表数据。
+ */
 export async function deriveNongliRemote(fields){
-	const params = paramsFromFields(fields);
-	if(!params){ return null; }
-	try{
-		// 安全解析:BC 的 date 串带前导负号('-7040-07-19'),裸 split('-') 会撕裂成
-		// 年 NaN/月 100(全年份域审计 4A)——统一走 parseDateParts。
-		const dp = parseDateParts(params.date);
-		if(!dp){ return null; }
-		const ad = (Number(params.ad) < 0 || dp.year < 0) ? -1 : 1;
-		const ay = astroYear(Math.abs(dp.year), ad);
-		// 🔴 /jieqi 后端月表用「无 0 年」显示年(ad×|年|:BC12026=-12026,与 Java/extreme_pillars 同轴),
-		// 非 astroYear 的「有 0 年」天文年(-12025)。旧码误传 ay→拿到晚 1 年(丙申)月表→一掌经等 BC
-		// civil 农历/生年支偏(申应未、日28应16;BC1 尤甚,ay=0 无效)。四柱仍用 ay(有 0 年,byte 零回归)。
-		const jieqiYear = ad < 0 ? -Math.abs(dp.year) : Math.abs(dp.year);
-		const zone = typeof params.zone === 'string' ? params.zone : '+08:00';
-		const base = { zone, lat: params.lat || '0n00', lon: params.lon || '0e00' };
-		const [nl, birth] = await Promise.all([
-			postJieqi('nongli', { year: jieqiYear, ...base }),
-			postJieqi('birth', { date: `${String(Math.abs(dp.year)).padStart(4, '0')}/${String(dp.month).padStart(2, '0')}/${String(dp.day).padStart(2, '0')}`, time: params.time, ad, ...base }),
-		]);
-		const hour = parseInt((params.time || '0').split(':')[0], 10) || 0;
-		const out = assembleNongliFromTables(
-			{ ay, month: dp.month, day: dp.day, hour },
-			nl.months, birth.jieqi, birth.birthJDN
-		);
-		if(out){ out.date = params.date; }
-		return out;
-	}catch(e){
-		return null;
-	}
+	return deriveLocalNongli(fields);
 }
 
-/** 统一入口:域内走本地(同步引擎,零回归);域外走后端实算。 */
+/** 统一入口:仅使用浏览器本地历法；没有可靠本地结果时返回 null。 */
 export async function deriveLocalNongliAsync(fields){
-	const local = deriveLocalNongli(fields);
-	if(local){ return local; }
-	const params = paramsFromFields(fields);
-	if(!params){ return null; }
-	const y = parseYearFromDateStr(params.date);
-	if(Number(params.ad) < 0 || !isLunarJsYearReliable(y)){
-		return deriveNongliRemote(fields);
-	}
-	return null;
+	return deriveLocalNongli(fields);
 }
 
 // ── 同步消费桥:12 技法组件在 render 里同步调 deriveLocalNongli——域外结果异步到货后
