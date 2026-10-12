@@ -51,4 +51,24 @@ describe('browser-native calculation paths do not fall back to remote services',
 		expect(source).toContain('未请求远程服务');
 		expect(source).not.toMatch(/ServerRoot|request\s*\(|cachedPost|\/ziwei\/birth/);
 	});
+
+	test('precise calendar bridge only computes locally and rejects unsupported domains', ()=>{
+		const source = withoutComments(read('utils/preciseCalcBridge.js'));
+		expect(source).toContain('buildLocalNongliFallback(reqParams)');
+		expect(source).toContain('buildLocalJieqiYearFallback(reqParams)');
+		expect(source).not.toMatch(/ServerRoot|request\s*\(|\/nongli\/time|\/jieqi\/year/);
+	});
+
+	test('divination time bridge does not fetch historical month/jieqi tables from Kentang', ()=>{
+		const source = withoutComments(read('utils/divinationTimeDraft.js'));
+		expect(source).toContain('export function deriveNongliUniversalSync(fields)');
+		expect(source).not.toMatch(/cachedKentangFetch|buildKentangEndpoint|postJieqi\s*\(/);
+	});
+
+	test('JinKou run-year is derived locally and no longer imports request transport', ()=>{
+		const source = withoutComments(read('components/jinkou/JinKouMain.js'));
+		expect(source).toContain('calcRunYearLocal(');
+		expect(source).toContain('setLiurengRunyearLocalCache(runyearKey, clonePlain(result))');
+		expect(source).not.toMatch(/request\s*\(|Constants\.ServerRoot/);
+	});
 });
