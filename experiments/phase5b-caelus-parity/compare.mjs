@@ -119,7 +119,10 @@ async function main() {
   const report = {
     experiment: 'PHASE 5-B candidate feasibility; not production',
     verdict: counts.FAIL === 0 && counts.MISSING === 0 ? 'CANDIDATE_CORE_PARITY_ON_ONE_HISTORICAL_CHART' : 'BLOCKED',
-    candidate: 'caelus@0.25.0 (MIT, clean-room engine)',
+    candidate: {
+      package: 'caelus@0.25.0 (MIT, clean-room engine)',
+      advertisedCoreBodyRange: '1000–3000 CE; vendor documentation only, not independently proven by this one fixture',
+    },
     golden: {
       type: 'HISTORICAL_GOLDEN',
       file: 'astrostudyui/src/divination/engine/__tests__/fixtures/realChartResult.json',
@@ -140,6 +143,7 @@ async function main() {
       'house placements and classical dignity payload',
       'primary directions, Jyotish, Qizheng, Three Styles, and Yi methods',
       'independent real charts and wider date coverage',
+      'full 1000–3000 CE range and any dates outside the candidate library\'s advertised core-body range',
       'production bundle, browser worker/offline and mobile testing',
     ],
     fields,
