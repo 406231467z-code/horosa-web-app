@@ -1259,6 +1259,32 @@ export default {
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
+			if(isBrowserOnlyEnv()){
+				// New/recalculated charts must update the local form even while the Western
+				// ephemeris migration is incomplete. Never leave the prior chart beside new inputs.
+				const drawer = closeAllDrawer('*nowChart');
+				yield put({
+					type: 'save',
+					payload: {
+						fields,
+						chartObj: null,
+						drawerVisible: drawer,
+					},
+				});
+				if(!values.nohook){
+					yield put({
+						type: 'doHook',
+						payload: { chartObj: null, fields },
+					});
+				}
+				markChartRefreshEnd();
+				const activeHook = astroState.predictHook && astroState.predictHook[astroState.currentTab];
+				if(!(activeHook && activeHook.chartFree === true)){
+					showChartServiceError();
+				}
+				return;
+			}
+
 			const rsp = yield call(service.fetchChart, param);
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
