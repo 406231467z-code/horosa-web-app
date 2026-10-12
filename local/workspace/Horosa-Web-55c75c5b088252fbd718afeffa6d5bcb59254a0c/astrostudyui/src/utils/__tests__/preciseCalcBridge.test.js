@@ -1,5 +1,5 @@
 import request from '../request';
-import { fetchPreciseJieqiSeed, fetchPreciseJieqiYear } from '../preciseCalcBridge';
+import { fetchPreciseJieqiSeed, fetchPreciseJieqiYear, fetchPreciseNongli } from '../preciseCalcBridge';
 import { buildLocalJieqiYearSeed } from '../localNongliAdapter';
 
 jest.mock('../request', ()=>jest.fn());
@@ -7,6 +7,27 @@ jest.mock('../request', ()=>jest.fn());
 describe('PHASE 4-B jieqi local table', ()=>{
 	beforeEach(()=>{
 		request.mockReset();
+	});
+
+	test('可靠公元日期的农历/四柱通过浏览器本地引擎计算，不请求后端', async()=>{
+		const result = await fetchPreciseNongli({
+			date: '2026/05/27',
+			time: '23:30:00',
+			zone: '+08:00',
+			lon: 113.0,
+			lat: 23.0,
+			gpsLon: 113.0,
+			gpsLat: 23.0,
+			ad: 1,
+			gender: 1,
+			timeAlg: 1,
+			after23NewDay: 1,
+			lateZiHourUseNextDay: 1,
+		});
+		expect(request).not.toHaveBeenCalled();
+		expect(result && result.local).toBe(true);
+		expect(result && result.bazi && result.bazi.fourColumns && result.bazi.fourColumns.day.ganzi).toBeTruthy();
+		expect(result && result.bazi && result.bazi.nongli).toBeTruthy();
 	});
 
 	test('公元可靠域走本地 24 节气表，不请求后端', async()=>{
