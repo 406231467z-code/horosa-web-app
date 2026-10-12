@@ -9,6 +9,7 @@ import pholusPack from 'caelus/data/pholus_cheb.json';
 import intpApogPack from 'caelus/data/intp_apog_cheb.json';
 import * as AstroConst from '../constants/AstroConst';
 import { HELLENISTIC } from '../divination/data/hellenisticData';
+import { mansionOf, degreeGender, monomoiriaRuler, ninthPartSign, darijanRuler, degreeQuality, specialDegree } from './browserClassicalTables';
 
 const DEG = Math.PI / 180;
 const SUPPORTED_HOUSES = {
@@ -390,6 +391,13 @@ function createObject(id, type, lon, lat, ra, dec, speed, cusps, asc, jdUt, geo,
 		antisciaPoint: { lon: antisciaLon, sign: signOf(antisciaLon), signlon: mod(antisciaLon,30) },
 		cantisciaPoint: { lon: cantisciaLon, sign: signOf(cantisciaLon), signlon: mod(cantisciaLon,30) },
 		su: mansion27(lon),
+		mansion: mansionOf(lon),
+		degreeQuality: degreeQuality(signOf(lon),mod(lon,30)),
+		specialDegree: specialDegree(signOf(lon),mod(lon,30)),
+		monomoiria: monomoiriaRuler(lon),
+		ninthPart: ninthPartSign(lon),
+		darijan: darijanRuler(signOf(lon),mod(lon,30)),
+		degreeGender: degreeGender(signOf(lon),mod(lon,30)),
 		dignities: meta.dignities,
 		selfDignity: meta.selfDignity,
 		score: meta.score,
