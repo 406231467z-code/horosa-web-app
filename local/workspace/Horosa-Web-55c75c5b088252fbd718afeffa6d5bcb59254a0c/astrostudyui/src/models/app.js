@@ -5,7 +5,6 @@ import {getStore, } from '../utils/storageutil';
 import * as Constants from '../utils/constants';
 import * as appService from '../services/app';
 import {setDispatch} from '../utils/request';
-import {detectPlatform} from '../utils/helper';
 import { loadBootChartSnapshot } from '../utils/bootChartRestore';
 import * as AstroConst from '../constants/AstroConst';
 import { setTmDelta } from '../utils/request';
@@ -694,30 +693,11 @@ export default {
 
     subscriptions: {
         setup({ dispatch, history }) {
-            let docw = document.documentElement.clientWidth;
-            let doch = document.documentElement.clientHeight;
-            let mindim = Math.min(docw, doch);
-            let platform = detectPlatform();
-            const isLocalHost = window.location.protocol === 'file:' ||
-                window.location.hostname === 'localhost' ||
-                window.location.hostname === '127.0.0.1';
-            if(platform === 'IPhone' || platform === 'IPod' || 
-                (platform === 'Android' && mindim < 600)){
-                    if(!isLocalHost){
-                    window.location.href = Constants.MobileServer;
-                    }
-            }
-            // alert(platform + '; ' + mindim + '; ' + navigator.userAgent + '; ' + navigator.platform);
-
+            // This is a single responsive browser app; do not redirect phones to a separate legacy site.
+            // Local charts and preferences need no account service, so startup does not check a remote user.
             setDispatch(dispatch);
             const { location } = history;
             const { query } = location;
-            if(location.pathname === '/' || location.pathname === ''){
-                dispatch({
-                    type: 'checkUser',
-                    payload:{},
-                });                           
-            }
 
             let aspects = localStorage.getItem(AstroConst.AspKey);
             if(aspects === undefined || aspects === null){
@@ -844,15 +824,8 @@ export default {
                 payload: { aspects: aspects },
             });
 
-            dispatch({
-                type: 'getSysTime',
-                payload:{},
-            });                           
-
-            dispatch({
-                type: 'rules/ziwei',
-                payload:{},
-            });
+            // Browser-first startup stays usable without Java/Python. The remaining calculation
+            // adapters are migrated module-by-module; do not probe server time or remote Ziwei rules here.
 
             // horosa_boot_chart_restore_v1(PERF-R10 S2):温启恢复上次工作现场 —— 快照按
             // fetchByChartData 的 record 口径重放(与「手动载入命盘」逐字节同管线:选项条件
