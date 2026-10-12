@@ -327,7 +327,7 @@ function buildProviderFormValues(profile){
 		providerType,
 		apiKey: profile ? profile.apiKey : '',
 		baseUrl: profile ? profile.baseUrl : preset.baseUrl,
-		aiTransport: providerOptions.aiTransport === 'direct' ? 'direct' : 'proxy',
+		aiTransport: 'direct',
 		manualModels: joinModelLines(manualModels),
 		embeddingModels: joinModelLines(embeddingModels),
 		extraHeadersText: JSON.stringify(providerOptions.extraHeaders || {}, null, 2),
@@ -377,9 +377,8 @@ function buildProviderOptionsFromForm(values){
 	if(streamMaxStreamMs){
 		providerOptions.streamMaxStreamMs = streamMaxStreamMs;
 	}
-	if(values.aiTransport === 'direct'){
-		providerOptions.aiTransport = 'direct';
-	}
+	// Pure browser mode has no Java AI proxy; normalize every saved/legacy profile to direct.
+	providerOptions.aiTransport = 'direct';
 	if(providerType === 'anthropic'){
 		const maxTokens = parseNumberText(values.anthropicMaxTokens, 'Anthropic max tokens', { integer: true });
 		const thinkingBudget = parseNumberText(values.anthropicThinkingBudget, 'Anthropic thinking budget', { integer: true });
@@ -5801,12 +5800,10 @@ function AIAnalysisMain(props){
 					<Form.Item name="baseUrl" label="Base URL">
 						<Input />
 					</Form.Item>
-					<Form.Item name="aiTransport" label="连接方式">
-						<Select>
-							<Select.Option value="proxy">经本机 Java 代理</Select.Option>
-							<Select.Option value="direct">浏览器直连供应商</Select.Option>
-						</Select>
-					</Form.Item>
+					<div className={styles.cardMeta}>
+						<div>连接方式：浏览器直连 AI 服务商</div>
+						<div>分析内容、相关命盘上下文与 API Key 会由当前浏览器直接发送给所配置的服务商，不经过 Horosa 后端代理。请只配置可信服务商，并确认其数据政策和浏览器跨域访问（CORS）设置。</div>
+					</div>
 					<Form.Item shouldUpdate noStyle>
 						{({ getFieldValue })=>(
 							<div className={styles.cardMeta}>
