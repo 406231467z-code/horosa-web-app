@@ -224,8 +224,10 @@ export function computePdPolesLocal(envelope, options = {}){
 	if(!Number.isFinite(phiRaw) || !Number.isFinite(lonRaw) || !Number.isFinite(jd)){
 		return null;
 	}
-	const mc = findById(chart, 'MC');
-	const armc = mc && finite(mc.ra) ? norm360(mc.ra) : norm360(meanSiderealAtGreenwich(jd) + lonRaw);
+	const mcCusp = Array.isArray(chart.houses) ? chart.houses.find((house)=>house && house.id === 'House10') : null;
+	// The MC object's RA field in the flatlib response is not consistently the ARMC;
+	// House10.ra is the equatorial coordinate of the meridian cusp and is the best local source.
+	const armc = mcCusp && finite(mcCusp.ra) ? norm360(mcCusp.ra) : norm360(meanSiderealAtGreenwich(jd) + lonRaw);
 	const eps = meanObliquity(jd);
 	const projection = resolveProjection(params);
 	const pdtype = Number(params.pdtype || 0);
