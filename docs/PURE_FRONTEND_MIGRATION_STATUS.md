@@ -11,10 +11,13 @@
 - 普通浏览器环境的 `ServerRoot` 设为空值，统一 `request/requestRaw/requestStream/uploadFile` 入口会拦截后端请求；术数模块使用的 `fetchChartWithRetry` 也不再调用本地计算服务。
 - 紫微静态规则从前端 JSON 加载；紫微本命盘在现有本地引擎支持的公元范围使用浏览器计算。
 - 八字排盘优先使用 `buildLocalBaziResult`；精确农历优先使用现有本地桥接；公元 1–9999 年且在依赖库可靠范围内的节气表直接在浏览器生成。
-- 遁甲通过现有 `calcDunJia` 本地引擎构建盘面；浏览器模式不再请求 `/qimen/pan`。
-- 太乙通过 `calcTaiyiPanFromKintaiyi` 立成表引擎与前端派生规则计算；浏览器模式不再请求 `/taiyi/pan`。
+- 遁甲通过现有 `calcDunJia` 本地引擎构建盘面；浏览器模式不再请求 `/qimen/pan`，本地历法缺少完整四柱时拒绝输出。
+- 太乙通过 `calcTaiyiPanFromKintaiyi` 立成表引擎与前端派生规则计算；浏览器模式不再请求 `/taiyi/pan`，缺少完整四柱时拒绝输出。
+- 六壬神煞已有本地计算器，行年已改为本地年差计算；主六壬课盘仍依赖西洋 `chartObj`（月将太阳位置、昼夜状态等），暂未宣称完整本地化。
 - 浏览器模式下，未迁移的计算模块不会把后端失败伪装成成功结果；会提示功能仍未完成本地计算迁移。
-- CSS 已补充动态视口高度 `100dvh`、根容器最小宽度限制、窄屏标签横向滚动和抽屉宽度限制。
+- CSS 已补充动态视口高度 `100dvh`、根容器最小宽度限制、窄屏标签横向滚动和抽屉宽度限制；工作区高度下限在窄屏由 660px 调整为 320px，保留桌面默认下限。
+- Umi 开发模式的 chunk `publicPath` 改为 `/`，正式 Web 部署继续使用 `/static/`，用于修复开发环境 `layouts__index.js` chunk 路径不匹配。
+- 新增 `chartFetchBrowserOnly.test.js`，断言未迁移术数接口在浏览器模式下不会调用 `fetch`，也不会返回伪成功。
 
 ## 已有前端数据与计算
 
@@ -27,6 +30,7 @@
 | 遁甲 | `DunJiaCalc.js`、`DunJiaMain.js` | 使用现有本地排盘构建器；生产浏览器对拍仍需做 |
 | 太乙 | `TaiYiCore.js`、`TaiYiCalc.js` | 使用前端立成表与派生规则；生产浏览器对拍仍需做 |
 | AI 分析 | 前端直连模型提供商 | 直连模式可保留；以前端代理为基础的功能已禁用，模型供应商自身仍需支持浏览器跨域请求 |
+| 六壬行年/神煞 | `liurengGodsLocal.js`、`calcRunYearLocal` | 已有本地年干支、神煞与行年路径；主课盘因缺少完整本地西洋/太阳信息仍不能单独启动 |
 
 ## 尚未完成，不能标记为 Web Ready
 
