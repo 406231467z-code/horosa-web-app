@@ -17,6 +17,7 @@
 		"postinstall": "node scripts/patch_quill_domnodeinserted.js && node scripts/patch-dom-align-zoom.js && umi generate tmp",
 		"prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
 		"audit:endpoints": "node scripts/audit-browser-endpoints.js",
+		"check:browser-build": "node scripts/check-browser-build.js",
 		"test": "umi-test",
 		"test:coverage": "umi-test --coverage"
 	},
