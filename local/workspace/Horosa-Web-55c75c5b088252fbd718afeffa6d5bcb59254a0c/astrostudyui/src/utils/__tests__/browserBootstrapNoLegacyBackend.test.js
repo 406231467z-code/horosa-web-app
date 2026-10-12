@@ -24,14 +24,16 @@ describe('browser bootstrap is independent of legacy startup APIs', ()=>{
 		expect(model).not.toMatch(/appService\.(checkUser|systime)\b/);
 	});
 
-	test('cloud-account and reader wrappers do not contain HTTP service URLs', ()=>{
-		const services = [
-			readSrc('services/app.js'),
-			readSrc('services/user.js'),
-		].join('\n');
+	test('legacy account/reader APIs are removed or network-free',()=>{
+		const accountService = stripComments(readSrc('services/app.js'));
+		const remainingPaths = ['services/user.js'].filter((relativePath)=>fs.existsSync(path.join(SRC_ROOT, relativePath)));
+		const remainingServices = remainingPaths.map(readSrc).join('\n');
+		const services = [accountService, remainingServices].join('\n');
 		expect(services).not.toMatch(/\$\{ServerRoot\}\/user\//);
 		expect(services).not.toMatch(/\$\{ServerRoot\}\/common\/time/);
 		expect(services).not.toMatch(/\$\{ServerRoot\}\/astroreader\//);
+		expect(stripComments(readSrc('models/user.js'))).not.toMatch(/from\s+['"]\.\.\/services\/user['"]/);
+
 	});
 
 	test('Ziwei rules are read from frontend assets, not the request helper', ()=>{
