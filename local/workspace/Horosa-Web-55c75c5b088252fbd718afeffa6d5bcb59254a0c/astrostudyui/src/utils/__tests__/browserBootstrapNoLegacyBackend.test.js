@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const SRC_ROOT = path.join(__dirname, '..');
+const SRC_ROOT = path.join(__dirname, '..', '..');
 
 function readSrc(relativePath){
 	return fs.readFileSync(path.join(SRC_ROOT, relativePath), 'utf8');
@@ -43,7 +43,7 @@ describe('browser bootstrap is independent of legacy startup APIs', ()=>{
 	});
 
 	test('Umi development config does not proxy API paths to Java/Python', ()=>{
-		const config = stripComments(readSrc('../.. /.umirc.js'.replace(' ','')));
+		const config = stripComments(readSrc('../.umirc.js'));
 		expect(config).not.toContain("'/backend'");
 		expect(config).not.toContain("'/chart-service'");
 	});
