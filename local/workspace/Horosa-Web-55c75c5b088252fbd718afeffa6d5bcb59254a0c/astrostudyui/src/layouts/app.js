@@ -8,11 +8,8 @@ import { listLocalCharts } from '../utils/localcharts';
 import * as AstroConst from '../constants/AstroConst';
 import PageHeader from '../components/homepage/PageHeader';
 import UpdateNotifier from '../components/update/UpdateNotifier';
-import ServiceStatusBanner from '../components/common/ServiceStatusBanner';
 import LocalStoreHealthBanner from '../components/common/LocalStoreHealthBanner';
 import MultiInstanceNotice from '../components/common/MultiInstanceNotice';
-import StartupGate from '../components/common/StartupGate';
-import BackendStatusDot from '../components/common/BackendStatusDot';
 import {
     APPEARANCE_DARK,
     applyAppearanceToDocument,
@@ -179,11 +176,8 @@ const App = ({children, dispatch, app, user, astro, })=>{
 
             <div id='globalFooter' style={{height: 0, overflow: 'hidden'}} />
             <UpdateNotifier />
-            <ServiceStatusBanner />
             <LocalStoreHealthBanner />
             <MultiInstanceNotice />
-            <BackendStatusDot />
-            <StartupGate />
         </Layout>
     );
 };
