@@ -1,5 +1,3 @@
-import request from './request';
-import { ServerRoot, ResultKey } from './constants';
 import {
 	getNongliLocalCache,
 	setNongliLocalCache,
@@ -23,12 +21,9 @@ const DEFAULT_SEED_TERMS = [
 	'立春', '雨水', '惊蛰', '春分', '清明', '谷雨', '立夏', '小满', '芒种', '夏至', '小暑', '大暑',
 	'立秋', '处暑', '白露', '秋分', '寒露', '霜降', '立冬', '小雪', '大雪', '冬至', '小寒', '大寒',
 ];
-const PRECISE_REQ_TIMEOUT_MS = 45000;
 
 const nongliMem = new Map();
-const nongliInflight = new Map();
 const jieqiYearMem = new Map();
-const jieqiYearInflight = new Map();
 const jieqiSeedMem = new Map();
 const jieqiSeedInflight = new Map();
 
@@ -377,131 +372,50 @@ export async function fetchPreciseNongli(params){
 	const reqParams = normalizeNongliParams(params);
 	const key = buildKey(reqParams, NONG_LI_KEYS);
 	if(key && nongliMem.has(key)){
-		return nongliMem.get(key);
-	}
-	const localHit = getNongliLocalCache(reqParams);
-	if(localHit){
-		if(key){
-			pushCache(nongliMem, key, localHit);
+		const memo = nongliMem.get(key);
+		if(memo && memo.local === true){
+			return memo;
 		}
-		return localHit;
 	}
-	// Browser-first migration: the existing local BaZi/lunar engine is the primary
-	// source for dates in its tested domain. Do not issue /nongli/time for ordinary
-	// dates when the complete local envelope can be built. Unsupported date domains
-	// still fall through below until their calendar algorithms are ported and tested.
-	const localComputed = buildLocalNongliFallback(reqParams);
-	if(localComputed){
-		if(key){
-			pushCache(nongliMem, key, localComputed);
-		}
-		setNongliLocalCache(reqParams, localComputed);
-		return localComputed;
+	const cacheHit = getNongliLocalCache(reqParams);
+	if(cacheHit && cacheHit.local === true){
+		if(key){ pushCache(nongliMem, key, cacheHit); }
+		return cacheHit;
 	}
-	if(key && nongliInflight.has(key)){
-		return nongliInflight.get(key);
+	const local = buildLocalNongliFallback(reqParams);
+	if(local && local.local === true){
+		if(key){ pushCache(nongliMem, key, local); }
+		setNongliLocalCache(reqParams, local);
+		return local;
 	}
-	const req = (async()=>{
-		try{
-			const rsp = await request(`${ServerRoot}/nongli/time`, {
-				body: JSON.stringify(reqParams),
-				silent: true,
-				timeoutMs: PRECISE_REQ_TIMEOUT_MS,
-			});
-			const result = rsp && rsp[ResultKey] ? rsp[ResultKey] : null;
-			if(result){
-				pushCache(nongliMem, key, result);
-				setNongliLocalCache(reqParams, result);
-				return result;
-			}
-			// 软失败:后端返非 0 码 / 网络抖动会让 request 返回 undefined(不抛异常),
-			// 原本写在下面 catch 里的本地兜底永不触发 → 奇门/太乙离线即空、改经纬度(缓存未命中)即暴露。
-			// 故对 !result 的软失败也走一次本地兜底,与 /liureng/gods 行为对齐。
-			const softFallback = buildLocalNongliFallback(reqParams);
-			if(softFallback){
-				pushCache(nongliMem, key, softFallback);
-				setNongliLocalCache(reqParams, softFallback);
-			}
-			return softFallback;
-		}catch(e){
-			const fallback = buildLocalNongliFallback(reqParams);
-			if(fallback){
-				pushCache(nongliMem, key, fallback);
-				setNongliLocalCache(reqParams, fallback);
-			}
-			return fallback;
-		}
-	})().finally(()=>{
-		if(key){
-			nongliInflight.delete(key);
-		}
-	});
-	if(key){
-		nongliInflight.set(key, req);
-	}
-	return req;
+	throw new Error(
+		`浏览器本地农历/四柱算法无法可靠计算日期 ${reqParams.date || '未知'}；未请求远程排盘服务。`
+	);
 }
 
 export async function fetchPreciseJieqiYear(params){
 	const reqParams = normalizeJieqiParams(params);
 	const key = buildKey(reqParams, JIE_QI_YEAR_KEYS);
-	// PHASE 4-B: 可靠域（公元 1–9999）用本地 24 节气表，不请求 Java/Python。
-	// 域外或公元前本地表会错位，下面仍走 /jieqi/year。
-	if(key && jieqiYearMem.has(key) && jieqiYearMem.get(key) && jieqiYearMem.get(key).local){
-		return jieqiYearMem.get(key);
+	if(key && jieqiYearMem.has(key)){
+		const memo = jieqiYearMem.get(key);
+		if(memo && memo.local === true){
+			return memo;
+		}
 	}
 	const localTable = buildLocalJieqiYearFallback(reqParams);
-	if(localTable){
-		if(key){
-			pushCache(jieqiYearMem, key, localTable);
-		}
+	if(localTable && localTable.local === true){
+		if(key){ pushCache(jieqiYearMem, key, localTable); }
 		setJieqiYearLocalCache(reqParams, localTable);
 		return localTable;
 	}
-	if(key && jieqiYearMem.has(key)){
-		return jieqiYearMem.get(key);
+	const cacheHit = getJieqiYearLocalCache(reqParams);
+	if(cacheHit && cacheHit.local === true){
+		if(key){ pushCache(jieqiYearMem, key, cacheHit); }
+		return cacheHit;
 	}
-	const localHit = getJieqiYearLocalCache(reqParams);
-	if(localHit){
-		if(key){
-			pushCache(jieqiYearMem, key, localHit);
-		}
-		return localHit;
-	}
-	if(key && jieqiYearInflight.has(key)){
-		return jieqiYearInflight.get(key);
-	}
-	const req = (async()=>{
-		try{
-			const rsp = await request(`${ServerRoot}/jieqi/year`, {
-				body: JSON.stringify(reqParams),
-				silent: true,
-				timeoutMs: PRECISE_REQ_TIMEOUT_MS,
-			});
-			const result = rsp && rsp[ResultKey] ? rsp[ResultKey] : null;
-			if(result){
-				const filledResult = fillJieqiDayGanzhiFromLocal(result, reqParams);
-				pushCache(jieqiYearMem, key, filledResult);
-				setJieqiYearLocalCache(reqParams, filledResult);
-			}
-			return result ? fillJieqiDayGanzhiFromLocal(result, reqParams) : result;
-		}catch(e){
-			const fallback = localHit || buildLocalJieqiYearFallback(reqParams);
-			if(fallback){
-				pushCache(jieqiYearMem, key, fallback);
-				setJieqiYearLocalCache(reqParams, fallback);
-			}
-			return fallback || null;
-		}
-	})().finally(()=>{
-		if(key){
-			jieqiYearInflight.delete(key);
-		}
-	});
-	if(key){
-		jieqiYearInflight.set(key, req);
-	}
-	return req;
+	throw new Error(
+		`浏览器本地节气引擎无法可靠计算公历年 ${reqParams.year || '未知'}；未请求远程排盘服务。`
+	);
 }
 
 // PERF-R8 P3(邻位预取):分至图年份步进的 year±1 静默预取 —— 只在「当前年已取到」之后
