@@ -27,29 +27,12 @@ function isLoopbackRoot(value){
 	return /^https?:\/\/(?:localhost|[^/]*\.localhost|127\.0\.0\.1|\[?::1\]?)(?::\d+)?(?:\/|$)/i.test(String(value || ''));
 }
 
-// LAN browser visits use the same remote API as the original browser build by default.
-// Opt into the host computer's loopback-only Java/Python services for this URL with
-// ?localBackend=1. Do not honor a persisted localStorage flag on LAN hosts: an old
-// desktop preference can otherwise silently switch every phone session to local proxies.
-function hasLocalBackendOptIn(){
-	if(typeof window === 'undefined'){
-		return false;
-	}
-	try{
-		return /(?:^|[?&])localBackend=1(?:&|$)/.test(String(window.location.search || ''));
-	}catch(e){
-		return false;
-	}
-}
-
+// Ordinary browser sessions (including localhost development and LAN phones) must
+// not choose the Java/Python loopback services. Only legacy file:// launches retain
+// their old local-service compatibility path while the frontend calculations migrate.
 const isLocalHost =
 	typeof window !== 'undefined' &&
-	(
-		window.location.protocol === 'file:' ||
-		window.location.hostname === 'localhost' ||
-		window.location.hostname === '127.0.0.1' ||
-		hasLocalBackendOptIn()
-	);
+	window.location.protocol === 'file:';
 
 function isValidServerRootValue(val){
 	return !!(val && /^https?:\/\/.+/i.test(String(val)));
@@ -79,13 +62,6 @@ function deriveLocalRootFromPagePort(){
 		return null;
 	}
 	try{
-		// During Umi development, use same-origin proxies so a phone never has to
-		// access the host computer's loopback directly or make cross-origin requests.
-		if(process.env.NODE_ENV === 'development' &&
-			(/^https?:$/.test(window.location.protocol)) &&
-			window.location.origin && window.location.origin !== 'null'){
-			return window.location.origin + '/backend';
-		}
 		// For production/local file hosting use the host serving the UI, not a guessed
 		// webPort + 1999 (Umi may move from 8000 to 8001 when the default port is busy).
 		let hostname = String(window.location.hostname || '').trim() || '127.0.0.1';
