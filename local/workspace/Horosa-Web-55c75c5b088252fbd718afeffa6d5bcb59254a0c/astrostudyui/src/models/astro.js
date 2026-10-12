@@ -564,6 +564,20 @@ function shouldIncludePrimaryDirection(state){
 	);
 }
 
+function shouldUseBrowserNativeChart(state){
+	// The main Western natal page is served by the browser chart engine. Other
+	// retained calculation families stay on their own migration paths until ported.
+	return !!state && canonicalizeTabKey(state.currentTab) === 'astrochart';
+}
+
+function chartRequestOptions(state, options){
+	const opts = { ...(options || {}) };
+	if(shouldUseBrowserNativeChart(state)){
+		opts.browserNative = true;
+	}
+	return opts;
+}
+
 function isValidChartResponse(rsp){
 	return rsp !== undefined && rsp !== null && rsp.Result !== undefined && rsp.Result !== null;
 }
@@ -711,14 +725,14 @@ function buildStepPrefetchTasks(fieldValues, stepHint, astroState){
 		}
 		param.cid = null;
 		param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-		if(skipChart){
+		if(skipChart || shouldUseBrowserNativeChart(astroState)){
 			chartTasks.push(null);   // 本地漏斗武装:占位保序,只发技法端点
 		}else{
 			chartTasks.push({
 				name: `chart${label}`,
 				path: '/chart',   // R4-B1 运行时白名单契约:无 path 的任务会被 submitStepPrefetch 丢弃
 				// silent+零重试:预取失败静默、绝不退避风暴;结果自动进 chartMem+requestDedupe
-				run: ()=> service.fetchChart(param, { silent: true, retry: { retries: 0 } }),
+				run: ()=> service.fetchChart(param, chartRequestOptions(astroState, { silent: true, retry: { retries: 0 } })),
 			});
 		}
 		let mine = null;
@@ -782,7 +796,7 @@ registerOptionChartTaskBuilder((variantFields, astroState)=>{
 	return {
 		name: 'chart',
 		path: '/chart',
-		run: ()=> service.fetchChart(param, { silent: true, retry: { retries: 0 } }),
+		run: ()=> service.fetchChart(param, chartRequestOptions(astroState, { silent: true, retry: { retries: 0 } })),
 	};
 });
 
@@ -1208,7 +1222,9 @@ export default {
 				}
 				const astroState = yield select((state)=>state.astro);
 				param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-				yield call(service.fetchChart, param, { silent: true, disableLoading: true });
+								if(!shouldUseBrowserNativeChart(astroState)){
+					yield call(service.fetchChart, param, { silent: true, disableLoading: true });
+				}
 			}catch(e){
 				// speculative only — never surface
 			}
@@ -1230,7 +1246,7 @@ export default {
 			const astroState = yield select((state)=>state.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
 
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState));
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;
@@ -1297,7 +1313,7 @@ export default {
 			const param = fieldsToParams(fields);
 			const astroState = yield select((allState)=>allState.astro);
 			param.includePrimaryDirection = shouldIncludePrimaryDirection(astroState);
-			const rsp = yield call(service.fetchChart, param);
+			const rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState));
 			if(!isValidChartResponse(rsp)){
 				showChartServiceError();
 				return;
@@ -1486,7 +1502,7 @@ export default {
 
 			let rsp;
 			try{
-				rsp = yield call(service.fetchChart, param, requestOptions);
+				rsp = yield call(service.fetchChart, param, chartRequestOptions(astroState, requestOptions));
 			}catch(abortErr){
 				// [R4-B5b] 被新请求 abort 的旧主链:静默退场(新请求自有其成败路径)。
 				// 其它错误维持旧行为原样上抛(request 层早已按 silent 决定 surface 与否)。
