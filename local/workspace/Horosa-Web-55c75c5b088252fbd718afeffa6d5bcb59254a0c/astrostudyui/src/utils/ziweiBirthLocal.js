@@ -10,7 +10,7 @@ const ZIWEI_JAVA_COMPAT_OPTS = Object.freeze({
 	lifeMasterBy: 'year_branch',
 });
 
-// PHASE 4-C: 可靠域起盘走已对拍的 ZiweiCalc（Java 兼容三键）。域外或公元前仍请求 /ziwei/birth。
+// Local-only contract: dates outside the validated lunar domain reject explicitly; never call /ziwei/birth.
 
 function solarYearOf(params){
 	const date = `${params && params.date || ''}`.trim();
