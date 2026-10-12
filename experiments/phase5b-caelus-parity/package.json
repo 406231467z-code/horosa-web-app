@@ -1,0 +1,11 @@
+{
+  "name": "horosa-phase5b-caelus-parity",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node compare.mjs"
+  },
+  "dependencies": {
+    "caelus": "0.25.0"
+  }
+}
