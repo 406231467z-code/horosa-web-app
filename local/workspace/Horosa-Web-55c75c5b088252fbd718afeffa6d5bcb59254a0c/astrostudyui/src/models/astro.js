@@ -1271,6 +1271,7 @@ export default {
 						drawerVisible: drawer,
 					},
 				});
+				try{ if(localFields){ saveBootChartSnapshot(localFields, current.currentTab); } }catch(e){ /* local snapshot only */ }
 				if(localFields && !values.nohook){
 					yield put({
 						type: 'doHook',
@@ -1565,6 +1566,7 @@ export default {
 			if(isBrowserOnlyEnv()){
 				// chartFree pages have already committed fields and run their own browser calculators.
 				if(fastPath){
+					try{ saveBootChartSnapshot(fieldValues, astroState.currentTab); }catch(e){ /* local snapshot only */ }
 					return;
 				}
 				// A blocked chart calculation must still preserve the user's changed birth fields.
@@ -1576,6 +1578,7 @@ export default {
 						chartObj: null,
 					},
 				});
+				try{ saveBootChartSnapshot(fieldValues, astroState.currentTab); }catch(e){ /* local snapshot only */ }
 				pm.computed();
 				pm.committed();
 				showChartServiceError();
@@ -1735,6 +1738,7 @@ export default {
 						drawerVisible: drawer,
 					},
 				});
+				try{ saveBootChartSnapshot(fields, astroState.currentTab); }catch(e){ /* local snapshot only */ }
 				if(!values.nohook){
 					yield put({
 						type: 'doHook',
