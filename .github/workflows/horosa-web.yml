@@ -37,12 +37,12 @@ jobs:
           cache-dependency-path: local/workspace/Horosa-Web-55c75c5b088252fbd718afeffa6d5bcb59254a0c/astrostudyui/package-lock.json
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
-      - name: Run DOCX extraction regression tests
+      - name: Run focused regression tests
         run: >-
-      npm test -- --runInBand --runTestsByPath
-      src/services/__tests__/aianalysisDocxExtraction.test.js
-      src/layouts/__tests__/phase4gKeepMobile.test.js
-      src/utils/__tests__/browserBootstrapNoLegacyBackend.test.js
-      src/utils/__tests__/preciseCalcBridge.test.js
+          npm test -- --runInBand --runTestsByPath
+          src/services/__tests__/aianalysisDocxExtraction.test.js
+          src/layouts/__tests__/phase4gKeepMobile.test.js
+          src/utils/__tests__/browserBootstrapNoLegacyBackend.test.js
+          src/utils/__tests__/preciseCalcBridge.test.js
       - name: Build browser application
         run: npm run build
